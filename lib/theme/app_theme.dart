@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Color Palette
-  static const Color primary = Color(0xFFF5C400);
-  static const Color primaryDark = Color(0xFFE5B600);
-  static const Color primaryLight = Color(0xFFFDD835);
+  // Color Palette from Design
+  static const Color primary = Color(0xFFF5C400); // Guardrail Yellow
+  static const Color primaryBlue = Color(0xFF135BEC); // For Guard Dashboard
+  static const Color primaryGreen = Color(0xFF2ECC71); // For Resident Dashboard
+  static const Color errorRed = Color(0xFFE74C3C);
   
   static const Color backgroundDark = Color(0xFF0F0F0F);
   static const Color surfaceDark = Color(0xFF141414);
@@ -15,66 +16,54 @@ class AppTheme {
   static const Color textSecondary = Color(0xFFB5B5B5);
   static const Color textTertiary = Color(0xFF6B7280);
   
-  static const Color successGreen = Color(0xFF10B981);
-  static const Color successLight = Color(0xFF2ECC71);
-  static const Color errorRed = Color(0xFFE74C3C);
-  static const Color warningYellow = Color(0xFFF5C400);
-  static const Color pending = Color(0xFFFFC107);
-  
-  static const Color primaryBlue = Color(0xFF135BEC);
-  static const Color blueDark = Color(0xFF1E3A8A);
+  static const Color successGreen = Color(0xFF2ECC71);
+  static const Color pendingYellow = Color(0xFFEAB308); // Approximate yellow-500
   
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryDark],
+    colors: [primary, Color(0xFFE5B600)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-  );
-  
-  static const LinearGradient successGradient = LinearGradient(
-    colors: [successGreen, Color(0xFF059669)],
-  );
-  
-  static const LinearGradient errorGradient = LinearGradient(
-    colors: [errorRed, Color(0xFFDC2626)],
   );
 
   // Text Styles
   static TextStyle get displayLarge => GoogleFonts.inter(
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: FontWeight.w600,
         color: textPrimary,
+        height: 1.1,
         letterSpacing: -0.5,
       );
 
   static TextStyle get displayMedium => GoogleFonts.inter(
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: FontWeight.w600,
         color: textPrimary,
-        letterSpacing: -0.3,
+        letterSpacing: -0.5,
+        height: 1.2,
       );
 
   static TextStyle get headlineLarge => GoogleFonts.inter(
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
         color: textPrimary,
-        letterSpacing: -0.2,
       );
 
   static TextStyle get headlineMedium => GoogleFonts.inter(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+        letterSpacing: -0.015,
+      );
+
+  static TextStyle get headlineSmall => GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: textPrimary,
       );
 
-  static TextStyle get headlineSmall => GoogleFonts.inter(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: textPrimary,
-      );
-
   static TextStyle get titleLarge => GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: textPrimary,
       );
@@ -113,27 +102,25 @@ class AppTheme {
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: textSecondary,
-        letterSpacing: 0.1,
       );
 
   static TextStyle get labelMedium => GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         color: textSecondary,
-        letterSpacing: 0.1,
       );
 
   static TextStyle get labelSmall => GoogleFonts.inter(
         fontSize: 10,
         fontWeight: FontWeight.w600,
         color: textSecondary,
-        letterSpacing: 0.15,
+        letterSpacing: 0.5,
       );
 
-  static TextStyle get captionSmall => GoogleFonts.inter(
-        fontSize: 10,
-        fontWeight: FontWeight.w400,
-        color: textTertiary,
+  static TextStyle get monoNum => GoogleFonts.spaceGrotesk(
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        color: textPrimary,
       );
 
   // ThemeData
@@ -141,6 +128,7 @@ class AppTheme {
         useMaterial3: true,
         brightness: Brightness.dark,
         scaffoldBackgroundColor: backgroundDark,
+        fontFamily: GoogleFonts.inter().fontFamily,
         appBarTheme: const AppBarTheme(
           backgroundColor: backgroundDark,
           elevation: 0,
@@ -157,7 +145,7 @@ class AppTheme {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: surfaceDark,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: borderDark),
@@ -176,11 +164,8 @@ class AppTheme {
           ),
           hintStyle: GoogleFonts.inter(
             color: textSecondary,
-            fontSize: 14,
-          ),
-          labelStyle: GoogleFonts.inter(
-            color: textSecondary,
-            fontSize: 12,
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -188,29 +173,11 @@ class AppTheme {
             backgroundColor: primary,
             foregroundColor: Colors.black,
             elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 18), // Height 60px approx
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             textStyle: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: textSecondary,
-            side: const BorderSide(color: borderDark),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: primary,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            textStyle: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -218,9 +185,18 @@ class AppTheme {
           color: surfaceDark,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14), // DEFAULT in role selection
             side: const BorderSide(color: borderDark),
           ),
+          margin: EdgeInsets.zero,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            backgroundColor: surfaceDark,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: primary,
+            unselectedItemColor: textSecondary,
+            selectedLabelStyle: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w500),
+            unselectedLabelStyle: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w500),
         ),
         dividerColor: borderDark,
         canvasColor: backgroundDark,

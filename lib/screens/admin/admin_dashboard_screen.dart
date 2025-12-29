@@ -10,452 +10,371 @@ class AdminDashboardScreen extends StatefulWidget {
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
-      appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
-        elevation: 0,
-        title: Row(
+      body: SafeArea(
+        bottom: false,
+        child: IndexedStack(
+          index: _currentIndex,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.security_outlined,
-                color: AppTheme.primary,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Admin Panel',
-              style: AppTheme.headlineSmall,
-            ),
+            _buildOverviewTab(),
+            _buildPlaceholderTab('Flats Management', Icons.apartment),
+            _buildPlaceholderTab('Guards Management', Icons.shield),
+            _buildPlaceholderTab('Visitor Logs', Icons.group),
+            _buildSettingsTab(),
           ],
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppTheme.borderDark,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  context.read<AuthProvider>().logout();
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: const Icon(
-                  Icons.logout,
-                  color: AppTheme.textSecondary,
-                  size: 16,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // Dashboard Stats
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Overview',
-                  style: AppTheme.labelSmall.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Dashboard',
-                      style: AppTheme.headlineLarge,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: AppTheme.primary.withOpacity(0.2),
-                        ),
-                      ),
-                      child: Text(
-                        'Live System',
-                        style: AppTheme.labelSmall.copyWith(
-                          color: AppTheme.primary,
-                          fontSize: 9,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // Stats Grid
-                GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _StatCard(
-                      label: 'Total Flats',
-                      value: '120',
-                      icon: Icons.apartment_outlined,
-                    ),
-                    _StatCard(
-                      label: 'Active Guards',
-                      value: '4',
-                      icon: Icons.security_outlined,
-                      highlighted: true,
-                    ),
-                    _StatCard(
-                      label: "Today's Visitors",
-                      value: '45',
-                      icon: Icons.group_outlined,
-                    ),
-                    _StatCard(
-                      label: 'Pending Approvals',
-                      value: '3',
-                      icon: Icons.pending_actions_outlined,
-                      isPrimary: true,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Activity Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF141414),
+          border: Border(top: BorderSide(color: AppTheme.borderDark)),
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 64,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text(
-                  'Live Gate Activity',
-                  style: AppTheme.headlineSmall,
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'View All',
-                    style: AppTheme.labelSmall.copyWith(
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                ),
+                _buildNavItem(Icons.dashboard, 'Overview', 0),
+                _buildNavItem(Icons.apartment, 'Flats', 1),
+                _buildNavItem(Icons.shield, 'Guards', 2),
+                _buildNavItem(Icons.group, 'Visitors', 3),
+                _buildNavItem(Icons.settings, 'Settings', 4),
               ],
             ),
           ),
-          // Activity Feed
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 5,
-              separatorBuilder: (_, __) => const Divider(
-                color: AppTheme.borderDark,
-                height: 1,
-              ),
-              itemBuilder: (context, index) {
-                return _ActivityItem(index: index);
-              },
-            ),
-          ),
-        ],
+        ),
       ),
-      bottomNavigationBar: const _AdminBottomNav(currentIndex: 0),
     );
   }
-}
 
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final bool highlighted;
-  final bool isPrimary;
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.highlighted = false,
-    this.isPrimary = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bgColor = isPrimary
-        ? AppTheme.primary.withOpacity(0.1)
-        : highlighted
-            ? AppTheme.surfaceDark
-            : AppTheme.surfaceDark;
-
-    final borderColor = isPrimary
-        ? AppTheme.primary.withOpacity(0.2)
-        : AppTheme.borderDark;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
+  Widget _buildOverviewTab() {
+    const primary = AppTheme.primary;
+    return Column(
+      children: [
+        // Top App Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: Color(0xFF2A2A2A))),
+          ),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.security, color: primary, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Admin Panel', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)),
+                ],
               ),
-              Icon(
-                icon,
-                color: AppTheme.textSecondary.withOpacity(0.3),
-                size: 28,
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      color: Colors.grey[800],
+                    ),
+                    child: const Icon(Icons.person, size: 20, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () {
+                      context.read<AuthProvider>().logout();
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.logout, color: Color(0xFFB5B5B5), size: 24),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          Text(
-            value,
-            style: AppTheme.displayMedium.copyWith(
-              color: isPrimary ? AppTheme.primary : AppTheme.textPrimary,
+        ),
+
+        // Scrollable Content
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Welcome / Date
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('OVERVIEW', style: AppTheme.labelSmall.copyWith(fontSize: 12, letterSpacing: 1)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Dashboard', style: AppTheme.headlineLarge),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: primary.withOpacity(0.2)),
+                            ),
+                            child: Text('Live System', style: AppTheme.labelSmall.copyWith(color: primary)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Stats Grid
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.5,
+                    children: [
+                      _buildStatCard('Total Flats', '120', Icons.apartment, false),
+                      _buildStatCard('Active Guards', '4', Icons.local_police, false, hasPulse: true),
+                      _buildStatCard("Today's Visitors", '45', Icons.group, false),
+                      _buildStatCard('Pending', '3', Icons.pending_actions, true),
+                    ],
+                  ),
+                ),
+
+                // Live Activity Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Live Gate Activity', style: AppTheme.titleLarge),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.sync, size: 12, color: primary),
+                              const SizedBox(width: 4),
+                              Text('Auto-refreshing every 10s', style: AppTheme.bodySmall),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text('View All', style: AppTheme.labelSmall.copyWith(color: primary)),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Activity List
+                _buildActivityItem('Delivery for Flat 401', '10:02 AM', 'Approved', Colors.green, Icons.local_shipping),
+                _buildActivityItem('Guest: John Doe', '09:55 AM', 'Waiting Approval (102)', primary, Icons.person, isPulse: true),
+                _buildActivityItem('Taxi Drop-off', '09:45 AM', 'Exited', const Color(0xFFB5B5B5), Icons.local_taxi),
+                _buildActivityItem('Unknown Vehicle', '09:30 AM', 'Entry Denied', AppTheme.errorRed, Icons.block),
+                _buildActivityItem('Housekeeping Staff', '08:15 AM', 'Entry Approved', Colors.green, Icons.cleaning_services),
+              ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlaceholderTab(String title, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 64, color: AppTheme.textSecondary),
+          const SizedBox(height: 16),
+          Text(title, style: AppTheme.headlineMedium),
+          const SizedBox(height: 8),
+          Text('Coming soon.', style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsTab() {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        Text('Admin Settings', style: AppTheme.headlineMedium),
+        const SizedBox(height: 32),
+        ListTile(
+          leading: const Icon(Icons.logout, color: AppTheme.errorRed),
+          title: const Text('Logout', style: TextStyle(color: AppTheme.errorRed)),
+          onTap: () => context.read<AuthProvider>().logout(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, bool highlighted, {bool hasPulse = false}) {
+    final bgColor = highlighted
+        ? AppTheme.primary.withOpacity(0.05) // Gradient simulation
+        : AppTheme.surfaceDark;
+    final borderColor = highlighted ? AppTheme.primary : Colors.white.withOpacity(0.1);
+    final iconColor = highlighted ? AppTheme.primary : Colors.white;
+    final textColor = highlighted ? AppTheme.primary : Colors.white;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: borderColor, width: 4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -10,
+            child: Icon(icon, size: 60, color: iconColor.withOpacity(0.1)),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: AppTheme.labelSmall.copyWith(color: AppTheme.textSecondary)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(value, style: AppTheme.monoNum.copyWith(fontSize: 32, color: textColor)),
+                  if (hasPulse) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-}
 
-class _ActivityItem extends StatelessWidget {
-  final int index;
-
-  const _ActivityItem({required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    final activities = [
-      {
-        'icon': Icons.local_shipping_outlined,
-        'color': AppTheme.successGreen,
-        'title': 'Delivery for Flat 401',
-        'time': '10:02 AM',
-        'status': 'Approved',
-        'statusColor': AppTheme.successGreen,
-      },
-      {
-        'icon': Icons.person_outline,
-        'color': AppTheme.primary,
-        'title': 'Guest: John Doe',
-        'time': '09:55 AM',
-        'status': 'Waiting Approval (102)',
-        'statusColor': AppTheme.primary,
-      },
-      {
-        'icon': Icons.local_taxi_outlined,
-        'color': AppTheme.textSecondary,
-        'title': 'Taxi Drop-off',
-        'time': '09:45 AM',
-        'status': 'Exited',
-        'statusColor': AppTheme.textSecondary,
-      },
-      {
-        'icon': Icons.block_outlined,
-        'color': AppTheme.errorRed,
-        'title': 'Unknown Vehicle',
-        'time': '09:30 AM',
-        'status': 'Entry Denied',
-        'statusColor': AppTheme.errorRed,
-      },
-      {
-        'icon': Icons.cleaning_services_outlined,
-        'color': AppTheme.textSecondary,
-        'title': 'Housekeeping Staff',
-        'time': '08:15 AM',
-        'status': 'Entry Approved',
-        'statusColor': AppTheme.successGreen,
-      },
-    ];
-
-    final activity = activities[index];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+  Widget _buildActivityItem(String title, String time, String status, Color statusColor, IconData icon, {bool isPulse = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.white10)),
+      ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: AppTheme.surfaceDark,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderDark.withOpacity(0.3)),
+              border: Border.all(color: Colors.white10),
             ),
-            child: Icon(
-              activity['icon'] as IconData,
-              color: activity['color'] as Color,
-              size: 20,
-            ),
+            child: Icon(icon, color: statusColor == AppTheme.errorRed ? statusColor : AppTheme.textSecondary, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  activity['title'] as String,
-                  style: AppTheme.titleSmall,
-                ),
+                Text(title, style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(
-                      activity['time'] as String,
-                      style: AppTheme.labelSmall,
-                    ),
+                    Text(time, style: AppTheme.bodySmall),
                     const SizedBox(width: 8),
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppTheme.borderDark,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                    Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.white24, shape: BoxShape.circle)),
                     const SizedBox(width: 8),
-                    Text(
-                      activity['status'] as String,
-                      style: AppTheme.labelSmall.copyWith(
-                        color: activity['statusColor'] as Color,
-                      ),
-                    ),
+                    Text(status, style: AppTheme.labelSmall.copyWith(color: statusColor)),
                   ],
                 ),
               ],
             ),
           ),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: activity['statusColor'] as Color,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: (activity['statusColor'] as Color).withOpacity(0.4),
-                  blurRadius: 8,
-                ),
-              ],
+          if (isPulse)
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: statusColor.withOpacity(0.6), blurRadius: 8),
+                ],
+              ),
+            )
+          else
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
             ),
-          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _currentIndex == index;
+    final color = isSelected ? AppTheme.primary : AppTheme.textSecondary;
+
+    return InkWell(
+      onTap: () => setState(() => _currentIndex = index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(label, style: AppTheme.labelSmall.copyWith(color: color, fontSize: 10)),
         ],
       ),
     );
   }
 }
-
-class _AdminBottomNav extends StatelessWidget {
-  final int currentIndex;
-
-  const _AdminBottomNav({required this.currentIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      backgroundColor: AppTheme.surfaceDark,
-      elevation: 0,
-      type: BottomNavigationBarType.fixed,
-      currentIndex: currentIndex,
-      selectedItemColor: AppTheme.primary,
-      unselectedItemColor: AppTheme.textSecondary,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_outlined),
-          activeIcon: Icon(Icons.dashboard),
-          label: 'Overview',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.apartment_outlined),
-          label: 'Flats',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.security),
-          label: 'Guards',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.group_outlined),
-          label: 'Visitors',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          label: 'Settings',
-        ),
-      ],
-      onTap: (index) {
-        if (index == currentIndex) return;
-        switch (index) {
-          case 0:
-            Navigator.pushReplacementNamed(context, '/admin_dashboard');
-            break;
-          case 1:
-            Navigator.pushReplacementNamed(context, '/admin_flats');
-            break;
-          case 2:
-            Navigator.pushReplacementNamed(context, '/admin_guards');
-            break;
-          case 3:
-            Navigator.pushReplacementNamed(context, '/admin_visitor_logs');
-            break;
-          case 4:
-            Navigator.pushReplacementNamed(context, '/admin_settings');
-            break;
-        }
-      },
-    );
-  }
-}
-

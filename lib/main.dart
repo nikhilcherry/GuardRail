@@ -8,10 +8,10 @@ import 'screens/auth/login_screen.dart';
 import 'screens/role_selection_screen.dart';
 import 'screens/guard/guard_home_screen.dart';
 import 'screens/resident/resident_home_screen.dart';
-import 'screens/resident/resident_visitors_screen.dart';
-import 'screens/resident/resident_settings_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
-import 'screens/admin/admin_additional_screens.dart';
+// Note: ResidentVisitorsScreen, ResidentSettingsScreen, etc. are placeholders
+// or to be implemented. I will create placeholder classes for them if they were used in main.dart
+// But for now, I'll rely on the dashboard screens handling internal nav state or routes.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,18 +34,12 @@ class GuardrailApp extends StatelessWidget {
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
         home: const RootScreen(),
+        // Define routes if necessary, but RootScreen handles auth state.
         routes: {
           '/role_selection': (_) => const RoleSelectionScreen(),
           '/guard_home': (_) => const GuardHomeScreen(),
           '/resident_home': (_) => const ResidentHomeScreen(),
           '/admin_dashboard': (_) => const AdminDashboardScreen(),
-          '/resident_visitors': (_) => const ResidentVisitorsScreen(),
-          '/resident_settings': (_) => const ResidentSettingsScreen(),
-          '/admin_flats': (_) => const AdminFlatsScreen(),
-          '/admin_guards': (_) => const AdminGuardsScreen(),
-          '/admin_visitor_logs': (_) => const AdminVisitorLogsScreen(),
-          '/admin_activity_logs': (_) => const AdminActivityLogsScreen(),
-          '/admin_settings': (_) => const AdminSettingsScreen(),
         },
       ),
     );
@@ -59,12 +53,14 @@ class RootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        // Navigation logic based on auth state
+        // If not logged in, show Role Selection (The "Entry" screen)
         if (!authProvider.isLoggedIn) {
-          return const LoginScreen();
+          return const RoleSelectionScreen();
         }
         
+        // If logged in, check role
         if (authProvider.selectedRole == null) {
+          // Should not happen if isLoggedIn is true, but fallback
           return const RoleSelectionScreen();
         }
 
@@ -77,7 +73,7 @@ class RootScreen extends StatelessWidget {
           case 'admin':
             return const AdminDashboardScreen();
           default:
-            return const LoginScreen();
+            return const RoleSelectionScreen();
         }
       },
     );

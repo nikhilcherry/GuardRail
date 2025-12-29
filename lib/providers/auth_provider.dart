@@ -15,6 +15,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> loginWithPhoneAndOTP({
     required String phone,
     required String otp,
+    required String role,
   }) async {
     try {
       // Simulate API call
@@ -22,6 +23,7 @@ class AuthProvider extends ChangeNotifier {
       
       _isLoggedIn = true;
       _userPhone = phone;
+      _selectedRole = role;
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -32,19 +34,21 @@ class AuthProvider extends ChangeNotifier {
   Future<void> loginWithEmail({
     required String email,
     required String password,
+    required String role,
   }) async {
     try {
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
       
       _isLoggedIn = true;
+      _selectedRole = role;
       notifyListeners();
     } catch (e) {
       rethrow;
     }
   }
 
-  // Select user role
+  // Select user role (Used if logic separated)
   void selectRole(String role) {
     _selectedRole = role;
     notifyListeners();
