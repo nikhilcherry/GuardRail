@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Families / Flats Management</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#efc006", 
+                        "background-dark": "#0F0F0F",
+                        "surface": "#141414",
+                        "surface-highlight": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                        "text-secondary": "#9CA3AF",
+                        "status-green": "#10B981",
+                        "status-red": "#EF4444",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F0F0F; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A2A; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #efc006; 
+        }
+        
+        /* Hide default details marker */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-display antialiased selection:bg-primary selection:text-black">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto border-x border-border-dark shadow-2xl overflow-hidden">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-30 bg-background-dark/95 backdrop-blur-md border-b border-border-dark px-5 py-4 flex items-center justify-between">
+<h1 class="text-xl font-semibold tracking-tight text-white">Families / Flats</h1>
+<button class="flex items-center justify-center size-10 rounded-full bg-primary hover:bg-yellow-400 transition-colors text-black shadow-lg shadow-yellow-500/20 active:scale-95">
+<span class="material-symbols-outlined font-semibold" style="font-size: 24px;">add</span>
+</button>
+</header>
+<!-- Search Area -->
+<div class="px-5 py-4 bg-background-dark z-20">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-secondary group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 bg-surface border border-border-dark rounded-lg leading-5 text-white placeholder-text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all sm:text-sm" placeholder="Search Flat No. or Name..." type="text"/>
+</div>
+</div>
+<!-- Scrollable Content -->
+<main class="flex-1 flex flex-col gap-4 px-5 pb-24 overflow-y-auto">
+<!-- Card: Flat 402 (Expanded Example) -->
+<div class="flex flex-col bg-surface border border-border-dark rounded-lg overflow-hidden transition-all duration-200">
+<details class="group w-full" open="">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-surface hover:bg-surface-highlight transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-lg bg-surface-highlight border border-border-dark text-white font-bold text-lg">
+                                402
+                            </div>
+<div class="flex flex-col">
+<span class="text-white font-semibold text-base">The Sharmas</span>
+<span class="text-xs text-text-secondary flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-status-green"></span>
+                                    3 Residents
+                                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<!-- Expanded Details -->
+<div class="border-t border-border-dark bg-background-dark/50 p-2">
+<!-- List of Members -->
+<div class="flex flex-col gap-1">
+<!-- Member 1: Admin & Accepted -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-highlight group/item transition-colors">
+<div class="flex items-center gap-3">
+<div class="relative size-10 rounded-full overflow-hidden bg-surface-highlight border border-border-dark" data-alt="Portrait of Rahul Sharma">
+<img alt="Rahul Sharma" class="w-full h-full object-cover opacity-80 group-hover/item:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUTBW-1X0P8UQBEnxgPtabzZ7RVE0J5FULbPc46St9XOTeZFMode495ZREpICef4UXpMyKbLABEqolQOHejzRDltO7Ip7d37MmGUQgfQqLdsAYzsWGpUMSkcpjQNCIRe1EU-DBOr-4Os76klYd-IbCd1m9lv8OC1qovfzxmMb46gI2GLKRbSXy0dID7GRBZyCqLWyJaRaCBoR3I7TChXUHcm8l37kY-Tyq2JtYZH_Az3Lv3m4VOpCH72fvztW5u2goOP61fPK8XLcT"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium text-white">Rahul Sharma</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/20">ADMIN</span>
+</div>
+<span class="text-xs text-text-secondary">+91 98765 43210</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="flex size-6 items-center justify-center rounded-full bg-status-green/10 text-status-green" title="Accepted">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</span>
+<button class="text-text-secondary hover:text-white p-1 rounded hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Member 2: Pending -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-highlight group/item transition-colors">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-surface-highlight border border-border-dark text-text-secondary font-medium text-sm">
+                                        PS
+                                    </div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Priya Sharma</span>
+<span class="text-xs text-text-secondary">+91 98765 43211</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold border border-primary/20">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                                        PENDING
+                                    </span>
+<button class="text-text-secondary hover:text-white p-1 rounded hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Member 3: Inactive -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-highlight group/item transition-colors opacity-60 hover:opacity-100">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-surface-highlight border border-border-dark text-text-secondary font-medium text-sm">
+                                        RK
+                                    </div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white line-through decoration-text-secondary">Ravi Kumar</span>
+<span class="text-xs text-text-secondary">Driver</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-semibold text-text-secondary bg-surface-highlight px-2 py-0.5 rounded border border-border-dark">INACTIVE</span>
+<button class="text-text-secondary hover:text-white p-1 rounded hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Add Member Button -->
+<button class="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/5 py-3 text-sm font-medium text-primary hover:bg-primary/10 hover:border-primary transition-all">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+                                Add Family Member
+                            </button>
+</div>
+</div>
+</details>
+</div>
+<!-- Card: Flat 403 (Vacant) -->
+<div class="flex flex-col bg-surface border border-border-dark rounded-lg overflow-hidden">
+<details class="group w-full">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-surface hover:bg-surface-highlight transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-lg bg-surface-highlight border border-border-dark text-text-secondary font-bold text-lg opacity-50">
+                                403
+                            </div>
+<div class="flex flex-col">
+<span class="text-text-secondary font-medium text-base italic">(Vacant)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="border-t border-border-dark bg-background-dark/50 p-4 flex flex-col items-center justify-center gap-3 py-6">
+<p class="text-sm text-text-secondary text-center">No residents assigned to this flat.</p>
+<button class="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-black font-semibold text-sm hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/10">
+                            Assign Residents
+                        </button>
+</div>
+</details>
+</div>
+<!-- Card: Flat 404 (Collapsed) -->
+<div class="flex flex-col bg-surface border border-border-dark rounded-lg overflow-hidden">
+<details class="group w-full">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-surface hover:bg-surface-highlight transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-lg bg-surface-highlight border border-border-dark text-white font-bold text-lg">
+                                404
+                            </div>
+<div class="flex flex-col">
+<span class="text-white font-semibold text-base">The Davids</span>
+<span class="text-xs text-text-secondary flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-status-green"></span>
+                                    2 Residents
+                                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="border-t border-border-dark bg-background-dark/50 p-2">
+<!-- Placeholder content for collapsed state demo -->
+<div class="p-4 text-center text-text-secondary text-sm">Loading details...</div>
+</div>
+</details>
+</div>
+<!-- Card: Flat 405 (Collapsed) -->
+<div class="flex flex-col bg-surface border border-border-dark rounded-lg overflow-hidden">
+<details class="group w-full">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-surface hover:bg-surface-highlight transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-10 rounded-lg bg-surface-highlight border border-border-dark text-white font-bold text-lg">
+                                405
+                            </div>
+<div class="flex flex-col">
+<span class="text-white font-semibold text-base">Dr. Strange</span>
+<span class="text-xs text-text-secondary flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-status-green"></span>
+                                    1 Resident
+                                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+</details>
+</div>
+</main>
+<!-- Optional: Simulated Action Sheet / Modal Overlay (Hidden by default, shown here for visual completeness of request) -->
+<!-- To visualize: remove 'hidden' class -->
+<div class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+<div class="w-full max-w-sm bg-surface border border-border-dark rounded-xl shadow-2xl p-6 flex flex-col gap-4 animate-in slide-in-from-bottom-10 fade-in duration-300">
+<div class="flex items-center gap-3 text-status-red mb-1">
+<span class="material-symbols-outlined">warning</span>
+<h3 class="text-lg font-bold text-white">Remove Resident?</h3>
+</div>
+<p class="text-text-secondary text-sm">
+                    Are you sure you want to remove <strong class="text-white">Ravi Kumar</strong> from Flat 402? This action cannot be undone.
+                </p>
+<div class="flex gap-3 mt-2">
+<button class="flex-1 px-4 py-2.5 rounded-lg border border-border-dark bg-transparent text-white font-medium hover:bg-white/5 transition-colors">
+                        Cancel
+                    </button>
+<button class="flex-1 px-4 py-2.5 rounded-lg bg-status-red text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-900/20">
+                        Remove
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

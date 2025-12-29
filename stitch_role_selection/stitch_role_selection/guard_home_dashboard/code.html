@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guard Home Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec", // Vibrant blue
+                        "background-light": "#f6f6f8", // Fallback (unused in this specific dark design)
+                        "background-dark": "#0F0F0F", // Jet Black
+                        "surface-dark": "#141414", // Dark Graphite
+                        "border-dark": "#2A2A2A", // Dark border
+                        "text-secondary": "#B5B5B5", // Soft Grey
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "md": "0.375rem", 
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Utilities for Low Light Readability */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .text-shadow-sm {
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-white selection:bg-primary selection:text-white h-screen flex flex-col overflow-hidden">
+<!-- Main Container -->
+<div class="flex-1 flex flex-col h-full w-full max-w-md mx-auto relative bg-[#0F0F0F] dark:bg-[#0F0F0F] border-x border-[#2A2A2A]">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between p-4 pb-2 bg-[#0F0F0F] z-20 shrink-0">
+<!-- Logo Icon -->
+<div class="flex items-center justify-center size-10 rounded-full bg-[#1c1f27] border border-[#2A2A2A]">
+<span class="material-symbols-outlined text-primary" style="font-size: 24px;">shield_person</span>
+</div>
+<!-- Title -->
+<h1 class="text-white text-[22px] font-semibold tracking-[-0.015em] flex-1 text-center truncate px-2">
+                Gate Control
+            </h1>
+<!-- Status & Time -->
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 bg-[#1c1f27] px-2.5 py-1 rounded-full border border-[#2A2A2A]">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+<span class="text-[#B5B5B5] text-sm font-bold tracking-wide">21:45</span>
+</div>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto px-4 pb-32"> <!-- Added padding-bottom to avoid overlap with footer -->
+<!-- Primary Action: New Visitor -->
+<div class="mt-4 mb-8">
+<button class="w-full group relative flex flex-col items-center justify-center gap-3 rounded-xl bg-[#141414] border border-[#2A2A2A] p-6 shadow-lg active:scale-[0.98] active:bg-[#1a1a1a] transition-all duration-150 min-h-[140px]">
+<div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none"></div>
+<div class="size-14 rounded-full bg-primary flex items-center justify-center shadow-[0_4px_12px_rgba(19,91,236,0.4)] group-active:shadow-none transition-shadow">
+<span class="material-symbols-outlined text-white" style="font-size: 32px;">add</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="text-white text-lg font-medium tracking-tight">Register New Visitor</span>
+<span class="text-[#B5B5B5] text-sm font-normal">Tap when a visitor arrives</span>
+</div>
+</button>
+</div>
+<!-- Section Title -->
+<div class="flex items-center justify-between mb-3 px-1">
+<h2 class="text-white text-[18px] font-semibold tracking-tight">Recent Entries</h2>
+<button class="text-primary text-sm font-medium hover:text-blue-400">View All</button>
+</div>
+<!-- Recent Entries List -->
+<div class="flex flex-col gap-3">
+<!-- Item 1: Approved -->
+<div class="flex items-center justify-between p-4 bg-[#141414] border border-[#2A2A2A] rounded-lg active:bg-[#1a1a1a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#1F2937] flex items-center justify-center text-[#9CA3AF] border border-[#374151]">
+<span class="material-symbols-outlined" style="font-size: 20px;">person</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-medium leading-tight">John Doe</p>
+<p class="text-[#B5B5B5] text-sm leading-normal">Flat 4B</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
+                            Approved
+                        </span>
+<span class="text-[#6B7280] text-xs">21:30</span>
+</div>
+</div>
+<!-- Item 2: Pending -->
+<div class="flex items-center justify-between p-4 bg-[#141414] border border-[#2A2A2A] rounded-lg active:bg-[#1a1a1a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#1F2937] flex items-center justify-center text-[#9CA3AF] border border-[#374151]">
+<span class="material-symbols-outlined" style="font-size: 20px;">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-medium leading-tight">Delivery Driver</p>
+<p class="text-[#B5B5B5] text-sm leading-normal">Flat 12A</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                            Pending
+                        </span>
+<span class="text-[#6B7280] text-xs">21:15</span>
+</div>
+</div>
+<!-- Item 3: Rejected -->
+<div class="flex items-center justify-between p-4 bg-[#141414] border border-[#2A2A2A] rounded-lg active:bg-[#1a1a1a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#1F2937] flex items-center justify-center text-[#9CA3AF] border border-[#374151]">
+<span class="material-symbols-outlined" style="font-size: 20px;">question_mark</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-medium leading-tight">Unknown Male</p>
+<p class="text-[#B5B5B5] text-sm leading-normal">Flat 2C</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                            Rejected
+                        </span>
+<span class="text-[#6B7280] text-xs">21:00</span>
+</div>
+</div>
+<!-- Item 4: Approved -->
+<div class="flex items-center justify-between p-4 bg-[#141414] border border-[#2A2A2A] rounded-lg active:bg-[#1a1a1a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#1F2937] flex items-center justify-center text-[#9CA3AF] border border-[#374151]">
+<span class="material-symbols-outlined" style="font-size: 20px;">person</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-medium leading-tight">Sarah Smith</p>
+<p class="text-[#B5B5B5] text-sm leading-normal">Flat 8A</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
+                            Approved
+                        </span>
+<span class="text-[#6B7280] text-xs">20:42</span>
+</div>
+</div>
+<!-- Item 5: Approved -->
+<div class="flex items-center justify-between p-4 bg-[#141414] border border-[#2A2A2A] rounded-lg active:bg-[#1a1a1a] transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-[#1F2937] flex items-center justify-center text-[#9CA3AF] border border-[#374151]">
+<span class="material-symbols-outlined" style="font-size: 20px;">engineering</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-medium leading-tight">Maintenance</p>
+<p class="text-[#B5B5B5] text-sm leading-normal">Building A</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
+                            Approved
+                        </span>
+<span class="text-[#6B7280] text-xs">19:15</span>
+</div>
+</div>
+</div>
+<!-- Spacer for bottom bar -->
+<div class="h-6"></div>
+</main>
+<!-- Bottom Patrol Check Bar (Sticky) -->
+<div class="absolute bottom-0 left-0 w-full bg-[#141414]/95 backdrop-blur-md border-t border-[#2A2A2A] p-4 pb-6 z-30">
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col gap-0.5">
+<span class="text-white text-sm font-semibold">Patrol Checkpoint</span>
+<span class="text-[#B5B5B5] text-xs">Last check: 45m ago</span>
+</div>
+<button class="bg-[#1c1f27] hover:bg-[#252933] active:bg-[#1a1a1a] text-white border border-[#2A2A2A] px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+<span class="font-medium text-sm">Check In</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

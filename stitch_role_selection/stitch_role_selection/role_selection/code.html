@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guardrail - Role Selection</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F5C400",
+                        "background-light": "#0F0F0F", // Forcing dark theme look as per description
+                        "background-dark": "#0F0F0F",
+                        "card-bg": "#141414",
+                        "card-border": "#2A2A2A",
+                        "text-subtitle": "#B5B5B5"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "14px",
+                    },
+                    scale: {
+                        '102': '1.02',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.role-card {
+            transition: transform 0.2s ease-out, border-color 0.2s ease;
+        }
+        .role-card:active, .role-card:focus-within {
+            transform: scale(1.02);
+            border-color: #F5C400;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-white font-sans antialiased min-h-screen flex flex-col items-center justify-center p-6 selection:bg-primary selection:text-black">
+<div class="w-full max-w-sm flex flex-col items-center space-y-10">
+<div class="flex flex-col items-center space-y-6">
+<div class="w-24 h-24 relative">
+<img alt="Guardrail Security Shield Logo" class="w-full h-full object-contain drop-shadow-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8ZhFm6axHoHUd1yXcr-pEseWYdbWBW35iyHdazDpQMF52BjcAkiVnEZwG4dO5AKKK2MmlLNfj8YOox3H9UjLD-dwGzLoPwEEjk0y2XTC8daR9tpm-VUE-GxwQldflNJikUMmek37nFUpQhr90ldmJis0PNyrFVUQl_cdrtPjDoWcik7QY0oyYATYAbxFlqr61QeRdb0FFan0TpQYG8IIzNmeuowtziUk25kgu4iCajfSnCYBjUBfe-Zqk8AI78P8BolNbbEKNtGpB"/>
+</div>
+<h1 class="text-2xl sm:text-[28px] font-semibold text-center tracking-tight text-white dark:text-white">
+                Continue as
+            </h1>
+</div>
+<div class="w-full space-y-4">
+<button class="role-card group w-full text-left bg-card-bg dark:bg-card-bg border border-card-border hover:border-primary/50 dark:hover:border-primary/50 focus:outline-none rounded-DEFAULT p-5 flex items-center gap-4 shadow-lg shadow-black/20">
+<div class="w-10 h-10 rounded-full bg-[#1E1E1E] flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+<span class="material-icons-round text-[24px]">home</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[16px] font-medium text-white">Resident</span>
+<span class="text-[14px] font-normal text-text-subtitle">Access your home and manage guests</span>
+</div>
+<div class="ml-auto opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-primary">
+<span class="material-icons-round">arrow_forward_ios</span>
+</div>
+</button>
+<button class="role-card group w-full text-left bg-card-bg dark:bg-card-bg border border-card-border hover:border-primary/50 dark:hover:border-primary/50 focus:outline-none rounded-DEFAULT p-5 flex items-center gap-4 shadow-lg shadow-black/20">
+<div class="w-10 h-10 rounded-full bg-[#1E1E1E] flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+<span class="material-icons-round text-[24px]">security</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[16px] font-medium text-white">Guard</span>
+<span class="text-[14px] font-normal text-text-subtitle">Monitor entries and verify visitors</span>
+</div>
+<div class="ml-auto opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-primary">
+<span class="material-icons-round">arrow_forward_ios</span>
+</div>
+</button>
+<button class="role-card group w-full text-left bg-card-bg dark:bg-card-bg border border-card-border hover:border-primary/50 dark:hover:border-primary/50 focus:outline-none rounded-DEFAULT p-5 flex items-center gap-4 shadow-lg shadow-black/20">
+<div class="w-10 h-10 rounded-full bg-[#1E1E1E] flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+<span class="material-icons-round text-[24px]">admin_panel_settings</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[16px] font-medium text-white">Admin</span>
+<span class="text-[14px] font-normal text-text-subtitle">System configuration and logs</span>
+</div>
+<div class="ml-auto opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-primary">
+<span class="material-icons-round">arrow_forward_ios</span>
+</div>
+</button>
+</div>
+<div class="mt-8">
+<p class="text-xs text-[#525252] text-center">
+                Need help with your account? <a class="text-primary hover:underline" href="#">Contact Support</a>
+</p>
+</div>
+</div>
+
+</body></html>

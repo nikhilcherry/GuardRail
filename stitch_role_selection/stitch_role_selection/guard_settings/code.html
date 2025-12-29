@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guard Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f5c400",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#141414",
+                        "border-dark": "#2A2A2A",
+                        "text-label": "#A1A1A1",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Optimizations for dark mode OLED screens and touch handling */
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .touch-target-min {
+            min-height: 48px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white antialiased selection:bg-primary/30 h-full min-h-screen">
+<div class="relative mx-auto flex h-full min-h-screen w-full max-w-md flex-col bg-[#0F0F0F] pb-6">
+<!-- Header -->
+<header class="sticky top-0 z-20 flex min-h-[64px] w-full items-center justify-between bg-[#0F0F0F]/95 px-4 pb-2 pt-4 backdrop-blur-sm">
+<button aria-label="Go back" class="group flex h-12 w-12 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 active:bg-white/20">
+<span class="material-symbols-outlined text-[24px] group-active:scale-95 transition-transform">arrow_back_ios_new</span>
+</button>
+<h1 class="flex-1 text-center text-[22px] font-semibold leading-tight tracking-[-0.015em] text-white">Guard Settings</h1>
+<div class="w-12"></div> <!-- Spacer for optical centering -->
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col gap-6 px-4 pt-2">
+<!-- Profile Section (Read Only) -->
+<section aria-label="My Profile">
+<h2 class="mb-2 px-1 text-sm font-medium uppercase tracking-wider text-text-label">My Profile</h2>
+<div class="flex flex-col overflow-hidden rounded-2xl border border-border-dark bg-surface-dark shadow-sm">
+<!-- Name -->
+<div class="flex min-h-[56px] items-center justify-between border-b border-border-dark px-5 py-4">
+<span class="text-sm font-normal text-text-label">Name</span>
+<span class="text-base font-medium text-white">Officer John Doe</span>
+</div>
+<!-- Badge ID -->
+<div class="flex min-h-[56px] items-center justify-between border-b border-border-dark px-5 py-4">
+<span class="text-sm font-normal text-text-label">Badge ID</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">badge</span>
+<span class="text-base font-medium text-white">G-4921</span>
+</div>
+</div>
+<!-- Shift -->
+<div class="flex min-h-[56px] items-center justify-between px-5 py-4">
+<span class="text-sm font-normal text-text-label">Shift</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">nights_stay</span>
+<span class="text-right text-base font-medium text-white">Sector 4 - Night Watch</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Notifications Section -->
+<section aria-label="Notifications">
+<h2 class="mb-2 px-1 text-sm font-medium uppercase tracking-wider text-text-label">Notifications</h2>
+<div class="flex flex-col overflow-hidden rounded-2xl border border-border-dark bg-surface-dark shadow-sm">
+<!-- Duty Alerts -->
+<div class="flex min-h-[64px] items-center justify-between border-b border-border-dark px-5 py-3 active:bg-[#1a1a1a] transition-colors">
+<div class="flex flex-col justify-center gap-0.5">
+<span class="text-base font-medium text-white">Duty Alerts</span>
+<span class="text-xs text-text-label">Urgent broadcasts &amp; shift updates</span>
+</div>
+<div class="shrink-0 pl-4">
+<!-- Custom Toggle based on provided component logic -->
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#3a3627] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors duration-200">
+<div class="h-full w-[27px] rounded-full bg-white shadow-sm transition-all duration-200" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+<input aria-label="Toggle duty alerts" checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Visitor Requests -->
+<div class="flex min-h-[64px] items-center justify-between px-5 py-3 active:bg-[#1a1a1a] transition-colors">
+<div class="flex flex-col justify-center gap-0.5">
+<span class="text-base font-medium text-white">Visitor Requests</span>
+<span class="text-xs text-text-label">Gate access notifications</span>
+</div>
+<div class="shrink-0 pl-4">
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#3a3627] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors duration-200">
+<div class="h-full w-[27px] rounded-full bg-white shadow-sm transition-all duration-200" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+<input aria-label="Toggle visitor requests" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Actions -->
+<section class="mt-auto flex flex-col items-center gap-8 pb-8 pt-4">
+<button class="touch-target-min flex w-full items-center justify-center rounded-xl bg-transparent px-6 py-3 text-lg font-semibold text-primary transition-all active:bg-primary/10 active:scale-[0.98]">
+                    Log out
+                </button>
+<div class="flex flex-col items-center gap-1 opacity-40">
+<span class="text-[10px] font-medium uppercase tracking-widest text-white">Guardrail Secure System</span>
+<span class="text-xs text-[#525252]">v1.4.2 (Build 892)</span>
+</div>
+</section>
+</main>
+</div>
+</body></html>

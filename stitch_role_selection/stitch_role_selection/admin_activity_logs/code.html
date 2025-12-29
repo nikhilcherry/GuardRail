@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Activity Logs</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#efc006",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0F0F0F", /* Jet Black override */
+                        "surface-dark": "#141414", /* Dark Graphite */
+                        "border-dark": "#2A2A2A",
+                        "text-secondary": "#A0A0A0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "md": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col overflow-hidden selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<div class="sticky top-0 z-50 bg-[#0F0F0F] border-b border-[#2A2A2A]">
+<!-- iOS Status Bar Placeholder -->
+<div class="h-11 w-full bg-[#0F0F0F]"></div>
+<div class="flex items-center px-4 py-3 justify-between">
+<button class="text-white hover:bg-[#2A2A2A] rounded-full p-2 transition-colors -ml-2">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h1 class="text-white text-lg font-semibold tracking-tight flex-1 text-center pr-10">Activity Logs</h1>
+</div>
+<!-- Filter Bar -->
+<div class="flex gap-3 px-4 py-3 overflow-x-auto no-scrollbar border-t border-[#2A2A2A]/50 bg-[#0F0F0F]">
+<!-- Active Filter -->
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-md bg-[#2A2A2A] border border-primary/40 px-3 transition-all hover:bg-[#333]">
+<span class="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
+<p class="text-white text-xs font-medium">Last 7 Days</p>
+<span class="material-symbols-outlined text-white text-[18px]">arrow_drop_down</span>
+</button>
+<!-- Inactive Filters -->
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-md bg-[#141414] border border-[#2A2A2A] px-3 transition-all hover:border-white/20">
+<span class="material-symbols-outlined text-text-secondary text-[18px]">filter_list</span>
+<p class="text-white text-xs font-medium">Event Type</p>
+<span class="material-symbols-outlined text-text-secondary text-[18px]">arrow_drop_down</span>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-md bg-[#141414] border border-[#2A2A2A] px-3 transition-all hover:border-white/20">
+<span class="material-symbols-outlined text-text-secondary text-[18px]">person</span>
+<p class="text-white text-xs font-medium">Actor</p>
+<span class="material-symbols-outlined text-text-secondary text-[18px]">arrow_drop_down</span>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-md bg-[#141414] border border-[#2A2A2A] px-3 transition-all hover:border-white/20">
+<span class="material-symbols-outlined text-text-secondary text-[18px]">warning</span>
+<p class="text-white text-xs font-medium">Severity</p>
+<span class="material-symbols-outlined text-text-secondary text-[18px]">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<!-- Main Content: Log Feed -->
+<div class="flex-1 overflow-y-auto bg-[#0F0F0F] pb-8">
+<!-- Date Header: Today -->
+<div class="px-4 py-3 sticky top-0 bg-[#0F0F0F]/95 backdrop-blur-sm z-10 border-b border-[#2A2A2A]">
+<h3 class="text-text-secondary text-xs font-bold uppercase tracking-wider">Today</h3>
+</div>
+<div class="flex flex-col">
+<!-- Log Entry: Visitor Approved (Success) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors">
+<div class="flex items-start gap-4 flex-1">
+<div class="flex items-center justify-center rounded-md bg-green-900/20 border border-green-900/50 shrink-0 size-10">
+<span class="material-symbols-outlined text-green-500 text-[20px]">check_circle</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Visitor Entry Approved</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">Actor: Resident (Unit 402)</p>
+<p class="text-text-secondary text-[10px] font-mono mt-1 opacity-70">ID: #8291-ACCESS</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">10:42 AM</p>
+</div>
+</div>
+<!-- Log Entry: Guard Shift Started (Neutral) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors">
+<div class="flex items-start gap-4 flex-1">
+<div class="flex items-center justify-center rounded-md bg-blue-900/20 border border-blue-900/50 shrink-0 size-10">
+<span class="material-symbols-outlined text-blue-400 text-[20px]">badge</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Guard Shift Started</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">Actor: Guard Michael S.</p>
+<p class="text-text-secondary text-[10px] font-mono mt-1 opacity-70">Loc: Main Gate</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">09:15 AM</p>
+</div>
+</div>
+<!-- Log Entry: Delivery Logged (Neutral) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors">
+<div class="flex items-start gap-4 flex-1">
+<div class="flex items-center justify-center rounded-md bg-[#2A2A2A] border border-[#333] shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-400 text-[20px]">local_shipping</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Package Delivery Logged</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">Actor: Guard Michael S.</p>
+<p class="text-text-secondary text-[10px] font-mono mt-1 opacity-70">Unit: 105</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">08:50 AM</p>
+</div>
+</div>
+</div>
+<!-- Date Header: Yesterday -->
+<div class="px-4 py-3 sticky top-0 bg-[#0F0F0F]/95 backdrop-blur-sm z-10 border-b border-[#2A2A2A] mt-2">
+<h3 class="text-text-secondary text-xs font-bold uppercase tracking-wider">Yesterday</h3>
+</div>
+<div class="flex flex-col">
+<!-- Log Entry: Admin Settings Changed (Primary/Warning) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors relative overflow-hidden group">
+<!-- Subtle left border accent for admin actions -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start gap-4 flex-1 pl-1">
+<div class="flex items-center justify-center rounded-md bg-primary/20 border border-primary/30 shrink-0 size-10">
+<span class="material-symbols-outlined text-primary text-[20px]">settings_alert</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Admin Settings Changed</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">Actor: Admin Sarah J.</p>
+<p class="text-text-secondary text-[10px] font-mono mt-1 opacity-70">Action: User Role Update</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">14:30 PM</p>
+</div>
+</div>
+<!-- Log Entry: Patrol Failed (Error) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors">
+<div class="flex items-start gap-4 flex-1">
+<div class="flex items-center justify-center rounded-md bg-red-900/20 border border-red-900/50 shrink-0 size-10">
+<span class="material-symbols-outlined text-red-500 text-[20px]">notification_important</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Patrol Checkpoint Missed</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">System Alert</p>
+<p class="text-red-400 text-[10px] font-mono mt-1 font-medium">Zone: North Perimeter</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">11:15 AM</p>
+</div>
+</div>
+<!-- Log Entry: System Backup (System) -->
+<div class="flex gap-4 bg-[#141414] px-4 py-4 border-b border-[#2A2A2A] hover:bg-[#1a1a1a] transition-colors">
+<div class="flex items-start gap-4 flex-1">
+<div class="flex items-center justify-center rounded-md bg-[#2A2A2A] border border-[#333] shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-400 text-[20px]">cloud_sync</span>
+</div>
+<div class="flex flex-col justify-center gap-0.5">
+<p class="text-white text-sm font-semibold leading-tight">Automated System Backup</p>
+<p class="text-text-secondary text-xs font-normal leading-normal">Actor: System</p>
+</div>
+</div>
+<div class="shrink-0 flex flex-col items-end">
+<p class="text-text-secondary text-xs font-medium tabular-nums">03:00 AM</p>
+</div>
+</div>
+</div>
+<!-- Loading State / End of List -->
+<div class="p-6 flex justify-center items-center">
+<p class="text-[#2A2A2A] text-xs font-medium uppercase tracking-widest">End of Logs</p>
+</div>
+<!-- Bottom Safe Area Spacer -->
+<div class="h-8"></div>
+</div>
+<!-- Floating Action Button (Optional, for "Scroll to Top" or similar, just adding visual interest) -->
+<!-- Not strictly requested but adds to the app feel -->
+<!-- <div class="absolute bottom-6 right-6">
+        <button class="bg-primary text-black rounded-full p-3 shadow-lg shadow-primary/20 flex items-center justify-center">
+             <span class="material-symbols-outlined">vertical_align_top</span>
+        </button>
+    </div> -->
+</body></html>

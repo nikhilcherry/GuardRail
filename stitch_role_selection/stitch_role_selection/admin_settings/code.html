@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Settings - Guardrail</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#efc006",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0F0F0F", 
+                        "surface-dark": "#141414",
+                        "border-dark": "#2A2A2A",
+                        "text-secondary": "#9CA3AF"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F0F0F; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A2A; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f3f; 
+        }
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #efc006;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #efc006;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-full min-h-screen">
+<div class="relative flex h-full w-full max-w-md mx-auto flex-col overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Header -->
+<div class="sticky top-0 z-50 flex items-center bg-background-light dark:bg-background-dark p-4 border-b dark:border-border-dark/50 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
+<button class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-semibold leading-tight tracking-tight flex-1 text-center pr-10">Settings</h2>
+</div>
+<!-- Main Content -->
+<div class="flex-1 overflow-y-auto pb-8">
+<!-- Profile Section -->
+<div class="px-4 py-6">
+<div class="flex items-center gap-4 bg-surface-dark rounded-xl p-4 border border-border-dark shadow-sm">
+<div class="relative">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-16 w-16 border-2 border-primary" data-alt="Profile picture of Alex Mercer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCZjrAHmt6H_Fs5X8QSNbuErDfsj8WeO-8pw4H7L2hHU39bMM8WNEWyJeuPtIcUefqsjiY9zrWF-u7MNfBhxhbZXd0Zx0hix4xh-WCQ4x0T9M2XY2yKzNITIWXLSNpMIXk6JUZaw6VQeQhufR4BdLKPY1ByUJRQh_2FuKQjV9KHkpt5aRwKawDu1eadQxBIvslogWbsi_uPyyGpkGH_aofIjYoM2catUyBcDLiSkfpFmj8rZSa2mYTaFolRWuMkPY39NBCypfPEz5Ny");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-surface-dark rounded-full"></div>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-lg font-bold leading-tight">Alex Mercer</p>
+<p class="text-text-secondary text-sm font-medium">Head of Security</p>
+<div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-primary">
+                            Super Admin
+                        </div>
+</div>
+</div>
+</div>
+<!-- General Settings -->
+<div class="mb-6">
+<h3 class="text-text-secondary text-xs font-bold tracking-wider uppercase px-6 pb-2">General Settings</h3>
+<div class="bg-white dark:bg-surface-dark mx-4 rounded-xl border dark:border-border-dark overflow-hidden">
+<!-- Organization Name -->
+<div class="p-4 border-b dark:border-border-dark">
+<label class="block text-text-secondary text-xs font-medium mb-1 uppercase">Organization Name</label>
+<input class="w-full bg-transparent border-none p-0 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-0 text-base font-medium" type="text" value="Pinecrest Estates"/>
+</div>
+<!-- Contact Email -->
+<div class="p-4">
+<label class="block text-text-secondary text-xs font-medium mb-1 uppercase">Contact Email</label>
+<input class="w-full bg-transparent border-none p-0 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-0 text-base font-medium" type="email" value="security@pinecrest.com"/>
+</div>
+</div>
+</div>
+<!-- Feature Management (Control Board) -->
+<div class="mb-6">
+<h3 class="text-text-secondary text-xs font-bold tracking-wider uppercase px-6 pb-2">Feature Control Board</h3>
+<div class="bg-white dark:bg-surface-dark mx-4 rounded-xl border dark:border-border-dark overflow-hidden divide-y dark:divide-border-dark">
+<!-- Visitor Pre-Approval -->
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">how_to_reg</span>
+</div>
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">Visitor Pre-Approval</span>
+<span class="text-text-secondary text-xs">Allow residents to create codes</span>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-surface-dark appearance-none cursor-pointer transition-all duration-300" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer border border-border-dark" for="toggle1"></label>
+</div>
+</div>
+<!-- Automated Gate Lift -->
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">garage_home</span>
+</div>
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">Automated Gate Lift</span>
+<span class="text-text-secondary text-xs">Lift based on sensors</span>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-surface-dark appearance-none cursor-pointer transition-all duration-300" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer border border-border-dark" for="toggle2"></label>
+</div>
+</div>
+<!-- License Plate Recognition -->
+<div class="flex items-center justify-between p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">videocam</span>
+</div>
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">LPR System</span>
+<span class="text-text-secondary text-xs">Auto-scan plates at entry</span>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-surface-dark appearance-none cursor-pointer right-0 border-primary" id="toggle3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer border border-border-dark" for="toggle3"></label>
+</div>
+</div>
+</div>
+<p class="px-6 pt-2 text-xs text-text-secondary flex gap-1 items-center">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                    Disabling critical features requires confirmation.
+                </p>
+</div>
+<!-- Security Parameters -->
+<div class="mb-6">
+<h3 class="text-text-secondary text-xs font-bold tracking-wider uppercase px-6 pb-2">Security Parameters</h3>
+<div class="bg-white dark:bg-surface-dark mx-4 rounded-xl border dark:border-border-dark overflow-hidden divide-y dark:divide-border-dark">
+<button class="w-full flex items-center justify-between p-4 hover:bg-black/20 transition-colors text-left">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">Patrol Interval</span>
+<span class="text-text-secondary text-xs">Frequency of guard rounds</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-primary font-medium text-sm">Every 30 mins</span>
+<span class="material-symbols-outlined text-text-secondary text-lg">chevron_right</span>
+</div>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-black/20 transition-colors text-left">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">Data Retention</span>
+<span class="text-text-secondary text-xs">Archive duration for logs</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-white font-medium text-sm">90 Days</span>
+<span class="material-symbols-outlined text-text-secondary text-lg">chevron_right</span>
+</div>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-black/20 transition-colors text-left">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-white font-medium text-base">Shift Handover</span>
+<span class="text-text-secondary text-xs">Required overlap time</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-white font-medium text-sm">15 mins</span>
+<span class="material-symbols-outlined text-text-secondary text-lg">chevron_right</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Notification Rules -->
+<div class="mb-6">
+<h3 class="text-text-secondary text-xs font-bold tracking-wider uppercase px-6 pb-2">Notification Rules</h3>
+<div class="bg-white dark:bg-surface-dark mx-4 rounded-xl border dark:border-border-dark overflow-hidden divide-y dark:divide-border-dark">
+<div class="flex items-center justify-between p-4">
+<span class="text-slate-900 dark:text-white font-medium text-base">Critical Alerts</span>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-surface-dark appearance-none cursor-pointer transition-all duration-300" id="notif1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer border border-border-dark" for="notif1"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4">
+<span class="text-slate-900 dark:text-white font-medium text-base">Daily Summary Report</span>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-gray-300 border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300 left-0" id="notif2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer border border-border-dark" for="notif2"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Danger Zone -->
+<div class="mb-10">
+<h3 class="text-red-500 text-xs font-bold tracking-wider uppercase px-6 pb-2">Danger Zone</h3>
+<div class="bg-white dark:bg-surface-dark mx-4 rounded-xl border border-red-900/30 overflow-hidden divide-y divide-red-900/20">
+<button class="w-full flex items-center justify-between p-4 hover:bg-red-500/10 transition-colors text-left group">
+<div class="flex flex-col">
+<span class="text-red-500 font-medium text-base">Reset Configuration</span>
+<span class="text-red-400/60 text-xs">Restore defaults</span>
+</div>
+<span class="material-symbols-outlined text-red-500 group-hover:scale-110 transition-transform">restart_alt</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-red-500/10 transition-colors text-left group">
+<div class="flex flex-col">
+<span class="text-red-500 font-medium text-base">Purge Logs</span>
+<span class="text-red-400/60 text-xs">Delete all historical data</span>
+</div>
+<span class="material-symbols-outlined text-red-500 group-hover:scale-110 transition-transform">delete_forever</span>
+</button>
+</div>
+</div>
+<div class="text-center pb-8">
+<p class="text-text-secondary text-xs">Guardrail v2.4.1 (Build 890)</p>
+</div>
+</div>
+<!-- Simulated Toast/Feedback (Hidden by default, shown for design purposes) -->
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-surface-dark border border-primary/30 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 opacity-0 pointer-events-none">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span class="text-sm font-medium">Settings saved</span>
+</div>
+</div>
+</body></html>

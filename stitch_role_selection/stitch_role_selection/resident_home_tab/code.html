@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resident Home Tab</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2ECC71", // Green specified
+                        "danger": "#E74C3C", // Red specified
+                        "surface": "#141414", // Dark Graphite
+                        "surface-border": "#2A2A2A",
+                        "background-dark": "#0F0F0F", // Jet Black
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-display antialiased selection:bg-primary selection:text-black">
+<div class="relative flex h-screen w-full flex-col max-w-md mx-auto overflow-hidden bg-background-dark group/design-root">
+<header class="flex-none pt-12 pb-6 px-6 flex justify-between items-start">
+<div class="flex flex-col gap-2">
+<h1 class="text-3xl font-semibold tracking-tight text-white leading-tight">
+                Good Evening,<br/>
+<span class="text-white/90">Robert</span>
+</h1>
+<div class="flex items-center self-start mt-2 px-3 py-1.5 rounded-full bg-surface border border-surface-border">
+<span class="material-symbols-outlined text-[18px] mr-1.5 text-primary">home</span>
+<span class="text-sm font-medium text-gray-300 tracking-wide">Flat 402</span>
+</div>
+</div>
+<button aria-label="Notifications" class="w-10 h-10 rounded-full bg-surface border border-surface-border flex items-center justify-center text-white hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-12 right-6 h-2.5 w-2.5 rounded-full bg-danger border-2 border-background-dark"></span>
+</button>
+</header>
+<main class="flex-1 flex flex-col px-5 pb-24 overflow-y-auto">
+<div class="flex items-center justify-between mb-4 mt-2">
+<h2 class="text-lg font-medium text-gray-300 tracking-tight">Pending Request</h2>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20">
+<div class="w-1.5 h-1.5 rounded-full bg-danger animate-pulse"></div>
+<span class="text-[10px] font-bold text-danger uppercase tracking-wider">Live</span>
+</div>
+</div>
+<div class="relative w-full bg-surface border border-surface-border rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+<div class="flex gap-4 mb-6">
+<div class="relative w-20 h-20 rounded-xl bg-gray-800 shrink-0 overflow-hidden border border-white/5 shadow-inner" data-alt="Portrait of delivery person in uniform">
+<div class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-gray-500">person</span>
+</div>
+<img alt="Visitor at gate" class="w-full h-full object-cover relative z-10" data-alt="Photo of the visitor at the gate, a man looking at the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKJzCHu7GesZQyMcIB56amlfIA6sCs-3CQPHyQEFLQQxraCOAkl_APsLQpYzns0Fwywh-zdPJkJdMExEHlRZ20WPMBOjqiXv68XwHZMETkRPyHsn48VKqGiYsxRYRoOYJzvA9ebBPM3xqzOinlJjovYLYHxQMdJmOJOeanewAVGeOpFaq0gKfB9O7rlqea3GT1CTMX0TImPCYAtZstaRQjPNxfdxONSccvLsby9r2OaFczGzpN40ot9w_LIov9AmqdF6P3HVJ5-89_"/>
+</div>
+<div class="flex flex-col justify-center flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-xl font-semibold text-white leading-tight truncate pr-2">John Doe</h3>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Delivery</span>
+</div>
+<div class="mt-2 space-y-1.5">
+<div class="flex items-center text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px] mr-1.5 text-gray-500">shield_person</span>
+<span class="truncate text-gray-300">Guard: Ramesh</span>
+</div>
+<div class="flex items-center text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px] mr-1.5 text-gray-500">schedule</span>
+<span class="text-gray-300">Arrived 1 min ago</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center h-16 rounded-xl bg-danger hover:bg-red-600 active:scale-95 transition-all duration-200 group">
+<span class="text-white text-lg font-semibold tracking-wide group-active:text-white/90">Reject</span>
+</button>
+<button class="flex flex-col items-center justify-center h-16 rounded-xl bg-primary hover:bg-green-500 active:scale-95 transition-all duration-200 shadow-[0_0_20px_rgba(46,204,113,0.15)] group">
+<span class="text-black text-lg font-bold tracking-wide group-active:text-black/80">Approve</span>
+</button>
+</div>
+</div>
+<div class="mt-8">
+<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 pl-1">Recent History</h4>
+<div class="flex items-center justify-between p-4 mb-3 rounded-xl bg-surface/50 border border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface border border-white/10 flex items-center justify-center text-gray-400">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+</div>
+<div>
+<p class="text-sm font-medium text-white">Amazon Delivery</p>
+<p class="text-xs text-gray-500">10:00 AM • Approved</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface/50 border border-white/5 opacity-60">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface border border-white/10 flex items-center justify-center text-gray-400">
+<span class="material-symbols-outlined text-lg">group</span>
+</div>
+<div>
+<p class="text-sm font-medium text-white">Sarah Smith (Guest)</p>
+<p class="text-xs text-gray-500">Yesterday • Approved</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-600 text-xl">check_circle</span>
+</div>
+</div>
+</main>
+<nav class="flex-none bg-[#141414]/95 backdrop-blur-md border-t border-surface-border pb-safe pt-2">
+<div class="flex justify-around items-center h-16 px-2">
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-primary">
+<span class="material-symbols-outlined text-[26px] fill-1">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-gray-500 hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+<span class="text-[10px] font-medium tracking-wide">Visitors</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-gray-500 hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px]">settings</span>
+<span class="text-[10px] font-medium tracking-wide">Settings</span>
+</button>
+</div>
+<div class="h-6 w-full"></div>
+</nav>
+</div>
+
+</body></html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guard Login - Guardrail</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#F5C400", // Custom yellow for this design
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#141414",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "input": "12px",
+                        "btn": "14px",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F0F0F;
+        }
+        /* Custom caret color for inputs since Tailwind caret utilities can sometimes be tricky with specific hexes in v3 */
+        .custom-caret {
+            caret-color: #F5C400;
+        }
+        /* Remove webkit autofill styling overlay to keep the dark theme consistent */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #141414 inset !important;
+            -webkit-text-fill-color: white !important;
+            caret-color: #F5C400 !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#0F0F0F] text-white min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+<!-- Ambient Background Effect for "Modern" feel -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+<div class="absolute -top-[10%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] bg-[#F5C400] opacity-[0.03] blur-[100px] rounded-full"></div>
+</div>
+<!-- Main Content Container -->
+<div class="w-full max-w-[400px] flex flex-col gap-8 z-10">
+<!-- Header Section -->
+<div class="flex flex-col items-center gap-6">
+<!-- Logo Icon -->
+<div class="w-16 h-16 rounded-2xl bg-[#141414] border border-[#2A2A2A] flex items-center justify-center shadow-lg shadow-black/50">
+<span class="material-symbols-outlined text-[#F5C400] text-[32px]">shield_person</span>
+</div>
+<!-- Headline -->
+<h1 class="text-white text-[28px] font-semibold tracking-tight text-center leading-tight">
+                Guard Login
+            </h1>
+</div>
+<!-- Form Section -->
+<form class="flex flex-col gap-5 w-full">
+<!-- Phone Input -->
+<div class="flex flex-col gap-2">
+<label class="text-[#B5B5B5] text-sm font-medium ml-1" for="phone">Phone Number</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#555] group-focus-within:text-[#F5C400] transition-colors duration-200">call</span>
+<input class="form-input w-full h-[52px] bg-[#141414] border border-[#2A2A2A] rounded-[12px] text-white placeholder-[#B5B5B5] px-4 pl-12 text-[16px] font-normal focus:border-[#F5C400] focus:ring-0 outline-none transition-colors duration-200 custom-caret" id="phone" placeholder="(555) 000-0000" type="tel"/>
+</div>
+</div>
+<!-- OTP Input -->
+<div class="flex flex-col gap-2">
+<label class="text-[#B5B5B5] text-sm font-medium ml-1" for="otp">One-Time Password</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#555] group-focus-within:text-[#F5C400] transition-colors duration-200">password</span>
+<input class="form-input w-full h-[52px] bg-[#141414] border border-[#2A2A2A] rounded-[12px] text-white placeholder-[#B5B5B5] px-4 pl-12 text-[16px] font-normal focus:border-[#F5C400] focus:ring-0 outline-none transition-colors duration-200 custom-caret tracking-widest" id="otp" inputmode="numeric" pattern="[0-9]*" placeholder="• • • • • •" type="text"/>
+</div>
+<div class="flex justify-end">
+<button class="text-xs text-[#F5C400] opacity-80 hover:opacity-100 font-medium py-1" type="button">Resend Code</button>
+</div>
+</div>
+<!-- Primary Action Button -->
+<!-- Height set to 60px (larger than input's 52px) -->
+<button class="mt-4 w-full h-[60px] bg-[#F5C400] hover:bg-[#E5B600] active:scale-[0.98] transition-all duration-150 rounded-[14px] flex items-center justify-center gap-2 group shadow-[0_4px_20px_rgba(245,196,0,0.15)]">
+<span class="text-black font-medium text-lg">Log In</span>
+<span class="material-symbols-outlined text-black group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Secondary Actions / Toggle -->
+<div class="flex flex-col items-center gap-6 mt-2">
+<button class="text-[#B5B5B5] hover:text-white transition-colors text-base font-normal flex flex-col items-center group">
+<span>Use email instead</span>
+<span class="h-[1px] w-0 bg-[#F5C400] mt-0.5 group-hover:w-full transition-all duration-300"></span>
+</button>
+<!-- Bottom Support Link -->
+<button class="flex items-center gap-2 text-[#555] hover:text-[#777] transition-colors mt-4">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span class="text-sm font-medium">Trouble logging in?</span>
+</button>
+</div>
+</div>
+</body></html>
