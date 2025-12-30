@@ -146,10 +146,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     // Headline
-                    Text(
-                      'Guard Login',
-                      style: AppTheme.displayMedium,
-                      textAlign: TextAlign.center,
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) {
+                        return Text(
+                          '${auth.selectedRole ?? 'User'} Login',
+                          style: AppTheme.displayMedium,
+                          textAlign: TextAlign.center,
+                        );
+                      },
                     ),
                     const SizedBox(height: 40),
                     // Phone or Email Input
@@ -283,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _isLoading
                             ? null
                             : (_useEmail
-                                ? (_showOTPInput ? _handleOTPVerification : _handlePhoneLogin)
+                                ? _handleEmailLogin
                                 : (_showOTPInput
                                     ? _handleOTPVerification
                                     : _handlePhoneLogin)),
