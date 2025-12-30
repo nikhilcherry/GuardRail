@@ -114,8 +114,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  String _capitalize(String s) => s[0].toUpperCase() + s.substring(1);
+
   @override
   Widget build(BuildContext context) {
+    final selectedRole = context.watch<AuthProvider>().selectedRole;
+    final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'Guard';
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
@@ -147,11 +152,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     // Headline
                     Text(
-                      'Guard Login',
+                      '$roleTitle Login',
                       style: AppTheme.displayMedium,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        context.read<AuthProvider>().selectRole(null);
+                      },
+                      child: Text(
+                        'Change Role',
+                        style: AppTheme.labelMedium.copyWith(color: AppTheme.primary),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     // Phone or Email Input
                     if (!_useEmail) ...[
                       // Phone Input
@@ -282,11 +297,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading
                             ? null
-                            : (_useEmail
-                                ? (_showOTPInput ? _handleOTPVerification : _handlePhoneLogin)
-                                : (_showOTPInput
-                                    ? _handleOTPVerification
-                                    : _handlePhoneLogin)),
+                            : () {
+                                if (_useEmail) {
+                                  _handleEmailLogin();
+                                } else {
+                                  if (_showOTPInput) {
+                                    _handleOTPVerification();
+                                  } else {
+                                    _handlePhoneLogin();
+                                  }
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primary,
                           shape: RoundedRectangleBorder(
@@ -350,12 +371,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
                         TextButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/forgot_password');
+                          },
                           icon: const Icon(Icons.help_outline),
                           label: Text(
                             'Trouble logging in?',
                             style: AppTheme.bodySmall,
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: AppTheme.bodySmall,
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/sign_up');
+                              },
+                              child: Text(
+                                'Sign Up',
+                                style: AppTheme.labelMedium.copyWith(
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

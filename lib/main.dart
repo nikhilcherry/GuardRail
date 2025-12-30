@@ -5,6 +5,8 @@ import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
 import 'providers/resident_provider.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/sign_up_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
 import 'screens/role_selection_screen.dart';
 import 'screens/guard/guard_home_screen.dart';
 import 'screens/resident/resident_home_screen.dart';
@@ -36,6 +38,8 @@ class GuardrailApp extends StatelessWidget {
         home: const RootScreen(),
         routes: {
           '/role_selection': (_) => const RoleSelectionScreen(),
+          '/sign_up': (_) => const SignUpScreen(),
+          '/forgot_password': (_) => const ForgotPasswordScreen(),
           '/guard_home': (_) => const GuardHomeScreen(),
           '/resident_home': (_) => const ResidentHomeScreen(),
           '/admin_dashboard': (_) => const AdminDashboardScreen(),
@@ -60,12 +64,12 @@ class RootScreen extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
         // Navigation logic based on auth state
-        if (!authProvider.isLoggedIn) {
-          return const LoginScreen();
-        }
-        
         if (authProvider.selectedRole == null) {
           return const RoleSelectionScreen();
+        }
+
+        if (!authProvider.isLoggedIn) {
+          return const LoginScreen();
         }
 
         // Route based on selected role
