@@ -45,7 +45,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Select user role
-  void selectRole(String role) {
+  void selectRole(String? role) {
     _selectedRole = role;
     notifyListeners();
   }

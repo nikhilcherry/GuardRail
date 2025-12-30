@@ -41,19 +41,21 @@ Press 'q' → Quit app
 
 > **Warning**: These credentials are for local development and testing purposes only. Do not use in production.
 
+> **Note:** Demo credentials are provided for local development only. Do not use in production.
+
 ### Guard Account
-- **Phone**: (555) 000-0000
-- **OTP**: 123456
+- **Phone**: (Demo only - see env)
+- **OTP**: (Demo only - see env)
 - **Role**: Guard
 
 ### Resident Account
-- **Phone**: (555) 111-1111
-- **OTP**: 654321
+- **Phone**: (Demo only - see env)
+- **OTP**: (Demo only - see env)
 - **Role**: Resident
 
 ### Admin Account
-- **Email**: admin@guardrail.com
-- **Password**: admin123
+- **Email**: (Demo only - see env)
+- **Password**: (Demo only - see env)
 - **Role**: Admin
 
 ---

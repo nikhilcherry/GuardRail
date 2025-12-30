@@ -17,7 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _otpController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-
   bool _showOTPInput = false;
   bool _useEmail = false;
   bool _isLoading = false;
@@ -49,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _showOTPInput = true);
   }
 
@@ -60,9 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _isLoading = true);
-
     try {
       await context.read<AuthProvider>().loginWithPhoneAndOTP(
             phone: _phoneController.text,
@@ -84,9 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _isLoading = true);
-
     try {
       await context.read<AuthProvider>().loginWithEmail(
             email: _emailController.text,
@@ -114,8 +108,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  String _capitalize(String s) => s[0].toUpperCase() + s.substring(1);
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final selectedRole = authProvider.selectedRole;
+    final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
@@ -146,16 +146,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     // Headline
-                    Consumer<AuthProvider>(
-                      builder: (context, auth, _) {
-                        return Text(
-                          '${auth.selectedRole ?? 'User'} Login',
-                          style: AppTheme.displayMedium,
-                          textAlign: TextAlign.center,
-                        );
-                      },
+                    Text(
+                      '$roleTitle Login',
+                      style: AppTheme.displayMedium,
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        context.read<AuthProvider>().selectRole(null);
+                      },
+                      child: Text(
+                        'Change Role',
+                        style: AppTheme.labelMedium.copyWith(
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     // Phone or Email Input
                     if (!_useEmail) ...[
                       // Phone Input
@@ -198,7 +206,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('One-Time Password', style: AppTheme.labelLarge),
+                                Text(
+                                  'One-Time Password',
+                                  style: AppTheme.labelLarge,
+                                ),
                                 TextButton(
                                   onPressed: _resendOTP,
                                   child: Text(
@@ -341,25 +352,44 @@ class _LoginScreenState extends State<LoginScreen> {
                               _passwordController.clear();
                             });
                           },
-                          child: Column(
-                            children: [
-                              Text(
-                                _useEmail ? 'Use phone instead' : 'Use email instead',
-                                style: AppTheme.bodyMedium.copyWith(
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            _useEmail ? 'Use phone instead' : 'Use email instead',
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/forgot_password');
+                          },
                           icon: const Icon(Icons.help_outline),
                           label: Text(
                             'Trouble logging in?',
                             style: AppTheme.bodySmall,
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: AppTheme.bodySmall,
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/sign_up');
+                              },
+                              child: Text(
+                                'Sign Up',
+                                style: AppTheme.labelMedium.copyWith(
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
