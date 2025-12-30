@@ -98,50 +98,70 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
             ),
             // Main Content
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Register New Visitor Button
-                    _RegisterVisitorButton(),
-                    const SizedBox(height: 32),
-                    // Recent Entries Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Recent Entries',
-                          style: AppTheme.headlineSmall,
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'View All',
-                            style: AppTheme.labelMedium.copyWith(
-                              color: AppTheme.primary,
-                            ),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Column(
+                        children: [
+                          // Register New Visitor Button
+                          const _RegisterVisitorButton(),
+                          const SizedBox(height: 32),
+                          // Recent Entries Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Recent Entries',
+                                style: AppTheme.headlineSmall,
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'View All',
+                                  style: AppTheme.labelMedium.copyWith(
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Entries List
+                  Consumer<GuardProvider>(
+                    builder: (context, guardProvider, _) {
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              // Handle separator
+                              if (index.isOdd) {
+                                return const SizedBox(height: 12);
+                              }
+                              // Handle item
+                              final itemIndex = index ~/ 2;
+                              if (itemIndex >= guardProvider.entries.length) return null;
+
+                              final entry = guardProvider.entries[itemIndex];
+                              return _EntryCard(entry: entry);
+                            },
+                            childCount: guardProvider.entries.isEmpty
+                                ? 0
+                                : guardProvider.entries.length * 2 - 1,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Entries List
-                    Consumer<GuardProvider>(
-                      builder: (context, guardProvider, _) {
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: guardProvider.entries.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final entry = guardProvider.entries[index];
-                            return _EntryCard(entry: entry);
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                      );
+                    },
+                  ),
+                  // Bottom padding for scroll
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ],
               ),
             ),
             // Bottom Patrol Check Bar
@@ -415,6 +435,9 @@ class _PurposeChip extends StatelessWidget {
 class _EntryCard extends StatelessWidget {
   final VisitorEntry entry;
 
+  // OPTIMIZE: Cached formatter to avoid recreation on every build
+  static final _timeFormatter = DateFormat('HH:mm');
+
   const _EntryCard({required this.entry});
 
   Color _getStatusColor(String status) {
@@ -503,7 +526,7 @@ class _EntryCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                DateFormat('HH:mm').format(entry.time),
+                _timeFormatter.format(entry.time),
                 style: AppTheme.labelSmall,
               ),
             ],
