@@ -17,7 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _otpController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-
   bool _showOTPInput = false;
   bool _useEmail = false;
   bool _isLoading = false;
@@ -49,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _showOTPInput = true);
   }
 
@@ -60,9 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _isLoading = true);
-
     try {
       await context.read<AuthProvider>().loginWithPhoneAndOTP(
             phone: _phoneController.text,
@@ -84,9 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
     setState(() => _isLoading = true);
-
     try {
       await context.read<AuthProvider>().loginWithEmail(
             email: _emailController.text,
@@ -118,8 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedRole = context.watch<AuthProvider>().selectedRole;
-    final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'Guard';
+    final authProvider = context.watch<AuthProvider>();
+    final selectedRole = authProvider.selectedRole;
+    final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
@@ -163,7 +158,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         'Change Role',
-                        style: AppTheme.labelMedium.copyWith(color: AppTheme.primary),
+                        style: AppTheme.labelMedium.copyWith(
+                          color: AppTheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -209,7 +206,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('One-Time Password', style: AppTheme.labelLarge),
+                                Text(
+                                  'One-Time Password',
+                                  style: AppTheme.labelLarge,
+                                ),
                                 TextButton(
                                   onPressed: _resendOTP,
                                   child: Text(
@@ -297,17 +297,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading
                             ? null
-                            : () {
-                                if (_useEmail) {
-                                  _handleEmailLogin();
-                                } else {
-                                  if (_showOTPInput) {
-                                    _handleOTPVerification();
-                                  } else {
-                                    _handlePhoneLogin();
-                                  }
-                                }
-                              },
+                            : (_useEmail
+                                ? _handleEmailLogin
+                                : (_showOTPInput
+                                    ? _handleOTPVerification
+                                    : _handlePhoneLogin)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primary,
                           shape: RoundedRectangleBorder(
@@ -358,15 +352,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               _passwordController.clear();
                             });
                           },
-                          child: Column(
-                            children: [
-                              Text(
-                                _useEmail ? 'Use phone instead' : 'Use email instead',
-                                style: AppTheme.bodyMedium.copyWith(
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            _useEmail ? 'Use phone instead' : 'Use email instead',
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),

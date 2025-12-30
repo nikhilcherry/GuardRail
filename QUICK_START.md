@@ -37,7 +37,9 @@ Press 'q' → Quit app
 
 ---
 
-## 📱 Test Login Credentials
+## 📱 Test Login Credentials (Local Development Only)
+
+> **Warning**: These credentials are for local development and testing purposes only. Do not use in production.
 
 > **Note:** Demo credentials are provided for local development only. Do not use in production.
 
