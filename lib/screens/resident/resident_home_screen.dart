@@ -133,113 +133,127 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                 ),
                 // Main Content
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        // Pending Request Card
-                        if (hasPendingRequest) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Pending Request',
-                                style: AppTheme.titleLarge,
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            // Pending Request Card
+                            if (hasPendingRequest) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Pending Request',
+                                    style: AppTheme.titleLarge,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.errorRed.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: AppTheme.errorRed.withOpacity(0.2),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.errorRed,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Live',
+                                          style: AppTheme.labelSmall.copyWith(
+                                            color: AppTheme.errorRed,
+                                            fontSize: 9,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
+                              const SizedBox(height: 16),
+                              _PendingVisitorCard(
+                                visitor: pendingVisitors.first,
+                                onApprove: () {
+                                  residentProvider.approveVisitor(
+                                    pendingVisitors.first.id,
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Visitor approved'),
+                                    ),
+                                  );
+                                },
+                                onReject: () {
+                                  residentProvider.rejectVisitor(
+                                    pendingVisitors.first.id,
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Visitor rejected'),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+                            // Recent History Header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Recent History',
+                                  style: AppTheme.titleLarge,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.errorRed.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: AppTheme.errorRed.withOpacity(0.2),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            if (residentProvider.todaysVisitors.isEmpty)
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                  ),
+                                  child: Text(
+                                    'No recent visitors',
+                                    style: AppTheme.labelMedium,
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.errorRed,
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Live',
-                                      style: AppTheme.labelSmall.copyWith(
-                                        color: AppTheme.errorRed,
-                                        fontSize: 9,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _PendingVisitorCard(
-                            visitor: pendingVisitors.first,
-                            onApprove: () {
-                              residentProvider.approveVisitor(
-                                pendingVisitors.first.id,
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Visitor approved'),
-                                ),
-                              );
-                            },
-                            onReject: () {
-                              residentProvider.rejectVisitor(
-                                pendingVisitors.first.id,
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Visitor rejected'),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                        // Recent History
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recent History',
-                              style: AppTheme.titleLarge,
-                            ),
-                          ],
+                          ]),
                         ),
-                        const SizedBox(height: 16),
-                        ...(residentProvider.todaysVisitors.isNotEmpty
-                            ? residentProvider.todaysVisitors.map(
-                                (visitor) => Padding(
+                      ),
+                      // Virtualized List
+                      if (residentProvider.todaysVisitors.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final visitor =
+                                    residentProvider.todaysVisitors[index];
+                                return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: _HistoryCard(visitor: visitor),
-                                ),
-                              )
-                            : [
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 32,
-                                    ),
-                                    child: Text(
-                                      'No recent visitors',
-                                      style: AppTheme.labelMedium,
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                      ],
-                    ),
+                                );
+                              },
+                              childCount: residentProvider.todaysVisitors.length,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
