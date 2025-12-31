@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../main.dart';
 import '../../providers/auth_provider.dart';
 
 class AdminFlatsScreen extends StatelessWidget {
@@ -153,8 +154,10 @@ class AdminSettingsScreen extends StatelessWidget {
                       onPressed: () {
                         context.read<AuthProvider>().logout();
                         Navigator.pop(context);
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const RootScreen()),
+                          (route) => false,
+                        );
                       },
                       child: Text(
                         'Logout',

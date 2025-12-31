@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_theme.dart';
+import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
 
@@ -65,7 +66,10 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     if (confirmed == true) {
       await context.read<AuthProvider>().logout();
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const RootScreen()),
+          (route) => false,
+        );
       }
     }
   }

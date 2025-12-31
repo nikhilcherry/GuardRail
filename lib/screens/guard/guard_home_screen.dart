@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 
@@ -101,22 +102,39 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                         onTap: () async {
                           await context.read<AuthProvider>().logout();
                           if (mounted) {
-                            Navigator.of(context)
-                                .pushNamedAndRemoveUntil('/', (route) => false);
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (_) => const RootScreen()),
+                              (route) => false,
+                            );
                           }
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: AppTheme.surfaceDark,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.borderDark),
+                            border: Border.all(
+                                color: AppTheme.errorRed.withOpacity(0.5)),
                           ),
-                          child: const Icon(
-                            Icons.logout,
-                            color: AppTheme.textSecondary,
-                            size: 20,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                color: AppTheme.errorRed,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Logout',
+                                style: AppTheme.labelSmall.copyWith(
+                                  color: AppTheme.errorRed,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
