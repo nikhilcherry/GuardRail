@@ -116,9 +116,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final selectedRole = authProvider.selectedRole;
     final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
-      body: SafeArea(
+    return WillPopScope(
+      onWillPop: () async {
+        context.read<AuthProvider>().selectRole(null);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundDark,
+        body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -398,6 +403,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

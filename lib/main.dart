@@ -17,17 +17,22 @@ import 'screens/admin/admin_additional_screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const GuardrailApp());
+  final authProvider = AuthProvider();
+  await authProvider.checkLoginStatus();
+
+  runApp(GuardrailApp(authProvider: authProvider));
 }
 
 class GuardrailApp extends StatelessWidget {
-  const GuardrailApp({Key? key}) : super(key: key);
+  final AuthProvider? authProvider;
+
+  const GuardrailApp({Key? key, this.authProvider}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => authProvider ?? AuthProvider()),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
       ],
