@@ -403,6 +403,9 @@ class _PendingVisitorCard extends StatelessWidget {
 class _HistoryCard extends StatelessWidget {
   final Visitor visitor;
 
+  // OPTIMIZE: Cached formatter to avoid recreation on every build
+  static final _timeFormatter = DateFormat('h:mm a');
+
   const _HistoryCard({required this.visitor});
 
   Color _getStatusColor() {
@@ -465,7 +468,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  DateFormat('h:mm a').format(visitor.date),
+                  _timeFormatter.format(visitor.date),
                   style: AppTheme.labelSmall,
                 ),
               ],
