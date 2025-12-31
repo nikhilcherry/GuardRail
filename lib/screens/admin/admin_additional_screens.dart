@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
 
 class AdminFlatsScreen extends StatelessWidget {
   const AdminFlatsScreen({Key? key}) : super(key: key);
@@ -98,19 +100,31 @@ class AdminSettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.tune,
             label: 'Gate configuration',
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Gate configuration coming soon')),
+              );
+            },
           ),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.notifications_active_outlined,
             label: 'Alerts & notifications',
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Alerts settings coming soon')),
+              );
+            },
           ),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.security_outlined,
             label: 'Security policies',
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Security policies coming soon')),
+              );
+            },
           ),
           const SizedBox(height: 24),
           _SettingsTile(
@@ -137,6 +151,7 @@ class AdminSettingsScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
+                        context.read<AuthProvider>().logout();
                         Navigator.pop(context);
                         Navigator.of(context)
                             .popUntil((route) => route.isFirst);

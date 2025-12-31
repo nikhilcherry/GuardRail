@@ -172,7 +172,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   style: AppTheme.headlineSmall,
                 ),
                 TextButton(
-                  onPressed: () {},
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Activity logs coming soon')),
+                      );
+                    },
                   child: Text(
                     'View All',
                     style: AppTheme.labelSmall.copyWith(

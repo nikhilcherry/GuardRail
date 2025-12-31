@@ -117,7 +117,11 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                                 style: AppTheme.headlineSmall,
                               ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('History view coming soon')),
+                                  );
+                                },
                                 child: Text(
                                   'View All',
                                   style: AppTheme.labelMedium.copyWith(

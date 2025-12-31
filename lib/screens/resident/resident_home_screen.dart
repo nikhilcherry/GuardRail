@@ -49,23 +49,32 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               ),
                             ],
                           ),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceDark,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: AppTheme.borderDark,
-                              ),
-                            ),
-                            child: Stack(
-                              children: [
-                                const Icon(
-                                  Icons.notifications_outlined,
-                                  color: AppTheme.textPrimary,
+                          InkWell(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Notifications coming soon')),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceDark,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppTheme.borderDark,
                                 ),
-                                if (residentProvider.pendingRequests > 0)
+                              ),
+                              child: Stack(
+                                children: [
+                                  const Center(
+                                    child: Icon(
+                                      Icons.notifications_outlined,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  if (residentProvider.pendingRequests > 0)
                                   Positioned(
                                     top: 4,
                                     right: 4,
@@ -82,7 +91,8 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       ),
                                     ),
                                   ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],

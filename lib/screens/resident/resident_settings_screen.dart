@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
@@ -14,6 +15,25 @@ class ResidentSettingsScreen extends StatefulWidget {
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   bool _biometricsEnabled = false;
   bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _biometricsEnabled = prefs.getBool('biometricsEnabled') ?? false;
+      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    });
+  }
+
+  Future<void> _savePreference(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
@@ -56,7 +76,13 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacementNamed(context, '/resident_home');
+            }
+          },
         ),
         title: Text(
           'Resident Settings',
@@ -78,12 +104,20 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.person,
                       title: 'My Profile',
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
-                      onTap: () {},
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Profile editing coming soon')),
+                        );
+                      },
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
                       title: 'Change Password',
-                      onTap: () {},
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Change password coming soon')),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -104,6 +138,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       value: _biometricsEnabled,
                       onChanged: (value) {
                         setState(() => _biometricsEnabled = value);
+                        _savePreference('biometricsEnabled', value);
                       },
                     ),
                   ],
@@ -120,6 +155,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       value: _notificationsEnabled,
                       onChanged: (value) {
                         setState(() => _notificationsEnabled = value);
+                        _savePreference('notificationsEnabled', value);
                       },
                     ),
                     _SettingsItem(
@@ -362,4 +398,3 @@ class _SettingsToggleItem extends StatelessWidget {
     );
   }
 }
-
