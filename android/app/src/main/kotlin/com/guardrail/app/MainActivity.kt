@@ -1,4 +1,4 @@
-package com.example.guardrail
+package com.guardrail.app
 
 import io.flutter.embedding.android.FlutterActivity
 
