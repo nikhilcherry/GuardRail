@@ -1,0 +1,4 @@
+storePassword=<password-from-your-keystore>
+keyPassword=<password-from-your-key>
+keyAlias=<key-alias>
+storeFile=<location-of-key-store-file>
