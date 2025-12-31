@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 
@@ -54,44 +55,90 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                     'Gate Control',
                     style: AppTheme.headlineMedium,
                   ),
-                  // Time
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1c1f27),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppTheme.borderDark),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
+                  Row(
+                    children: [
+                      // Time
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1c1f27),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppTheme.borderDark),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: AppTheme.successGreen,
+                                borderRadius: BorderRadius.circular(4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.successGreen.withOpacity(0.6),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
+                              style: AppTheme.labelMedium.copyWith(
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Logout Button
+                      InkWell(
+                        onTap: () async {
+                          await context.read<AuthProvider>().logout();
+                          if (mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (_) => const RootScreen()),
+                              (route) => false,
+                            );
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: AppTheme.successGreen,
-                            borderRadius: BorderRadius.circular(4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.successGreen.withOpacity(0.6),
-                                blurRadius: 8,
+                            color: AppTheme.surfaceDark,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: AppTheme.errorRed.withOpacity(0.5)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                color: AppTheme.errorRed,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Logout',
+                                style: AppTheme.labelSmall.copyWith(
+                                  color: AppTheme.errorRed,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
-                          style: AppTheme.labelMedium.copyWith(
-                            color: AppTheme.textSecondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -283,18 +330,20 @@ class _RegisterVisitorButton extends StatelessWidget {
     final nameController = TextEditingController();
     final flatController = TextEditingController();
     String selectedPurpose = 'guest';
+    bool isLoading = false;
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: AppTheme.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          backgroundColor: AppTheme.surfaceDark,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text('Register Visitor', style: AppTheme.headlineSmall),
               const SizedBox(height: 24),
               Text('Flat Number', style: AppTheme.labelLarge),
@@ -324,61 +373,83 @@ class _RegisterVisitorButton extends StatelessWidget {
               const SizedBox(height: 16),
               Text('Purpose', style: AppTheme.labelLarge),
               const SizedBox(height: 8),
-              StatefulBuilder(
-                builder: (context, setState) => Column(
-                  children: [
-                    _PurposeChip(
-                      label: 'Guest',
-                      icon: Icons.person,
-                      selected: selectedPurpose == 'guest',
-                      onSelected: () => setState(() => selectedPurpose = 'guest'),
-                    ),
-                    const SizedBox(height: 8),
-                    _PurposeChip(
-                      label: 'Delivery',
-                      icon: Icons.local_shipping,
-                      selected: selectedPurpose == 'delivery',
-                      onSelected: () => setState(() => selectedPurpose = 'delivery'),
-                    ),
-                    const SizedBox(height: 8),
-                    _PurposeChip(
-                      label: 'Service',
-                      icon: Icons.build,
-                      selected: selectedPurpose == 'service',
-                      onSelected: () => setState(() => selectedPurpose = 'service'),
-                    ),
-                  ],
-                ),
+              Column(
+                children: [
+                  _PurposeChip(
+                    label: 'Guest',
+                    icon: Icons.person,
+                    selected: selectedPurpose == 'guest',
+                    onSelected: () => setState(() => selectedPurpose = 'guest'),
+                  ),
+                  const SizedBox(height: 8),
+                  _PurposeChip(
+                    label: 'Delivery',
+                    icon: Icons.local_shipping,
+                    selected: selectedPurpose == 'delivery',
+                    onSelected: () => setState(() => selectedPurpose = 'delivery'),
+                  ),
+                  const SizedBox(height: 8),
+                  _PurposeChip(
+                    label: 'Service',
+                    icon: Icons.build,
+                    selected: selectedPurpose == 'service',
+                    onSelected: () => setState(() => selectedPurpose = 'service'),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    if (nameController.text.isEmpty ||
-                        flatController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please fill in all fields'),
-                        ),
-                      );
-                      return;
-                    }
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          if (nameController.text.isEmpty ||
+                              flatController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please fill in all fields'),
+                              ),
+                            );
+                            return;
+                          }
 
-                    await context.read<GuardProvider>().registerNewVisitor(
-                          name: nameController.text,
-                          flatNumber: flatController.text,
-                          purpose: selectedPurpose,
-                        );
+                          setState(() => isLoading = true);
 
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Visitor registered successfully'),
-                      ),
-                    );
-                  },
-                  child: const Text('Register Visitor'),
+                          try {
+                            await context.read<GuardProvider>().registerNewVisitor(
+                                  name: nameController.text,
+                                  flatNumber: flatController.text,
+                                  purpose: selectedPurpose,
+                                );
+
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Visitor registered successfully'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                              setState(() => isLoading = false);
+                            }
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.black),
+                          ),
+                        )
+                      : const Text('Register Visitor'),
                 ),
               ),
             ],

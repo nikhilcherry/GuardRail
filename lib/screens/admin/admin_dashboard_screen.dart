@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../main.dart';
 import '../../providers/auth_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -69,6 +70,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               child: InkWell(
                 onTap: () {
                   context.read<AuthProvider>().logout();
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const RootScreen()),
+                      (route) => false,
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: const Icon(
