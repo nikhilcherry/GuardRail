@@ -65,8 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
             otp: _otpController.text,
           );
     } catch (e) {
+      // SECURITY: Prevents leaking internal error details to the user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        const SnackBar(content: Text('Login failed. Please check your OTP and try again.')),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -102,8 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
         const SnackBar(content: Text('OTP resent successfully')),
       );
     } catch (e) {
+      // SECURITY: Prevents leaking internal error details to the user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resend OTP: $e')),
+        const SnackBar(content: Text('Failed to resend OTP. Please try again later.')),
       );
     }
   }
