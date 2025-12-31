@@ -63,7 +63,10 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     );
 
     if (confirmed == true) {
-      context.read<AuthProvider>().logout();
+      await context.read<AuthProvider>().logout();
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     }
   }
 
