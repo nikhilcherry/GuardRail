@@ -73,6 +73,94 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     }
   }
 
+  void _showEditProfileDialog(BuildContext context, ResidentProvider residentProvider) {
+    final theme = Theme.of(context);
+    final nameController = TextEditingController(text: residentProvider.residentName);
+    final flatController = TextEditingController(text: residentProvider.flatNumber);
+    final phoneController = TextEditingController(text: residentProvider.phoneNumber);
+    final emailController = TextEditingController(text: residentProvider.email);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Edit Profile', style: theme.textTheme.headlineSmall),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: theme.textTheme.bodyMedium,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: flatController,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  labelText: 'Flat Number',
+                  labelStyle: theme.textTheme.bodyMedium,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  labelText: 'Phone',
+                  labelStyle: theme.textTheme.bodyMedium,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: theme.textTheme.bodyMedium,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: theme.textTheme.bodyMedium),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              residentProvider.updateResidentInfo(
+                name: nameController.text,
+                flatNumber: flatController.text,
+                phoneNumber: phoneController.text,
+                email: emailController.text,
+              );
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile updated successfully')),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.black,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -113,7 +201,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       title: 'My Profile',
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
                       onTap: () {
-                        // Empty state/hidden for now
+                        _showEditProfileDialog(context, residentProvider);
                       },
                     ),
                     _SettingsItem(

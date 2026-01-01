@@ -326,8 +326,8 @@ class _AdminBottomNav extends StatelessWidget {
           label: 'Guards',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.group_outlined),
-          label: 'Visitors',
+          icon: Icon(Icons.history),
+          label: 'Logs',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings_outlined),

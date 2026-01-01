@@ -52,6 +52,11 @@ class GuardProvider extends ChangeNotifier {
   ];
 
   DateTime _lastPatrolCheck = DateTime.now().subtract(const Duration(minutes: 45));
+  final List<DateTime> _patrolLogs = [];
+  
+  List<VisitorEntry> get entries => _entries;
+  DateTime get lastPatrolCheck => _lastPatrolCheck;
+  List<DateTime> get patrolLogs => _patrolLogs;
   bool _isLoading = false;
   
   List<VisitorEntry> get entries => _entries;
@@ -146,11 +151,41 @@ class GuardProvider extends ChangeNotifier {
     }
   }
 
+  // Update visitor entry
+  Future<void> updateVisitorEntry({
+    required String id,
+    required String name,
+    required String flatNumber,
+    required String purpose,
+  }) async {
+    try {
+      await Future.delayed(const Duration(seconds: 1));
+
+      final index = _entries.indexWhere((entry) => entry.id == id);
+      if (index != -1) {
+        final oldEntry = _entries[index];
+        _entries[index] = VisitorEntry(
+          id: oldEntry.id,
+          name: name,
+          flatNumber: flatNumber,
+          purpose: purpose,
+          status: oldEntry.status,
+          time: oldEntry.time,
+          guardName: oldEntry.guardName,
+        );
+        notifyListeners();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Patrol check-in
   Future<void> patrolCheckIn() async {
     try {
       await Future.delayed(const Duration(seconds: 1));
       _lastPatrolCheck = DateTime.now();
+      _patrolLogs.insert(0, _lastPatrolCheck);
       notifyListeners();
     } catch (e) {
       rethrow;
