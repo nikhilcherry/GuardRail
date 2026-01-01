@@ -15,10 +15,19 @@ import 'screens/resident/resident_visitors_screen.dart';
 import 'screens/resident/resident_settings_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/admin/admin_additional_screens.dart';
+import 'services/crash_reporting_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const GuardrailApp());
+
+  // Initialize crash reporting
+  await CrashReportingService().init();
+
+  final authProvider = AuthProvider();
+  await authProvider.checkLoginStatus();
+
+  runApp(GuardrailApp(authProvider: authProvider));
 }
 
 class GuardrailApp extends StatelessWidget {
