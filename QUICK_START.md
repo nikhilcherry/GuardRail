@@ -41,22 +41,7 @@ Press 'q' → Quit app
 
 > **Warning**: These credentials are for local development and testing purposes only. Do not use in production.
 
-> **Note:** Demo credentials are provided for local development only. Do not use in production.
-
-### Guard Account
-- **Phone**: (Demo only - see env)
-- **OTP**: (Demo only - see env)
-- **Role**: Guard
-
-### Resident Account
-- **Phone**: (Demo only - see env)
-- **OTP**: (Demo only - see env)
-- **Role**: Resident
-
-### Admin Account
-- **Email**: (Demo only - see env)
-- **Password**: (Demo only - see env)
-- **Role**: Admin
+Credentials are configured via environment variables. See `.env.example` for the required keys and default values for development.
 
 ---
 

@@ -9,6 +9,7 @@ import 'providers/theme_provider.dart';
 import 'providers/settings_provider.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/settings_repository.dart';
+import 'providers/admin_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/sign_up_screen.dart';
@@ -20,6 +21,7 @@ import 'screens/resident/resident_visitors_screen.dart';
 import 'screens/resident/resident_settings_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/admin/admin_additional_screens.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/crash_reporting_service.dart';
 
 void main() {
@@ -31,6 +33,12 @@ void main() {
 
   // Pre-load critical state
   final authProvider = AuthProvider(repository: authRepository);
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Fallback if .env is missing (e.g. first run without setup)
+    await dotenv.load(fileName: ".env.example");
+  }
   await Firebase.initializeApp();
   runApp(const GuardrailApp());
 
@@ -66,6 +74,8 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
         ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: Builder(
         builder: (context) {

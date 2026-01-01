@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
 import '../../providers/auth_provider.dart';
+import 'resident_notifications_screen.dart';
 import '../../widgets/shimmer_list_item.dart';
 
 class ResidentHomeScreen extends StatefulWidget {
@@ -64,6 +65,11 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                           ),
                           InkWell(
                             onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ResidentNotificationsScreen(),
+                                ),
                               showComingSoonDialog(
                                 context,
                                 title: 'Notifications',

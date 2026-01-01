@@ -219,7 +219,10 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                               if (itemIndex >= guardProvider.entries.length) return null;
 
                               final entry = guardProvider.entries[itemIndex];
-                              return _EntryCard(entry: entry);
+                              return InkWell(
+                                onTap: () => _showVisitorDialog(context, entry: entry),
+                                child: _EntryCard(entry: entry),
+                              );
                             },
                             childCount: guardProvider.entries.isEmpty
                                 ? 0
@@ -346,11 +349,12 @@ class _RegisterVisitorButton extends StatelessWidget {
     );
   }
 
-  void _showVisitorDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final flatController = TextEditingController();
-    String selectedPurpose = 'guest';
+  void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
+    final nameController = TextEditingController(text: entry?.name ?? '');
+    final flatController = TextEditingController(text: entry?.flatNumber ?? '');
+    String selectedPurpose = entry?.purpose.toLowerCase() ?? 'guest';
     bool isLoading = false;
+    final isEditing = entry != null;
 
     showDialog(
       context: context,
@@ -366,7 +370,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Text('Register Visitor', style: theme.textTheme.headlineSmall),
+                Text(isEditing ? 'Visitor Details' : 'Register Visitor', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 24),
                 Text('Flat Number', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
@@ -439,17 +443,28 @@ class _RegisterVisitorButton extends StatelessWidget {
                             setState(() => isLoading = true);
 
                             try {
-                              await context.read<GuardProvider>().registerNewVisitor(
-                                    name: nameController.text,
-                                    flatNumber: flatController.text,
-                                    purpose: selectedPurpose,
-                                  );
+                              if (isEditing) {
+                                await context.read<GuardProvider>().updateVisitorEntry(
+                                      id: entry!.id,
+                                      name: nameController.text,
+                                      flatNumber: flatController.text,
+                                      purpose: selectedPurpose,
+                                    );
+                              } else {
+                                await context.read<GuardProvider>().registerNewVisitor(
+                                      name: nameController.text,
+                                      flatNumber: flatController.text,
+                                      purpose: selectedPurpose,
+                                    );
+                              }
 
                               if (context.mounted) {
                                 context.pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Visitor registered successfully'),
+                                  SnackBar(
+                                    content: Text(isEditing
+                                        ? 'Visitor updated successfully'
+                                        : 'Visitor registered successfully'),
                                   ),
                                 );
                               }
@@ -471,7 +486,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                               valueColor: AlwaysStoppedAnimation(theme.colorScheme.onPrimary),
                             ),
                           )
-                        : const Text('Register Visitor'),
+                        : Text(isEditing ? 'Save Changes' : 'Register Visitor'),
                   ),
                 ),
               ],
