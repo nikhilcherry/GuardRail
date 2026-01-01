@@ -5,7 +5,12 @@ import '../services/auth_service.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
+import '../services/logger_service.dart';
+
+class AuthProvider extends ChangeNotifier {
+  final _logger = LoggerService();
   bool _isLoggedIn = false;
+  bool _isInitializing = true;
   String? _selectedRole;
   String? _userPhone;
   String? _userName;
@@ -13,6 +18,7 @@ class AuthProvider extends ChangeNotifier {
   bool _biometricsEnabled = false;
 
   bool get isLoggedIn => _isLoggedIn;
+  bool get isInitializing => _isInitializing;
   String? get selectedRole => _selectedRole;
   String? get userPhone => _userPhone;
   String? get userName => _userName;
@@ -46,7 +52,19 @@ class AuthProvider extends ChangeNotifier {
       }
     }
 
+    _isInitializing = false;
     notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      _selectedRole = prefs.getString('selectedRole');
+      _userPhone = prefs.getString('userPhone');
+      _userName = prefs.getString('userName');
+      _logger.info('Login status checked. LoggedIn: $_isLoggedIn, Role: $_selectedRole');
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _logger.error('Error checking login status', e, stackTrace);
+    }
   }
 
   // Login with phone and OTP
@@ -58,6 +76,24 @@ class AuthProvider extends ChangeNotifier {
       final response = await _authService.login(phone, otp);
       await _handleLoginSuccess(response, phone: phone);
     } catch (e) {
+      _logger.info('Attempting login with phone: $phone');
+      // Simulate API call
+      await Future.delayed(const Duration(seconds: 1));
+      
+      _isLoggedIn = true;
+      _userPhone = phone;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      if (_selectedRole != null) {
+        await prefs.setString('selectedRole', _selectedRole!);
+      }
+      await prefs.setString('userPhone', phone);
+
+      _logger.info('Login successful for phone: $phone');
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _logger.error('Login failed for phone: $phone', e, stackTrace);
       rethrow;
     }
   }
@@ -89,6 +125,9 @@ class AuthProvider extends ChangeNotifier {
         password: password,
         role: role,
       );
+      _logger.info('Attempting login with email: $email');
+      // Simulate API call
+      await Future.delayed(const Duration(seconds: 1));
       
       // Auto login after registration
       await _handleLoginSuccess(response,
@@ -143,17 +182,24 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setBool('biometricsEnabled', false);
       notifyListeners();
       return true;
+      _logger.info('Login successful for email: $email');
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _logger.error('Login failed for email: $email', e, stackTrace);
+      rethrow;
     }
   }
 
   // Select user role
   void selectRole(String? role) {
+    _logger.info('Role selected: $role');
     _selectedRole = role;
     notifyListeners();
   }
 
   // Logout
   Future<void> logout() async {
+    _logger.info('Logging out user: $_userName ?? $_userPhone');
     _isLoggedIn = false;
     _selectedRole = null;
     _userPhone = null;
@@ -171,9 +217,11 @@ class AuthProvider extends ChangeNotifier {
   // Resend OTP
   Future<void> resendOTP(String phone) async {
     try {
+      _logger.info('Resending OTP to: $phone');
       await Future.delayed(const Duration(seconds: 1));
       // API call to resend OTP
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.error('Failed to resend OTP to: $phone', e, stackTrace);
       rethrow;
     }
   }
