@@ -12,40 +12,32 @@ import 'repositories/settings_repository.dart';
 import 'providers/admin_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
-import 'screens/auth/sign_up_screen.dart';
-import 'screens/auth/forgot_password_screen.dart';
 import 'screens/role_selection_screen.dart';
-import 'screens/guard/guard_home_screen.dart';
-import 'screens/resident/resident_home_screen.dart';
-import 'screens/resident/resident_visitors_screen.dart';
-import 'screens/resident/resident_settings_screen.dart';
-import 'screens/admin/admin_dashboard_screen.dart';
-import 'screens/admin/admin_additional_screens.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/crash_reporting_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Repositories
   final authRepository = AuthRepository();
   final settingsRepository = SettingsRepository();
 
-  // Pre-load critical state
-  final authProvider = AuthProvider(repository: authRepository);
+  // Load environment variables
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
     // Fallback if .env is missing (e.g. first run without setup)
     await dotenv.load(fileName: ".env.example");
   }
+
   await Firebase.initializeApp();
-  runApp(const GuardrailApp());
 
   // Initialize crash reporting
   await CrashReportingService().init();
 
-  final authProvider = AuthProvider();
+  // Pre-load critical state
+  final authProvider = AuthProvider(repository: authRepository);
   await authProvider.checkLoginStatus();
 
   runApp(GuardrailApp(
@@ -55,30 +47,31 @@ void main() {
 }
 
 class GuardrailApp extends StatelessWidget {
-  final AuthProvider? authProvider;
+  final AuthProvider authProvider;
   final SettingsRepository settingsRepository;
 
   const GuardrailApp({
     Key? key,
-    this.authProvider,
+    required this.authProvider,
     required this.settingsRepository,
   }) : super(key: key);
-  const GuardrailApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()..checkLoginStatus()),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
         ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: Builder(
         builder: (context) {
+          // We need to read AuthProvider from context to pass it to AppRouter,
+          // or just use the one we have in the widget if we prefer.
+          // Using context.read ensures we get the one from Provider tree.
           final authProvider = context.read<AuthProvider>();
           final appRouter = AppRouter(authProvider);
 
@@ -124,7 +117,11 @@ class RootScreen extends StatelessWidget {
         if (!authProvider.isLoggedIn) {
           return const LoginScreen();
         }
-      ),
+
+        // This widget is actually not used if we use GoRouter redirection,
+        // but keeping it valid just in case.
+        return const Scaffold(body: Center(child: Text("Home")));
+      },
     );
   }
 }
