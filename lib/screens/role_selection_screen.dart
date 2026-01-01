@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 
@@ -8,6 +9,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
   void _selectRole(BuildContext context, String role) {
     context.read<AuthProvider>().selectRole(role);
+    context.push('/login');
   }
 
   @override

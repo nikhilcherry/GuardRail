@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
@@ -73,12 +74,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               child: InkWell(
                 onTap: () {
                   context.read<AuthProvider>().logout();
-                  if (context.mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const RootScreen()),
-                      (route) => false,
-                    );
-                  }
+                  // AuthProvider listener in AppRouter will handle redirect to login
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Icon(
@@ -339,19 +335,19 @@ class _AdminBottomNav extends StatelessWidget {
         if (index == currentIndex) return;
         switch (index) {
           case 0:
-            Navigator.pushReplacementNamed(context, '/admin_dashboard');
+            context.go('/admin_dashboard');
             break;
           case 1:
-            Navigator.pushReplacementNamed(context, '/admin_flats');
+            context.go('/admin_dashboard/flats');
             break;
           case 2:
-            Navigator.pushReplacementNamed(context, '/admin_guards');
+            context.go('/admin_dashboard/guards');
             break;
           case 3:
-            Navigator.pushReplacementNamed(context, '/admin_visitor_logs');
+            context.go('/admin_dashboard/visitor_logs');
             break;
           case 4:
-            Navigator.pushReplacementNamed(context, '/admin_settings');
+            context.go('/admin_dashboard/settings');
             break;
         }
       },
