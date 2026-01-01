@@ -17,26 +17,12 @@ class ResidentSettingsScreen extends StatefulWidget {
 }
 
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
-  // Local state removed, using SettingsProvider
+  // Local state removed, using SettingsProvider and AuthProvider
 
   @override
   void initState() {
     super.initState();
     // Settings are loaded in provider initialization
-    _loadPreferences();
-  }
-
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // _biometricsEnabled is now managed by AuthProvider
-      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
-    });
-  }
-
-  Future<void> _savePreference(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
   }
 
   Future<void> _handleLogout() async {
@@ -71,15 +57,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     if (confirmed == true) {
       if (mounted) {
         await context.read<AuthProvider>().logout();
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const RootScreen()),
-            (route) => false,
-          );
-        }
+        // AuthProvider listener in AppRouter will handle redirect to login
       }
-      await context.read<AuthProvider>().logout();
-      // AuthProvider listener in AppRouter will handle redirect to login
     }
   }
 
@@ -241,13 +220,6 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       subtitle: 'Pre-approvals & Guests',
                       onTap: () {},
                     ),
-                    _SettingsToggleItem(
-                      icon: Icons.face,
-                      title: 'Face ID Login',
-                      value: settingsProvider.biometricsEnabled,
-                      onChanged: (value) {
-                        settingsProvider.setBiometricsEnabled(value);
-                      },
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) => _SettingsToggleItem(
                         icon: Icons.face,

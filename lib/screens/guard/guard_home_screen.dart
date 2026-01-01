@@ -25,330 +25,6 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
     currentTime = TimeOfDay.now();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top App Bar
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: Icon(
-                      Icons.security_outlined,
-                      color: theme.colorScheme.primary,
-                      size: 24,
-                    ),
-                  ),
-                  // Title
-                  Text(
-                    'Gate Control',
-                    style: theme.textTheme.headlineMedium,
-                  ),
-                  Row(
-                    children: [
-                      // Time
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: theme.dividerColor),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: AppTheme.successGreen,
-                                borderRadius: BorderRadius.circular(4),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.successGreen.withOpacity(0.6),
-                                    blurRadius: 8,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Logout Button
-                      InkWell(
-                        onTap: () async {
-                          await context.read<AuthProvider>().logout();
-                          // AuthProvider listener in AppRouter will handle redirect to login
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                                color: theme.colorScheme.error.withOpacity(0.5)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.logout,
-                                color: theme.colorScheme.error,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Logout',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.error,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // Main Content
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: Column(
-                        children: [
-                          // Register New Visitor Button
-                          const _RegisterVisitorButton(),
-                          const SizedBox(height: 32),
-                          // Recent Entries Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Recent Entries',
-                                style: theme.textTheme.headlineSmall,
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  showComingSoonDialog(
-                                    context,
-                                    title: 'Visitor History',
-                                    message: 'A complete history of all visitor entries will be available here.',
-                                  );
-                                },
-                                child: Text(
-                                  'View All',
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Entries List
-                  Consumer<GuardProvider>(
-                    builder: (context, guardProvider, _) {
-                      if (guardProvider.isLoading) {
-                        return SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                // Handle separator
-                                if (index.isOdd) {
-                                  return const SizedBox(height: 12);
-                                }
-                                return const ShimmerEntryCard();
-                              },
-                              childCount: 5 * 2 - 1, // Show 5 shimmer items
-                            ),
-                          ),
-                        );
-                      }
-
-                      return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              // Handle separator
-                              if (index.isOdd) {
-                                return const SizedBox(height: 12);
-                              }
-                              // Handle item
-                              final itemIndex = index ~/ 2;
-                              if (itemIndex >= guardProvider.entries.length) return null;
-
-                              final entry = guardProvider.entries[itemIndex];
-                              return InkWell(
-                                onTap: () => _showVisitorDialog(context, entry: entry),
-                                child: _EntryCard(entry: entry),
-                              );
-                            },
-                            childCount: guardProvider.entries.isEmpty
-                                ? 0
-                                : guardProvider.entries.length * 2 - 1,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  // Bottom padding for scroll
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                ],
-              ),
-            ),
-            // Bottom Patrol Check Bar
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor.withOpacity(0.95),
-                border: Border(
-                  top: BorderSide(color: theme.dividerColor),
-                ),
-              ),
-              child: Consumer<GuardProvider>(
-                builder: (context, guardProvider, _) {
-                  final lastCheck = guardProvider.lastPatrolCheck;
-                  final minutesAgo = DateTime.now().difference(lastCheck).inMinutes;
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Patrol Checkpoint',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Last check: ${minutesAgo}m ago',
-                            style: theme.textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          await guardProvider.patrolCheckIn();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Patrol check-in recorded'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.check_circle),
-                        label: const Text('Check In'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.cardColor,
-                          foregroundColor: theme.textTheme.bodyLarge?.color,
-                          side: BorderSide(color: theme.dividerColor),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RegisterVisitorButton extends StatelessWidget {
-  const _RegisterVisitorButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _showVisitorDialog(context),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    color: theme.colorScheme.onPrimary,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Register New Visitor',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tap when a visitor arrives',
-                  style: theme.textTheme.labelSmall,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
     final nameController = TextEditingController(text: entry?.name ?? '');
     final flatController = TextEditingController(text: entry?.flatNumber ?? '');
@@ -494,6 +170,332 @@ class _RegisterVisitorButton extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top App Bar
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Logo
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: Icon(
+                      Icons.security_outlined,
+                      color: theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                  ),
+                  // Title
+                  Text(
+                    'Gate Control',
+                    style: theme.textTheme.headlineMedium,
+                  ),
+                  Row(
+                    children: [
+                      // Time
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: theme.dividerColor),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: AppTheme.successGreen,
+                                borderRadius: BorderRadius.circular(4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.successGreen.withOpacity(0.6),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Logout Button
+                      InkWell(
+                        onTap: () async {
+                          await context.read<AuthProvider>().logout();
+                          // AuthProvider listener in AppRouter will handle redirect to login
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: theme.cardColor,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: theme.colorScheme.error.withOpacity(0.5)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                color: theme.colorScheme.error,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Logout',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.error,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Main Content
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      child: Column(
+                        children: [
+                          // Register New Visitor Button
+                          _RegisterVisitorButton(onTap: () => _showVisitorDialog(context)),
+                          const SizedBox(height: 32),
+                          // Recent Entries Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Recent Entries',
+                                style: theme.textTheme.headlineSmall,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  showComingSoonDialog(
+                                    context,
+                                    title: 'Visitor History',
+                                    message: 'A complete history of all visitor entries will be available here.',
+                                  );
+                                },
+                                child: Text(
+                                  'View All',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Entries List
+                  Consumer<GuardProvider>(
+                    builder: (context, guardProvider, _) {
+                      if (guardProvider.isLoading) {
+                        return SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                // Handle separator
+                                if (index.isOdd) {
+                                  return const SizedBox(height: 12);
+                                }
+                                return const ShimmerEntryCard();
+                              },
+                              childCount: 5 * 2 - 1, // Show 5 shimmer items
+                            ),
+                          ),
+                        );
+                      }
+
+                      return SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              // Handle separator
+                              if (index.isOdd) {
+                                return const SizedBox(height: 12);
+                              }
+                              // Handle item
+                              final itemIndex = index ~/ 2;
+                              if (itemIndex >= guardProvider.entries.length) return null;
+
+                              final entry = guardProvider.entries[itemIndex];
+                              return InkWell(
+                                onTap: () => _showVisitorDialog(context, entry: entry),
+                                child: _EntryCard(entry: entry),
+                              );
+                            },
+                            childCount: guardProvider.entries.isEmpty
+                                ? 0
+                                : guardProvider.entries.length * 2 - 1,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  // Bottom padding for scroll
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ],
+              ),
+            ),
+            // Bottom Patrol Check Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor.withOpacity(0.95),
+                border: Border(
+                  top: BorderSide(color: theme.dividerColor),
+                ),
+              ),
+              child: Consumer<GuardProvider>(
+                builder: (context, guardProvider, _) {
+                  final lastCheck = guardProvider.lastPatrolCheck;
+                  final minutesAgo = DateTime.now().difference(lastCheck).inMinutes;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Patrol Checkpoint',
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Last check: ${minutesAgo}m ago',
+                            style: theme.textTheme.labelSmall,
+                          ),
+                        ],
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          await guardProvider.patrolCheckIn();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Patrol check-in recorded'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text('Check In'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.cardColor,
+                          foregroundColor: theme.textTheme.bodyLarge?.color,
+                          side: BorderSide(color: theme.dividerColor),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RegisterVisitorButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _RegisterVisitorButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: theme.colorScheme.onPrimary,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Register New Visitor',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tap when a visitor arrives',
+                  style: theme.textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

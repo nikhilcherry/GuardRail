@@ -63,13 +63,6 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
-  Widget build(BuildContext context) {
-    return const _AdminScaffold(
-      title: 'Flats',
-      body: ComingSoonView(
-        title: 'Flats Management',
-        message: 'Configure families, units, and resident details here.',
-        icon: Icons.apartment_outlined,
       ),
     );
   }
@@ -165,13 +158,6 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
-  Widget build(BuildContext context) {
-    return const _AdminScaffold(
-      title: 'Guards',
-      body: ComingSoonView(
-        title: 'Guard Management',
-        message: 'Assign, enable or disable guard accounts and manage shifts.',
-        icon: Icons.security_outlined,
       ),
     );
   }
@@ -208,14 +194,6 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
           currentIndex: 2,
         );
       },
-    return const _AdminScaffold(
-      title: 'Visitor Logs',
-      body: ComingSoonView(
-        title: 'Visitor Logs',
-        message: 'Review all visitor entries and filter by flat, guard or status.',
-        icon: Icons.history_outlined,
-      ),
-      currentIndex: 3,
     );
   }
 }
@@ -276,13 +254,6 @@ class AdminVisitorLogsScreen extends StatelessWidget {
             );
           },
         ),
-    return const _AdminScaffold(
-      title: 'Activity Logs',
-      body: ComingSoonView(
-        title: 'System Activity',
-        message: 'Full audit trail of system activity will appear here.',
-        icon: Icons.list_alt_outlined,
-      ),
       currentIndex: 3,
     );
   }
@@ -362,10 +333,6 @@ class AdminSettingsScreen extends StatelessWidget {
                       onPressed: () {
                         context.read<AuthProvider>().logout();
                         Navigator.pop(context);
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const RootScreen()),
-                          (route) => false,
-                        );
                       },
                       child: Text(
                         'Logout',
@@ -436,8 +403,8 @@ class _AdminScaffold extends StatelessWidget {
             label: 'Guards',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history), // Changed from group_outlined to history
-            label: 'Logs', // Changed from Visitors to Logs
+            icon: Icon(Icons.history),
+            label: 'Logs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

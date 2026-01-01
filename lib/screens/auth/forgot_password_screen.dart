@@ -23,8 +23,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
       ),

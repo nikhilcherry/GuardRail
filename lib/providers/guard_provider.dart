@@ -59,8 +59,6 @@ class GuardProvider extends ChangeNotifier {
   List<DateTime> get patrolLogs => _patrolLogs;
   bool _isLoading = false;
   
-  List<VisitorEntry> get entries => _entries;
-  DateTime get lastPatrolCheck => _lastPatrolCheck;
   bool get isLoading => _isLoading;
 
   GuardProvider() {
