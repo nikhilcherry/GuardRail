@@ -325,9 +325,9 @@ class _RegisterVisitorButton extends StatelessWidget {
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add,
-                    color: Colors.black,
+                    color: theme.colorScheme.onPrimary,
                     size: 32,
                   ),
                 ),
@@ -478,12 +478,12 @@ class _RegisterVisitorButton extends StatelessWidget {
                             }
                           },
                     child: isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.black),
+                              valueColor: AlwaysStoppedAnimation(theme.colorScheme.onPrimary),
                             ),
                           )
                         : Text(isEditing ? 'Save Changes' : 'Register Visitor'),

@@ -71,7 +71,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               borderRadius: BorderRadius.circular(16),
             ),
             child: Material(
-              color: Colors.transparent,
+              color: Colors.transparent, // Correct: Transparent is fine here for ripple effect
               child: InkWell(
                 onTap: () {
                   context.read<AuthProvider>().logout();

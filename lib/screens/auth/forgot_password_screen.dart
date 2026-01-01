@@ -14,12 +14,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
+          onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
@@ -32,16 +36,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               Text(
                 'Reset Password',
-                style: AppTheme.displayMedium,
+                style: theme.textTheme.displayMedium,
               ),
               const SizedBox(height: 8),
               Text(
                 'Enter your email to receive reset instructions',
-                style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
               const SizedBox(height: 32),
 
-              Text('Email Address', style: AppTheme.labelLarge),
+              Text('Email Address', style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
@@ -53,7 +59,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: AppTheme.bodyLarge,
+                style: theme.textTheme.bodyLarge,
               ),
               const SizedBox(height: 32),
 
@@ -69,14 +75,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     context.pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: theme.colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: Text(
                     'Send Reset Link',
-                    style: AppTheme.titleLarge.copyWith(color: Colors.black),
+                    style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
                   ),
                 ),
               ),

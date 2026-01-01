@@ -310,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation(
-                                    Colors.black,
+                                    theme.colorScheme.onPrimary,
                                   ),
                                 ),
                               )
@@ -320,13 +320,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Text(
                                     _showOTPInput ? 'Verify' : 'Log In',
                                     style: theme.textTheme.titleLarge?.copyWith(
-                                      color: Colors.black,
+                                      color: theme.colorScheme.onPrimary,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  const Icon(
+                                  Icon(
                                     Icons.arrow_forward,
-                                    color: Colors.black,
+                                    color: theme.colorScheme.onPrimary,
                                   ),
                                 ],
                               ),

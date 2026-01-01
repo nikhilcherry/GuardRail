@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
@@ -16,12 +17,12 @@ class ResidentSettingsScreen extends StatefulWidget {
 }
 
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
-  bool _biometricsEnabled = false;
-  bool _notificationsEnabled = true;
+  // Local state removed, using SettingsProvider
 
   @override
   void initState() {
     super.initState();
+    // Settings are loaded in provider initialization
     _loadPreferences();
   }
 
@@ -59,7 +60,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.error,
-              foregroundColor: Colors.white,
+              foregroundColor: theme.colorScheme.onError,
             ),
             child: const Text('Log Out'),
           ),
@@ -68,6 +69,15 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     );
 
     if (confirmed == true) {
+      if (mounted) {
+        await context.read<AuthProvider>().logout();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const RootScreen()),
+            (route) => false,
+          );
+        }
+      }
       await context.read<AuthProvider>().logout();
       // AuthProvider listener in AppRouter will handle redirect to login
     }
@@ -186,8 +196,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         ),
         centerTitle: true,
       ),
-      body: Consumer2<ResidentProvider, ThemeProvider>(
-        builder: (context, residentProvider, themeProvider, _) {
+      body: Consumer3<ResidentProvider, ThemeProvider, SettingsProvider>(
+        builder: (context, residentProvider, themeProvider, settingsProvider, _) {
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -231,6 +241,13 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       subtitle: 'Pre-approvals & Guests',
                       onTap: () {},
                     ),
+                    _SettingsToggleItem(
+                      icon: Icons.face,
+                      title: 'Face ID Login',
+                      value: settingsProvider.biometricsEnabled,
+                      onChanged: (value) {
+                        settingsProvider.setBiometricsEnabled(value);
+                      },
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) => _SettingsToggleItem(
                         icon: Icons.face,
@@ -257,10 +274,9 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.notifications,
                       title: 'Entry Notifications',
                       subtitle: 'Alerts for gate requests',
-                      value: _notificationsEnabled,
+                      value: settingsProvider.notificationsEnabled,
                       onChanged: (value) {
-                        setState(() => _notificationsEnabled = value);
-                        _savePreference('notificationsEnabled', value);
+                        settingsProvider.setNotificationsEnabled(value);
                       },
                     ),
                     _SettingsToggleItem(

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../repositories/auth_repository.dart';
+
+class AuthProvider extends ChangeNotifier {
+  final AuthRepository _repository;
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 
@@ -24,8 +29,16 @@ class AuthProvider extends ChangeNotifier {
   String? get userName => _userName;
   bool get biometricsEnabled => _biometricsEnabled;
 
+  AuthProvider({AuthRepository? repository})
+      : _repository = repository ?? AuthRepository();
+
   // Check login status on app start
   Future<void> checkLoginStatus() async {
+    final status = await _repository.getLoginStatus();
+    _isLoggedIn = status['isLoggedIn'] ?? false;
+    _selectedRole = status['selectedRole'];
+    _userPhone = status['userPhone'];
+    _userName = status['userName'];
     final prefs = await SharedPreferences.getInstance();
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     _selectedRole = prefs.getString('selectedRole');
@@ -73,6 +86,7 @@ class AuthProvider extends ChangeNotifier {
     required String otp,
   }) async {
     try {
+      await _repository.loginWithPhoneAndOTP(phone, otp);
       final response = await _authService.login(phone, otp);
       await _handleLoginSuccess(response, phone: phone);
     } catch (e) {
@@ -83,12 +97,11 @@ class AuthProvider extends ChangeNotifier {
       _isLoggedIn = true;
       _userPhone = phone;
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      if (_selectedRole != null) {
-        await prefs.setString('selectedRole', _selectedRole!);
-      }
-      await prefs.setString('userPhone', phone);
+      await _repository.saveLoginStatus(
+        isLoggedIn: true,
+        role: _selectedRole,
+        phone: phone,
+      );
 
       _logger.info('Login successful for phone: $phone');
       notifyListeners();
@@ -104,6 +117,7 @@ class AuthProvider extends ChangeNotifier {
     required String password,
   }) async {
     try {
+      await _repository.loginWithEmail(email, password);
       final response = await _authService.loginWithEmail(email, password);
       await _handleLoginSuccess(response, email: email);
     } catch (e) {
@@ -140,6 +154,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+      await _repository.saveLoginStatus(
+        isLoggedIn: true,
+        role: _selectedRole,
+      );
   Future<void> _handleLoginSuccess(Map<String, dynamic> response, {String? phone, String? email, String? name}) async {
     final token = response['token'];
     await _authService.saveToken(token);
@@ -208,8 +226,7 @@ class AuthProvider extends ChangeNotifier {
 
     await _authService.deleteToken();
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await _repository.clearAuth();
 
     notifyListeners();
   }
@@ -217,6 +234,8 @@ class AuthProvider extends ChangeNotifier {
   // Resend OTP
   Future<void> resendOTP(String phone) async {
     try {
+      await _repository.resendOTP(phone);
+    } catch (e) {
       _logger.info('Resending OTP to: $phone');
       await Future.delayed(const Duration(seconds: 1));
       // API call to resend OTP
