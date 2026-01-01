@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../main.dart';
@@ -62,6 +64,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
           );
         }
       }
+      await context.read<AuthProvider>().logout();
+      // AuthProvider listener in AppRouter will handle redirect to login
     }
   }
 
@@ -77,10 +81,10 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: theme.iconTheme.color),
           onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
+            if (context.canPop()) {
+              context.pop();
             } else {
-              Navigator.pushReplacementNamed(context, '/resident_home');
+              context.go('/resident_home');
             }
           },
         ),

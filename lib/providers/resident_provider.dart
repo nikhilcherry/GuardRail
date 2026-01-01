@@ -74,6 +74,7 @@ class ResidentProvider extends ChangeNotifier {
   String _residentName = 'Robert';
   String _flatNumber = '402';
   int _pendingRequests = 1;
+  bool _isLoading = false;
 
   List<Visitor> get todaysVisitors => _todaysVisitors;
   List<Visitor> get pastVisitors => _pastVisitors;
@@ -84,6 +85,22 @@ class ResidentProvider extends ChangeNotifier {
   String get residentName => _residentName;
   String get flatNumber => _flatNumber;
   int get pendingRequests => _pendingRequests;
+  bool get isLoading => _isLoading;
+
+  ResidentProvider() {
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    _isLoading = false;
+    notifyListeners();
+  }
 
   // Approve visitor request
   Future<void> approveVisitor(String visitorId) async {

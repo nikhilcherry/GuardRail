@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/shimmer_entry_card.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -33,7 +36,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
           children: [
             // Top App Bar
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -103,13 +106,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                       InkWell(
                         onTap: () async {
                           await context.read<AuthProvider>().logout();
-                          if (mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (_) => const RootScreen()),
-                              (route) => false,
-                            );
-                          }
+                          // AuthProvider listener in AppRouter will handle redirect to login
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
@@ -151,7 +148,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Column(
                         children: [
                           // Register New Visitor Button
@@ -167,8 +164,10 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('History view coming soon')),
+                                  showComingSoonDialog(
+                                    context,
+                                    title: 'Visitor History',
+                                    message: 'A complete history of all visitor entries will be available here.',
                                   );
                                 },
                                 child: Text(
@@ -188,8 +187,26 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                   // Entries List
                   Consumer<GuardProvider>(
                     builder: (context, guardProvider, _) {
+                      if (guardProvider.isLoading) {
+                        return SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                // Handle separator
+                                if (index.isOdd) {
+                                  return const SizedBox(height: 12);
+                                }
+                                return const ShimmerEntryCard();
+                              },
+                              childCount: 5 * 2 - 1, // Show 5 shimmer items
+                            ),
+                          ),
+                        );
+                      }
+
                       return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -429,7 +446,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                                   );
 
                               if (context.mounted) {
-                                Navigator.pop(context);
+                                context.pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Visitor registered successfully'),

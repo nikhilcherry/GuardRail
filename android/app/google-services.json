@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "342366342068",
+    "project_id": "guardrail-79bcd",
+    "storage_bucket": "guardrail-79bcd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342366342068:android:4906a9b9a3e003289040e1",
+        "android_client_info": {
+          "package_name": "com.arvyo.GuardRail"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3292KcuOK5cSr23yRyVMBm9dZdaLCjkQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
