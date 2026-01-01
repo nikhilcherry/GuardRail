@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -33,7 +34,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
           children: [
             // Top App Bar
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -151,7 +152,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Column(
                         children: [
                           // Register New Visitor Button
@@ -167,8 +168,10 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('History view coming soon')),
+                                  showComingSoonDialog(
+                                    context,
+                                    title: 'Visitor History',
+                                    message: 'A complete history of all visitor entries will be available here.',
                                   );
                                 },
                                 child: Text(
@@ -189,7 +192,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                   Consumer<GuardProvider>(
                     builder: (context, guardProvider, _) {
                       return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 
@@ -9,16 +10,12 @@ class AdminFlatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminScaffold(
+    return const _AdminScaffold(
       title: 'Flats',
-      body: Center(
-        child: Text(
-          'Flats management coming soon.\nConfigure families and units here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
-        ),
+      body: ComingSoonView(
+        title: 'Flats Management',
+        message: 'Configure families, units, and resident details here.',
+        icon: Icons.apartment_outlined,
       ),
       currentIndex: 1,
     );
@@ -30,16 +27,12 @@ class AdminGuardsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminScaffold(
+    return const _AdminScaffold(
       title: 'Guards',
-      body: Center(
-        child: Text(
-          'Assign, enable or disable guard accounts here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
-        ),
+      body: ComingSoonView(
+        title: 'Guard Management',
+        message: 'Assign, enable or disable guard accounts and manage shifts.',
+        icon: Icons.security_outlined,
       ),
       currentIndex: 2,
     );
@@ -51,16 +44,12 @@ class AdminVisitorLogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminScaffold(
+    return const _AdminScaffold(
       title: 'Visitor Logs',
-      body: Center(
-        child: Text(
-          'Review all visitor entries and filter by flat, guard or status.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
-        ),
+      body: ComingSoonView(
+        title: 'Visitor Logs',
+        message: 'Review all visitor entries and filter by flat, guard or status.',
+        icon: Icons.history_outlined,
       ),
       currentIndex: 3,
     );
@@ -72,16 +61,12 @@ class AdminActivityLogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminScaffold(
+    return const _AdminScaffold(
       title: 'Activity Logs',
-      body: Center(
-        child: Text(
-          'Full audit trail of system activity will appear here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
-        ),
+      body: ComingSoonView(
+        title: 'System Activity',
+        message: 'Full audit trail of system activity will appear here.',
+        icon: Icons.list_alt_outlined,
       ),
       currentIndex: 3,
     );
@@ -98,14 +83,16 @@ class AdminSettingsScreen extends StatelessWidget {
     return _AdminScaffold(
       title: 'Settings',
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
           _SettingsTile(
             icon: Icons.tune,
             label: 'Gate configuration',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Gate configuration coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Gate Configuration',
+                message: 'Advanced gate settings and hardware integration options are coming soon.',
               );
             },
           ),
@@ -114,8 +101,10 @@ class AdminSettingsScreen extends StatelessWidget {
             icon: Icons.notifications_active_outlined,
             label: 'Alerts & notifications',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Alerts settings coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Alert Settings',
+                message: 'Customize system-wide alerts and notification preferences.',
               );
             },
           ),
@@ -124,8 +113,10 @@ class AdminSettingsScreen extends StatelessWidget {
             icon: Icons.security_outlined,
             label: 'Security policies',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Security policies coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Security Policies',
+                message: 'Define and manage security protocols and access levels.',
               );
             },
           ),
