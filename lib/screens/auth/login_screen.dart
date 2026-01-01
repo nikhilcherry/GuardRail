@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
@@ -120,10 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final selectedRole = authProvider.selectedRole;
     final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
         context.read<AuthProvider>().selectRole(null);
-        return false;
+        context.pop();
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -164,6 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         context.read<AuthProvider>().selectRole(null);
+                        context.pop();
                       },
                       child: Text(
                         'Change Role',
@@ -353,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                         TextButton.icon(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/forgot_password');
+                            context.push('/forgot_password');
                           },
                           icon: Icon(Icons.help_outline, color: theme.iconTheme.color),
                           label: Text(
@@ -380,7 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, '/sign_up');
+                                context.push('/sign_up');
                               },
                               child: Text(
                                 'Sign Up',

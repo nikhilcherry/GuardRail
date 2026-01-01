@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -147,11 +148,11 @@ class _ResidentBottomNav extends StatelessWidget {
       onTap: (index) {
         if (index == currentIndex) return;
         if (index == 0) {
-          Navigator.pushReplacementNamed(context, '/resident_home');
+          context.go('/resident_home');
         } else if (index == 1) {
-          Navigator.pushReplacementNamed(context, '/resident_visitors');
+          context.go('/resident_home/visitors');
         } else if (index == 2) {
-          Navigator.pushReplacementNamed(context, '/resident_settings');
+          context.go('/resident_home/settings');
         }
       },
     );

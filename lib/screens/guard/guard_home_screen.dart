@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
@@ -105,13 +106,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                       InkWell(
                         onTap: () async {
                           await context.read<AuthProvider>().logout();
-                          if (mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (_) => const RootScreen()),
-                              (route) => false,
-                            );
-                          }
+                          // AuthProvider listener in AppRouter will handle redirect to login
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
@@ -451,7 +446,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                                   );
 
                               if (context.mounted) {
-                                Navigator.pop(context);
+                                context.pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Visitor registered successfully'),
