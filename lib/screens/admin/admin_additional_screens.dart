@@ -1,47 +1,198 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/admin_provider.dart';
+import '../../providers/guard_provider.dart';
 
-class AdminFlatsScreen extends StatelessWidget {
+class AdminFlatsScreen extends StatefulWidget {
   const AdminFlatsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return _AdminScaffold(
-      title: 'Flats',
-      body: Center(
-        child: Text(
-          'Flats management coming soon.\nConfigure families and units here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
+  State<AdminFlatsScreen> createState() => _AdminFlatsScreenState();
+}
+
+class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
+  void _showAddEditFlatDialog(AdminProvider provider, {Map<String, String>? flat, int? index}) {
+    final isEditing = flat != null;
+    final flatController = TextEditingController(text: flat?['flat'] ?? '');
+    final residentController = TextEditingController(text: flat?['resident'] ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: flatController,
+              decoration: const InputDecoration(labelText: 'Flat Number'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: residentController,
+              decoration: const InputDecoration(labelText: 'Resident Name'),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (isEditing) {
+                provider.updateFlat(
+                  index!,
+                  flatController.text,
+                  residentController.text,
+                );
+              } else {
+                provider.addFlat(
+                  flatController.text,
+                  residentController.text,
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: Text(isEditing ? 'Save' : 'Add'),
+          ),
+        ],
       ),
-      currentIndex: 1,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AdminProvider>(
+      builder: (context, adminProvider, _) {
+        return _AdminScaffold(
+          title: 'Flats',
+          body: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: adminProvider.flats.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final flat = adminProvider.flats[index];
+              return ListTile(
+                tileColor: Theme.of(context).cardColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: const Icon(Icons.home),
+                title: Text('Flat ${flat['flat']}'),
+                subtitle: Text(flat['resident']!),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat, index: index),
+                ),
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddEditFlatDialog(adminProvider),
+            child: const Icon(Icons.add),
+          ),
+          currentIndex: 1,
+        );
+      },
     );
   }
 }
 
-class AdminGuardsScreen extends StatelessWidget {
+class AdminGuardsScreen extends StatefulWidget {
   const AdminGuardsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return _AdminScaffold(
-      title: 'Guards',
-      body: Center(
-        child: Text(
-          'Assign, enable or disable guard accounts here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
+  State<AdminGuardsScreen> createState() => _AdminGuardsScreenState();
+}
+
+class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
+  void _showAddEditGuardDialog(AdminProvider provider, {Map<String, String>? guard, int? index}) {
+    final isEditing = guard != null;
+    final nameController = TextEditingController(text: guard?['name'] ?? '');
+    final idController = TextEditingController(text: guard?['id'] ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isEditing ? 'Edit Guard' : 'Add Guard'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: idController,
+              decoration: const InputDecoration(labelText: 'Guard ID'),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (isEditing) {
+                provider.updateGuard(
+                  index!,
+                  nameController.text,
+                  idController.text,
+                );
+              } else {
+                provider.addGuard(
+                  nameController.text,
+                  idController.text,
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: Text(isEditing ? 'Save' : 'Add'),
+          ),
+        ],
       ),
-      currentIndex: 2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AdminProvider>(
+      builder: (context, adminProvider, _) {
+        return _AdminScaffold(
+          title: 'Guards',
+          body: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: adminProvider.guards.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final guard = adminProvider.guards[index];
+              return ListTile(
+                tileColor: Theme.of(context).cardColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: const Icon(Icons.security),
+                title: Text(guard['name']!),
+                subtitle: Text('ID: ${guard['id']}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard, index: index),
+                ),
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddEditGuardDialog(adminProvider),
+            child: const Icon(Icons.add),
+          ),
+          currentIndex: 2,
+        );
+      },
     );
   }
 }
@@ -51,38 +202,57 @@ class AdminVisitorLogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminScaffold(
-      title: 'Visitor Logs',
-      body: Center(
-        child: Text(
-          'Review all visitor entries and filter by flat, guard or status.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-      currentIndex: 3,
-    );
-  }
-}
+    final guardProvider = Provider.of<GuardProvider>(context);
 
-class AdminActivityLogsScreen extends StatelessWidget {
-  const AdminActivityLogsScreen({Key? key}) : super(key: key);
+    // Combine logs from different sources
+    final List<Map<String, dynamic>> logs = [];
 
-  @override
-  Widget build(BuildContext context) {
+    // Add Patrol Logs
+    for (var date in guardProvider.patrolLogs) {
+      logs.add({
+        'action': 'Patrol Check',
+        'user': 'Guard',
+        'details': 'Checkpoint Recorded',
+        'time': date,
+      });
+    }
+
+    // Add Entry Logs
+    for (var entry in guardProvider.entries) {
+      logs.add({
+        'action': 'Visitor ${entry.status == 'approved' ? 'Entry' : 'Request'}',
+        'user': entry.guardName ?? 'Guard',
+        'details': '${entry.name} (${entry.purpose}) -> Flat ${entry.flatNumber}',
+        'time': entry.time,
+      });
+    }
+
+    // Sort by time descending
+    logs.sort((a, b) => (b['time'] as DateTime).compareTo(a['time'] as DateTime));
+
     return _AdminScaffold(
-      title: 'Activity Logs',
-      body: Center(
-        child: Text(
-          'Full audit trail of system activity will appear here.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
-          textAlign: TextAlign.center,
+      title: 'Audit Logs',
+      body: logs.isEmpty
+        ? Center(child: Text('No activity logs found', style: Theme.of(context).textTheme.bodyMedium))
+        : ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: logs.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final log = logs[index];
+            return ListTile(
+              tileColor: Theme.of(context).cardColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+              title: Text(log['action']),
+              subtitle: Text('${log['user']} • ${log['details']}'),
+              trailing: Text(
+                DateFormat('MMM d, h:mm a').format(log['time']),
+                style: Theme.of(context).textTheme.bodySmall
+              ),
+            );
+          },
         ),
-      ),
       currentIndex: 3,
     );
   }
@@ -184,11 +354,13 @@ class _AdminScaffold extends StatelessWidget {
   final String title;
   final Widget body;
   final int currentIndex;
+  final FloatingActionButton? floatingActionButton;
 
   const _AdminScaffold({
     required this.title,
     required this.body,
     required this.currentIndex,
+    this.floatingActionButton,
   });
 
   @override
@@ -206,6 +378,7 @@ class _AdminScaffold extends StatelessWidget {
         ),
       ),
       body: body,
+      floatingActionButton: floatingActionButton,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: theme.cardColor,
         elevation: 0,
@@ -227,8 +400,8 @@ class _AdminScaffold extends StatelessWidget {
             label: 'Guards',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined),
-            label: 'Visitors',
+            icon: Icon(Icons.history), // Changed from group_outlined to history
+            label: 'Logs', // Changed from Visitors to Logs
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

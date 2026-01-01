@@ -73,6 +73,8 @@ class ResidentProvider extends ChangeNotifier {
 
   String _residentName = 'Robert';
   String _flatNumber = '402';
+  String _phoneNumber = '+91 98765 43210';
+  String _email = 'robert@example.com';
   int _pendingRequests = 1;
 
   List<Visitor> get todaysVisitors => _todaysVisitors;
@@ -83,6 +85,8 @@ class ResidentProvider extends ChangeNotifier {
   
   String get residentName => _residentName;
   String get flatNumber => _flatNumber;
+  String get phoneNumber => _phoneNumber;
+  String get email => _email;
   int get pendingRequests => _pendingRequests;
 
   // Approve visitor request
@@ -174,9 +178,16 @@ class ResidentProvider extends ChangeNotifier {
     return _todaysVisitors.where((v) => v.status == 'pending').toList();
   }
 
-  void updateResidentInfo({String? name, String? flatNumber}) {
+  void updateResidentInfo({
+    String? name,
+    String? flatNumber,
+    String? phoneNumber,
+    String? email,
+  }) {
     if (name != null) _residentName = name;
     if (flatNumber != null) _flatNumber = flatNumber;
+    if (phoneNumber != null) _phoneNumber = phoneNumber;
+    if (email != null) _email = email;
     notifyListeners();
   }
 }

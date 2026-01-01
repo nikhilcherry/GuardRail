@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/resident_provider.dart';
 import '../../providers/auth_provider.dart';
+import 'resident_notifications_screen.dart';
 
 class ResidentHomeScreen extends StatefulWidget {
   const ResidentHomeScreen({Key? key}) : super(key: key);
@@ -53,8 +54,11 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                           ),
                           InkWell(
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Notifications coming soon')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ResidentNotificationsScreen(),
+                                ),
                               );
                             },
                             borderRadius: BorderRadius.circular(8),

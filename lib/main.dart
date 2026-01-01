@@ -5,6 +5,7 @@ import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
 import 'providers/resident_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/admin_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/sign_up_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
@@ -37,6 +38,7 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
