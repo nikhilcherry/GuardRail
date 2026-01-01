@@ -350,150 +350,178 @@ class _RegisterVisitorButton extends StatelessWidget {
   }
 
   void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
-    final nameController = TextEditingController(text: entry?.name ?? '');
-    final flatController = TextEditingController(text: entry?.flatNumber ?? '');
-    String selectedPurpose = entry?.purpose.toLowerCase() ?? 'guest';
-    bool isLoading = false;
-    final isEditing = entry != null;
-
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          final theme = Theme.of(context);
-          return Dialog(
-            backgroundColor: theme.dialogBackgroundColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                Text(isEditing ? 'Visitor Details' : 'Register Visitor', style: theme.textTheme.headlineSmall),
-                const SizedBox(height: 24),
-                Text('Flat Number', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: flatController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. 402',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text('Visitor Name', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text('Purpose', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Column(
-                  children: [
-                    _PurposeChip(
-                      label: 'Guest',
-                      icon: Icons.person,
-                      selected: selectedPurpose == 'guest',
-                      onSelected: () => setState(() => selectedPurpose = 'guest'),
-                    ),
-                    const SizedBox(height: 8),
-                    _PurposeChip(
-                      label: 'Delivery',
-                      icon: Icons.local_shipping,
-                      selected: selectedPurpose == 'delivery',
-                      onSelected: () => setState(() => selectedPurpose = 'delivery'),
-                    ),
-                    const SizedBox(height: 8),
-                    _PurposeChip(
-                      label: 'Service',
-                      icon: Icons.build,
-                      selected: selectedPurpose == 'service',
-                      onSelected: () => setState(() => selectedPurpose = 'service'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            if (nameController.text.isEmpty ||
-                                flatController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please fill in all fields'),
-                                ),
-                              );
-                              return;
-                            }
+      builder: (context) => _VisitorDialog(entry: entry),
+    );
+  }
+}
 
-                            setState(() => isLoading = true);
+class _VisitorDialog extends StatefulWidget {
+  final VisitorEntry? entry;
 
-                            try {
-                              if (isEditing) {
-                                await context.read<GuardProvider>().updateVisitorEntry(
-                                      id: entry!.id,
-                                      name: nameController.text,
-                                      flatNumber: flatController.text,
-                                      purpose: selectedPurpose,
-                                    );
-                              } else {
-                                await context.read<GuardProvider>().registerNewVisitor(
-                                      name: nameController.text,
-                                      flatNumber: flatController.text,
-                                      purpose: selectedPurpose,
-                                    );
-                              }
+  const _VisitorDialog({this.entry});
 
-                              if (context.mounted) {
-                                context.pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(isEditing
-                                        ? 'Visitor updated successfully'
-                                        : 'Visitor registered successfully'),
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e')),
-                                );
-                                setState(() => isLoading = false);
-                              }
-                            }
-                          },
-                    child: isLoading
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(theme.colorScheme.onPrimary),
-                            ),
-                          )
-                        : Text(isEditing ? 'Save Changes' : 'Register Visitor'),
-                  ),
+  @override
+  State<_VisitorDialog> createState() => _VisitorDialogState();
+}
+
+class _VisitorDialogState extends State<_VisitorDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _flatController;
+  late String _selectedPurpose;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.entry?.name ?? '');
+    _flatController = TextEditingController(text: widget.entry?.flatNumber ?? '');
+    _selectedPurpose = widget.entry?.purpose.toLowerCase() ?? 'guest';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _flatController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isEditing = widget.entry != null;
+
+    return Dialog(
+      backgroundColor: theme.dialogBackgroundColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(isEditing ? 'Visitor Details' : 'Register Visitor', style: theme.textTheme.headlineSmall),
+            const SizedBox(height: 24),
+            Text('Flat Number', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _flatController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: 'e.g. 402',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
               ),
             ),
-          );
-        },
+            const SizedBox(height: 16),
+            Text('Visitor Name', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                hintText: 'Enter name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Purpose', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            Column(
+              children: [
+                _PurposeChip(
+                  label: 'Guest',
+                  icon: Icons.person,
+                  selected: _selectedPurpose == 'guest',
+                  onSelected: () => setState(() => _selectedPurpose = 'guest'),
+                ),
+                const SizedBox(height: 8),
+                _PurposeChip(
+                  label: 'Delivery',
+                  icon: Icons.local_shipping,
+                  selected: _selectedPurpose == 'delivery',
+                  onSelected: () => setState(() => _selectedPurpose = 'delivery'),
+                ),
+                const SizedBox(height: 8),
+                _PurposeChip(
+                  label: 'Service',
+                  icon: Icons.build,
+                  selected: _selectedPurpose == 'service',
+                  onSelected: () => setState(() => _selectedPurpose = 'service'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        if (_nameController.text.isEmpty ||
+                            _flatController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please fill in all fields'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() => _isLoading = true);
+
+                        try {
+                          if (isEditing) {
+                            await context.read<GuardProvider>().updateVisitorEntry(
+                                  id: widget.entry!.id,
+                                  name: _nameController.text,
+                                  flatNumber: _flatController.text,
+                                  purpose: _selectedPurpose,
+                                );
+                          } else {
+                            await context.read<GuardProvider>().registerNewVisitor(
+                                  name: _nameController.text,
+                                  flatNumber: _flatController.text,
+                                  purpose: _selectedPurpose,
+                                );
+                          }
+
+                          if (context.mounted) {
+                            context.pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(isEditing
+                                    ? 'Visitor updated successfully'
+                                    : 'Visitor registered successfully'),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                            setState(() => _isLoading = false);
+                          }
+                        }
+                      },
+                child: _isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(theme.colorScheme.onPrimary),
+                        ),
+                      )
+                    : Text(isEditing ? 'Save Changes' : 'Register Visitor'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
