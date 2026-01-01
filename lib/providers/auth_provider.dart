@@ -3,11 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
+  bool _isInitializing = true;
   String? _selectedRole;
   String? _userPhone;
   String? _userName;
 
   bool get isLoggedIn => _isLoggedIn;
+  bool get isInitializing => _isInitializing;
   String? get selectedRole => _selectedRole;
   String? get userPhone => _userPhone;
   String? get userName => _userName;
@@ -19,6 +21,7 @@ class AuthProvider extends ChangeNotifier {
     _selectedRole = prefs.getString('selectedRole');
     _userPhone = prefs.getString('userPhone');
     _userName = prefs.getString('userName');
+    _isInitializing = false;
     notifyListeners();
   }
 

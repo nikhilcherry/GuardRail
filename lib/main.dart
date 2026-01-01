@@ -16,24 +16,19 @@ import 'screens/resident/resident_settings_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/admin/admin_additional_screens.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final authProvider = AuthProvider();
-  await authProvider.checkLoginStatus();
-
-  runApp(GuardrailApp(authProvider: authProvider));
+  runApp(const GuardrailApp());
 }
 
 class GuardrailApp extends StatelessWidget {
-  final AuthProvider? authProvider;
-
-  const GuardrailApp({Key? key, this.authProvider}) : super(key: key);
+  const GuardrailApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => authProvider ?? AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()..checkLoginStatus()),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
@@ -76,6 +71,15 @@ class RootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
+        // Show loading if auth status is not yet determined
+        if (authProvider.isInitializing) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
         // Navigation logic based on auth state
         if (authProvider.selectedRole == null) {
           return const RoleSelectionScreen();
