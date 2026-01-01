@@ -4,6 +4,7 @@ import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
 import 'providers/resident_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/sign_up_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
@@ -35,26 +36,33 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => authProvider ?? AuthProvider()),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'Guardrail',
-        theme: AppTheme.darkTheme,
-        debugShowCheckedModeBanner: false,
-        home: const RootScreen(),
-        routes: {
-          '/role_selection': (_) => const RoleSelectionScreen(),
-          '/sign_up': (_) => const SignUpScreen(),
-          '/forgot_password': (_) => const ForgotPasswordScreen(),
-          '/guard_home': (_) => const GuardHomeScreen(),
-          '/resident_home': (_) => const ResidentHomeScreen(),
-          '/admin_dashboard': (_) => const AdminDashboardScreen(),
-          '/resident_visitors': (_) => const ResidentVisitorsScreen(),
-          '/resident_settings': (_) => const ResidentSettingsScreen(),
-          '/admin_flats': (_) => const AdminFlatsScreen(),
-          '/admin_guards': (_) => const AdminGuardsScreen(),
-          '/admin_visitor_logs': (_) => const AdminVisitorLogsScreen(),
-          '/admin_activity_logs': (_) => const AdminActivityLogsScreen(),
-          '/admin_settings': (_) => const AdminSettingsScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'Guardrail',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            debugShowCheckedModeBanner: false,
+            home: const RootScreen(),
+            routes: {
+              '/role_selection': (_) => const RoleSelectionScreen(),
+              '/sign_up': (_) => const SignUpScreen(),
+              '/forgot_password': (_) => const ForgotPasswordScreen(),
+              '/guard_home': (_) => const GuardHomeScreen(),
+              '/resident_home': (_) => const ResidentHomeScreen(),
+              '/admin_dashboard': (_) => const AdminDashboardScreen(),
+              '/resident_visitors': (_) => const ResidentVisitorsScreen(),
+              '/resident_settings': (_) => const ResidentSettingsScreen(),
+              '/admin_flats': (_) => const AdminFlatsScreen(),
+              '/admin_guards': (_) => const AdminGuardsScreen(),
+              '/admin_visitor_logs': (_) => const AdminVisitorLogsScreen(),
+              '/admin_activity_logs': (_) => const AdminActivityLogsScreen(),
+              '/admin_settings': (_) => const AdminSettingsScreen(),
+            },
+          );
         },
       ),
     );

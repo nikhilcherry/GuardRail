@@ -24,8 +24,10 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -40,20 +42,20 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1c1f27),
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppTheme.borderDark),
+                      border: Border.all(color: theme.dividerColor),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.security_outlined,
-                      color: AppTheme.primary,
+                      color: theme.colorScheme.primary,
                       size: 24,
                     ),
                   ),
                   // Title
                   Text(
                     'Gate Control',
-                    style: AppTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                   Row(
                     children: [
@@ -64,9 +66,9 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1c1f27),
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.borderDark),
+                          border: Border.all(color: theme.dividerColor),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -88,8 +90,8 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                             const SizedBox(width: 6),
                             Text(
                               '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
-                              style: AppTheme.labelMedium.copyWith(
-                                color: AppTheme.textSecondary,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -114,23 +116,23 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: AppTheme.surfaceDark,
+                            color: theme.cardColor,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: AppTheme.errorRed.withOpacity(0.5)),
+                                color: theme.colorScheme.error.withOpacity(0.5)),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.logout,
-                                color: AppTheme.errorRed,
+                                color: theme.colorScheme.error,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 'Logout',
-                                style: AppTheme.labelSmall.copyWith(
-                                  color: AppTheme.errorRed,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.error,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -161,7 +163,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                             children: [
                               Text(
                                 'Recent Entries',
-                                style: AppTheme.headlineSmall,
+                                style: theme.textTheme.headlineSmall,
                               ),
                               TextButton(
                                 onPressed: () {
@@ -171,8 +173,8 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                                 },
                                 child: Text(
                                   'View All',
-                                  style: AppTheme.labelMedium.copyWith(
-                                    color: AppTheme.primary,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -219,9 +221,9 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceDark.withOpacity(0.95),
+                color: theme.cardColor.withOpacity(0.95),
                 border: Border(
-                  top: BorderSide(color: AppTheme.borderDark),
+                  top: BorderSide(color: theme.dividerColor),
                 ),
               ),
               child: Consumer<GuardProvider>(
@@ -237,12 +239,12 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                         children: [
                           Text(
                             'Patrol Checkpoint',
-                            style: AppTheme.titleSmall,
+                            style: theme.textTheme.titleSmall,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Last check: ${minutesAgo}m ago',
-                            style: AppTheme.labelSmall,
+                            style: theme.textTheme.labelSmall,
                           ),
                         ],
                       ),
@@ -258,9 +260,9 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                         icon: const Icon(Icons.check_circle),
                         label: const Text('Check In'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1c1f27),
-                          foregroundColor: AppTheme.textPrimary,
-                          side: const BorderSide(color: AppTheme.borderDark),
+                          backgroundColor: theme.cardColor,
+                          foregroundColor: theme.textTheme.bodyLarge?.color,
+                          side: BorderSide(color: theme.dividerColor),
                         ),
                       ),
                     ],
@@ -280,11 +282,12 @@ class _RegisterVisitorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surfaceDark,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderDark),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Material(
         color: Colors.transparent,
@@ -299,7 +302,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppTheme.primary,
+                    color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -311,12 +314,12 @@ class _RegisterVisitorButton extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   'Register New Visitor',
-                  style: AppTheme.titleMedium,
+                  style: theme.textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Tap when a visitor arrives',
-                  style: AppTheme.labelSmall,
+                  style: theme.textTheme.labelSmall,
                 ),
               ],
             ),
@@ -335,127 +338,130 @@ class _RegisterVisitorButton extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          backgroundColor: AppTheme.surfaceDark,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Text('Register Visitor', style: AppTheme.headlineSmall),
-              const SizedBox(height: 24),
-              Text('Flat Number', style: AppTheme.labelLarge),
-              const SizedBox(height: 8),
-              TextField(
-                controller: flatController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'e.g. 402',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text('Visitor Name', style: AppTheme.labelLarge),
-              const SizedBox(height: 8),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text('Purpose', style: AppTheme.labelLarge),
-              const SizedBox(height: 8),
-              Column(
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          return Dialog(
+            backgroundColor: theme.dialogBackgroundColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _PurposeChip(
-                    label: 'Guest',
-                    icon: Icons.person,
-                    selected: selectedPurpose == 'guest',
-                    onSelected: () => setState(() => selectedPurpose = 'guest'),
+                Text('Register Visitor', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 24),
+                Text('Flat Number', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: flatController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. 402',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  _PurposeChip(
-                    label: 'Delivery',
-                    icon: Icons.local_shipping,
-                    selected: selectedPurpose == 'delivery',
-                    onSelected: () => setState(() => selectedPurpose = 'delivery'),
+                ),
+                const SizedBox(height: 16),
+                Text('Visitor Name', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  _PurposeChip(
-                    label: 'Service',
-                    icon: Icons.build,
-                    selected: selectedPurpose == 'service',
-                    onSelected: () => setState(() => selectedPurpose = 'service'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          if (nameController.text.isEmpty ||
-                              flatController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please fill in all fields'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          setState(() => isLoading = true);
-
-                          try {
-                            await context.read<GuardProvider>().registerNewVisitor(
-                                  name: nameController.text,
-                                  flatNumber: flatController.text,
-                                  purpose: selectedPurpose,
-                                );
-
-                            if (context.mounted) {
-                              Navigator.pop(context);
+                ),
+                const SizedBox(height: 16),
+                Text('Purpose', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                Column(
+                  children: [
+                    _PurposeChip(
+                      label: 'Guest',
+                      icon: Icons.person,
+                      selected: selectedPurpose == 'guest',
+                      onSelected: () => setState(() => selectedPurpose = 'guest'),
+                    ),
+                    const SizedBox(height: 8),
+                    _PurposeChip(
+                      label: 'Delivery',
+                      icon: Icons.local_shipping,
+                      selected: selectedPurpose == 'delivery',
+                      onSelected: () => setState(() => selectedPurpose = 'delivery'),
+                    ),
+                    const SizedBox(height: 8),
+                    _PurposeChip(
+                      label: 'Service',
+                      icon: Icons.build,
+                      selected: selectedPurpose == 'service',
+                      onSelected: () => setState(() => selectedPurpose = 'service'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            if (nameController.text.isEmpty ||
+                                flatController.text.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Visitor registered successfully'),
+                                  content: Text('Please fill in all fields'),
                                 ),
                               );
+                              return;
                             }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
-                              );
-                              setState(() => isLoading = false);
+
+                            setState(() => isLoading = true);
+
+                            try {
+                              await context.read<GuardProvider>().registerNewVisitor(
+                                    name: nameController.text,
+                                    flatNumber: flatController.text,
+                                    purpose: selectedPurpose,
+                                  );
+
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Visitor registered successfully'),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e')),
+                                );
+                                setState(() => isLoading = false);
+                              }
                             }
-                          }
-                        },
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.black),
-                          ),
-                        )
-                      : const Text('Register Visitor'),
+                          },
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.black),
+                            ),
+                          )
+                        : const Text('Register Visitor'),
+                  ),
                 ),
+              ],
               ),
-            ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -476,8 +482,9 @@ class _PurposeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: selected ? AppTheme.primary.withOpacity(0.2) : AppTheme.surfaceDark,
+      color: selected ? theme.colorScheme.primary.withOpacity(0.2) : theme.cardColor,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onSelected,
@@ -487,17 +494,17 @@ class _PurposeChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: selected ? AppTheme.primary : AppTheme.borderDark,
+              color: selected ? theme.colorScheme.primary : theme.dividerColor,
             ),
           ),
           child: Row(
             children: [
-              Icon(icon, color: selected ? AppTheme.primary : AppTheme.textSecondary),
+              Icon(icon, color: selected ? theme.colorScheme.primary : theme.textTheme.bodySmall?.color),
               const SizedBox(width: 12),
               Text(
                 label,
-                style: AppTheme.titleSmall.copyWith(
-                  color: selected ? AppTheme.primary : AppTheme.textPrimary,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: selected ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -535,14 +542,15 @@ class _EntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final statusColor = _getStatusColor(entry.status);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceDark,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.borderDark),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
@@ -550,13 +558,13 @@ class _EntryCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1F2937),
+              color: theme.dividerColor,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF374151)),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Icon(
               Icons.person_outline,
-              color: AppTheme.textTertiary,
+              color: theme.textTheme.bodySmall?.color,
               size: 20,
             ),
           ),
@@ -567,12 +575,12 @@ class _EntryCard extends StatelessWidget {
               children: [
                 Text(
                   entry.name,
-                  style: AppTheme.titleSmall,
+                  style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Flat ${entry.flatNumber}',
-                  style: AppTheme.labelSmall,
+                  style: theme.textTheme.labelSmall,
                 ),
               ],
             ),
@@ -594,7 +602,7 @@ class _EntryCard extends StatelessWidget {
                 ),
                 child: Text(
                   _getStatusLabel(entry.status),
-                  style: AppTheme.labelSmall.copyWith(
+                  style: theme.textTheme.labelSmall?.copyWith(
                     color: statusColor,
                     fontSize: 10,
                   ),
@@ -603,7 +611,7 @@ class _EntryCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 _timeFormatter.format(entry.time),
-                style: AppTheme.labelSmall,
+                style: theme.textTheme.labelSmall,
               ),
             ],
           ),
