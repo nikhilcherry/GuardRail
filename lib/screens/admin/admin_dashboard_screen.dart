@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 
@@ -183,8 +184,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ),
                 TextButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Activity logs coming soon')),
+                      showComingSoonDialog(
+                        context,
+                        title: 'Activity Logs',
+                        message: 'Detailed activity logs with filtering capabilities are coming soon.',
                       );
                     },
                   child: Text(
