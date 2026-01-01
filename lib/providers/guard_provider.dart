@@ -57,6 +57,26 @@ class GuardProvider extends ChangeNotifier {
   List<VisitorEntry> get entries => _entries;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
+  bool _isLoading = false;
+  
+  List<VisitorEntry> get entries => _entries;
+  DateTime get lastPatrolCheck => _lastPatrolCheck;
+  bool get isLoading => _isLoading;
+
+  GuardProvider() {
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    _isLoading = false;
+    notifyListeners();
+  }
 
   // Register new visitor
   Future<VisitorEntry> registerNewVisitor({

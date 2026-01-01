@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
@@ -62,6 +63,13 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
+  Widget build(BuildContext context) {
+    return const _AdminScaffold(
+      title: 'Flats',
+      body: ComingSoonView(
+        title: 'Flats Management',
+        message: 'Configure families, units, and resident details here.',
+        icon: Icons.apartment_outlined,
       ),
     );
   }
@@ -157,6 +165,13 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
+  Widget build(BuildContext context) {
+    return const _AdminScaffold(
+      title: 'Guards',
+      body: ComingSoonView(
+        title: 'Guard Management',
+        message: 'Assign, enable or disable guard accounts and manage shifts.',
+        icon: Icons.security_outlined,
       ),
     );
   }
@@ -193,6 +208,14 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
           currentIndex: 2,
         );
       },
+    return const _AdminScaffold(
+      title: 'Visitor Logs',
+      body: ComingSoonView(
+        title: 'Visitor Logs',
+        message: 'Review all visitor entries and filter by flat, guard or status.',
+        icon: Icons.history_outlined,
+      ),
+      currentIndex: 3,
     );
   }
 }
@@ -253,6 +276,13 @@ class AdminVisitorLogsScreen extends StatelessWidget {
             );
           },
         ),
+    return const _AdminScaffold(
+      title: 'Activity Logs',
+      body: ComingSoonView(
+        title: 'System Activity',
+        message: 'Full audit trail of system activity will appear here.',
+        icon: Icons.list_alt_outlined,
+      ),
       currentIndex: 3,
     );
   }
@@ -268,14 +298,16 @@ class AdminSettingsScreen extends StatelessWidget {
     return _AdminScaffold(
       title: 'Settings',
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
           _SettingsTile(
             icon: Icons.tune,
             label: 'Gate configuration',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Gate configuration coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Gate Configuration',
+                message: 'Advanced gate settings and hardware integration options are coming soon.',
               );
             },
           ),
@@ -284,8 +316,10 @@ class AdminSettingsScreen extends StatelessWidget {
             icon: Icons.notifications_active_outlined,
             label: 'Alerts & notifications',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Alerts settings coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Alert Settings',
+                message: 'Customize system-wide alerts and notification preferences.',
               );
             },
           ),
@@ -294,8 +328,10 @@ class AdminSettingsScreen extends StatelessWidget {
             icon: Icons.security_outlined,
             label: 'Security policies',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Security policies coming soon')),
+              showComingSoonDialog(
+                context,
+                title: 'Security Policies',
+                message: 'Define and manage security protocols and access levels.',
               );
             },
           ),

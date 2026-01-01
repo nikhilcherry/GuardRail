@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'resident_notifications_screen.dart';
+import '../../widgets/shimmer_list_item.dart';
 
 class ResidentHomeScreen extends StatefulWidget {
   const ResidentHomeScreen({Key? key}) : super(key: key);
@@ -30,7 +33,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -41,12 +44,20 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
+                                'Resident Portal',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
                                 'Good Evening,',
-                                style: theme.textTheme.displayMedium,
+                                style: theme.textTheme.headlineMedium,
                               ),
                               Text(
                                 residentProvider.residentName,
-                                style: theme.textTheme.displayMedium?.copyWith(
+                                style: theme.textTheme.headlineMedium?.copyWith(
                                   color: theme.textTheme.bodyLarge?.color?.withOpacity(0.9),
                                 ),
                               ),
@@ -59,15 +70,19 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => const ResidentNotificationsScreen(),
                                 ),
+                              showComingSoonDialog(
+                                context,
+                                title: 'Notifications',
+                                message: 'We are adding a notification center to keep you updated on all activities.',
                               );
                             },
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              width: 40,
-                              height: 40,
+                              width: 44,
+                              height: 44,
                               decoration: BoxDecoration(
                                 color: theme.cardColor,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: theme.dividerColor,
                                 ),
@@ -81,22 +96,22 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                     ),
                                   ),
                                   if (residentProvider.pendingRequests > 0)
-                                  Positioned(
-                                    top: 4,
-                                    right: 4,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.errorRed,
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(
-                                          color: theme.scaffoldBackgroundColor,
-                                          width: 2,
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.errorRed,
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(
+                                            color: theme.cardColor,
+                                            width: 1.5,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -242,7 +257,19 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                         ),
                       ),
                       // Virtualized List
-                      if (residentProvider.todaysVisitors.isNotEmpty)
+                      if (residentProvider.isLoading)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                return const ShimmerListItem();
+                              },
+                              childCount: 5,
+                            ),
+                          ),
+                        )
+                      else if (residentProvider.todaysVisitors.isNotEmpty)
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           sliver: SliverList(
@@ -272,7 +299,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
   }
 }
 
-class _PendingVisitorCard extends StatelessWidget {
+class _PendingVisitorCard extends StatefulWidget {
   final Visitor visitor;
   final VoidCallback onApprove;
   final VoidCallback onReject;
@@ -284,9 +311,39 @@ class _PendingVisitorCard extends StatelessWidget {
   });
 
   @override
+  State<_PendingVisitorCard> createState() => _PendingVisitorCardState();
+}
+
+class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.cardColor,
@@ -300,122 +357,146 @@ class _PendingVisitorCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: theme.dividerColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  color: theme.textTheme.bodySmall?.color,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      visitor.name,
-                      style: theme.textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        visitor.type.replaceFirst(
-                          visitor.type[0],
-                          visitor.type[0].toUpperCase(),
-                        ),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Icon(
-                Icons.security,
-                size: 16,
-                color: theme.textTheme.bodySmall?.color,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Guard: Ramesh',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                Icons.schedule,
-                size: 16,
-                color: theme.textTheme.bodySmall?.color,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Arrived 1 min ago',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onReject,
-                  icon: const Icon(Icons.close),
-                  label: const Text('Reject'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.errorRed,
-                    foregroundColor: Colors.white,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.dividerColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2), // Reduced opacity for subtler shadow
+              blurRadius: 30,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor.withOpacity(0.1), // Subtler placeholder
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+                  ),
+                  child: Icon(
+                    Icons.person_outline,
+                    color: theme.textTheme.bodyMedium?.color,
+                    size: 32,
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onApprove,
-                  icon: const Icon(Icons.check),
-                  label: const Text('Approve'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.black,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.visitor.name,
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          widget.visitor.type.replaceFirst(
+                            widget.visitor.type[0],
+                            widget.visitor.type[0].toUpperCase(),
+                          ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Icon(
+                  Icons.security,
+                  size: 16,
+                  color: theme.textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Guard: Ramesh', // Ideally this should be dynamic too
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: theme.textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Arrived 1 min ago', // Ideally dynamic
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: widget.onReject,
+                    icon: const Icon(Icons.close),
+                    label: const Text('Reject'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.errorRed,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: widget.onApprove,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Approve'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.black,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -560,11 +641,11 @@ class _ResidentBottomNav extends StatelessWidget {
       onTap: (index) {
         if (index == currentIndex) return;
         if (index == 0) {
-          Navigator.pushReplacementNamed(context, '/resident_home');
+          context.go('/resident_home');
         } else if (index == 1) {
-          Navigator.pushReplacementNamed(context, '/resident_visitors');
+          context.go('/resident_home/visitors');
         } else if (index == 2) {
-          Navigator.pushReplacementNamed(context, '/resident_settings');
+          context.go('/resident_home/settings');
         }
       },
     );

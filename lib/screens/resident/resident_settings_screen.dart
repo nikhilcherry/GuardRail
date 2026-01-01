@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/theme_provider.dart';
 import '../../main.dart';
@@ -27,7 +28,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _biometricsEnabled = prefs.getBool('biometricsEnabled') ?? false;
+      // _biometricsEnabled is now managed by AuthProvider
       _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
     });
   }
@@ -68,12 +69,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
 
     if (confirmed == true) {
       await context.read<AuthProvider>().logout();
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const RootScreen()),
-          (route) => false,
-        );
-      }
+      // AuthProvider listener in AppRouter will handle redirect to login
     }
   }
 
@@ -177,10 +173,10 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: theme.iconTheme.color),
           onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
+            if (context.canPop()) {
+              context.pop();
             } else {
-              Navigator.pushReplacementNamed(context, '/resident_home');
+              context.go('/resident_home');
             }
           },
         ),
@@ -235,14 +231,20 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       subtitle: 'Pre-approvals & Guests',
                       onTap: () {},
                     ),
-                    _SettingsToggleItem(
-                      icon: Icons.face,
-                      title: 'Face ID Login',
-                      value: _biometricsEnabled,
-                      onChanged: (value) {
-                        setState(() => _biometricsEnabled = value);
-                        _savePreference('biometricsEnabled', value);
-                      },
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) => _SettingsToggleItem(
+                        icon: Icons.face,
+                        title: 'Face ID Login',
+                        value: authProvider.biometricsEnabled,
+                        onChanged: (value) async {
+                          final success = await authProvider.toggleBiometrics(value);
+                          if (!success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Biometrics not available or authentication failed')),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
