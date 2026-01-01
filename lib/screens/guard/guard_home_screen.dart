@@ -453,6 +453,7 @@ class _RegisterVisitorButton extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),
