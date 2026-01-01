@@ -14,8 +14,8 @@ class AdminFlatsScreen extends StatelessWidget {
       body: Center(
         child: Text(
           'Flats management coming soon.\nConfigure families and units here.',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondary,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
           textAlign: TextAlign.center,
         ),
@@ -35,8 +35,8 @@ class AdminGuardsScreen extends StatelessWidget {
       body: Center(
         child: Text(
           'Assign, enable or disable guard accounts here.',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondary,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
           textAlign: TextAlign.center,
         ),
@@ -56,8 +56,8 @@ class AdminVisitorLogsScreen extends StatelessWidget {
       body: Center(
         child: Text(
           'Review all visitor entries and filter by flat, guard or status.',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondary,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
           textAlign: TextAlign.center,
         ),
@@ -77,8 +77,8 @@ class AdminActivityLogsScreen extends StatelessWidget {
       body: Center(
         child: Text(
           'Full audit trail of system activity will appear here.',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondary,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
           textAlign: TextAlign.center,
         ),
@@ -93,6 +93,8 @@ class AdminSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return _AdminScaffold(
       title: 'Settings',
       body: ListView(
@@ -136,14 +138,14 @@ class AdminSettingsScreen extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: AppTheme.surfaceDark,
+                  backgroundColor: theme.dialogBackgroundColor,
                   title: Text(
                     'Logout',
-                    style: AppTheme.headlineSmall,
+                    style: theme.textTheme.headlineSmall,
                   ),
                   content: Text(
                     'Are you sure you want to logout as Admin?',
-                    style: AppTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium,
                   ),
                   actions: [
                     TextButton(
@@ -161,8 +163,8 @@ class AdminSettingsScreen extends StatelessWidget {
                       },
                       child: Text(
                         'Logout',
-                        style: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.errorRed,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.error,
                         ),
                       ),
                     ),
@@ -191,24 +193,26 @@ class _AdminScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
           title,
-          style: AppTheme.headlineSmall,
+          style: theme.textTheme.headlineSmall,
         ),
       ),
       body: body,
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppTheme.surfaceDark,
+        backgroundColor: theme.cardColor,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
         currentIndex: currentIndex,
-        selectedItemColor: AppTheme.primary,
-        unselectedItemColor: AppTheme.textSecondary,
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: theme.textTheme.bodySmall?.color,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
@@ -271,8 +275,10 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: AppTheme.surfaceDark,
+      color: theme.cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -283,23 +289,23 @@ class _SettingsTile extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isDestructive ? AppTheme.errorRed : AppTheme.textSecondary,
+                color: isDestructive ? theme.colorScheme.error : theme.textTheme.bodySmall?.color,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
-                  style: AppTheme.bodyMedium.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDestructive
-                        ? AppTheme.errorRed
-                        : AppTheme.textPrimary,
+                        ? theme.colorScheme.error
+                        : theme.textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: AppTheme.textSecondary,
+                color: theme.textTheme.bodySmall?.color,
               ),
             ],
           ),
@@ -308,5 +314,3 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
-
-

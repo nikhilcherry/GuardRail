@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../theme/app_theme.dart';
+import '../../providers/theme_provider.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
+import '../../widgets/contact_support_dialog.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
   const ResidentSettingsScreen({Key? key}) : super(key: key);
@@ -37,25 +38,27 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   }
 
   Future<void> _handleLogout() async {
+    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surfaceDark,
+        backgroundColor: theme.dialogBackgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Log Out', style: AppTheme.headlineSmall),
+        title: Text('Log Out', style: theme.textTheme.headlineSmall),
         content: Text(
           'Are you sure you want to log out?',
-          style: AppTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: AppTheme.bodyMedium),
+            child: Text('Cancel', style: theme.textTheme.bodyMedium),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorRed,
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: Colors.white,
             ),
             child: const Text('Log Out'),
           ),
@@ -76,13 +79,15 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.iconTheme.color),
           onPressed: () {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
@@ -93,12 +98,12 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         ),
         title: Text(
           'Resident Settings',
-          style: AppTheme.headlineMedium.copyWith(fontSize: 26),
+          style: theme.textTheme.headlineMedium?.copyWith(fontSize: 26),
         ),
         centerTitle: true,
       ),
-      body: Consumer<ResidentProvider>(
-        builder: (context, residentProvider, _) {
+      body: Consumer2<ResidentProvider, ThemeProvider>(
+        builder: (context, residentProvider, themeProvider, _) {
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -112,18 +117,21 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       title: 'My Profile',
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Profile editing coming soon')),
-                        );
+                        // Empty state/hidden for now
                       },
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
                       title: 'Change Password',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Change password coming soon')),
-                        );
+                        // Empty state/hidden for now
+                      },
+                    ),
+                    _SettingsItem(
+                      icon: Icons.apartment,
+                      title: 'Flat Management',
+                      onTap: () {
+                         // Empty state/hidden for now
                       },
                     ),
                   ],
@@ -165,17 +173,27 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                         _savePreference('notificationsEnabled', value);
                       },
                     ),
-                    _SettingsItem(
-                      icon: Icons.dark_mode,
+                    _SettingsToggleItem(
+                      icon: themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
                       title: 'Dark Mode',
-                      trailing: Text(
-                        'System',
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
+                      value: themeProvider.isDarkMode,
+                      onChanged: (value) {
+                        themeProvider.toggleTheme(value);
+                      },
                     ),
                   ],
+                ),
+                const SizedBox(height: 24),
+                // Support Section
+                 _SettingsSection(
+                  title: 'Support',
+                  children: [
+                     _SettingsItem(
+                      icon: Icons.support_agent,
+                      title: 'Contact Support',
+                      onTap: () => showContactSupportDialog(context),
+                    ),
+                  ]
                 ),
                 const SizedBox(height: 40),
                 // Logout Button
@@ -185,15 +203,15 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: _handleLogout,
-                      icon: const Icon(Icons.logout, color: AppTheme.primary),
+                      icon: Icon(Icons.logout, color: theme.colorScheme.primary),
                       label: Text(
                         'Log Out',
-                        style: AppTheme.titleLarge.copyWith(
-                          color: AppTheme.primary,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppTheme.borderDark),
+                        side: BorderSide(color: theme.dividerColor),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -205,8 +223,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Version 2.4.1 (Build 890)',
-                  style: AppTheme.labelSmall.copyWith(
-                    color: AppTheme.textTertiary,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -230,6 +248,7 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,8 +256,8 @@ class _SettingsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Text(
             title,
-            style: AppTheme.labelSmall.copyWith(
-              color: AppTheme.textSecondary,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
               fontSize: 13,
               letterSpacing: 1.2,
             ),
@@ -247,9 +266,9 @@ class _SettingsSection extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceDark,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.borderDark),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
             children: children,
@@ -277,6 +296,7 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hasSubtitle = subtitle != null;
     final hasTrailing = trailing != null;
 
@@ -289,7 +309,7 @@ class _SettingsItem extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: AppTheme.borderDark,
+                color: theme.dividerColor,
                 width: hasSubtitle && !hasTrailing ? 1 : 0,
               ),
             ),
@@ -300,10 +320,10 @@ class _SettingsItem extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.borderDark,
+                  color: theme.dividerColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: AppTheme.textPrimary, size: 20),
+                child: Icon(icon, color: theme.textTheme.bodyLarge?.color, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -311,17 +331,17 @@ class _SettingsItem extends StatelessWidget {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: AppTheme.titleMedium),
+                          Text(title, style: theme.textTheme.titleMedium),
                           const SizedBox(height: 2),
                           Text(
                             subtitle!,
-                            style: AppTheme.bodySmall.copyWith(
-                              color: AppTheme.textSecondary,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ],
                       )
-                    : Text(title, style: AppTheme.bodyLarge),
+                    : Text(title, style: theme.textTheme.bodyLarge),
               ),
               if (hasTrailing)
                 trailing!
@@ -329,7 +349,7 @@ class _SettingsItem extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: AppTheme.textTertiary,
+                  color: theme.colorScheme.onSurface.withOpacity(0.4),
                 ),
             ],
           ),
@@ -356,12 +376,13 @@ class _SettingsToggleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: subtitle != null ? AppTheme.borderDark : Colors.transparent,
+            color: subtitle != null ? theme.dividerColor : Colors.transparent,
             width: subtitle != null ? 1 : 0,
           ),
         ),
@@ -372,10 +393,10 @@ class _SettingsToggleItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppTheme.borderDark,
+              color: theme.dividerColor.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppTheme.textPrimary, size: 20),
+            child: Icon(icon, color: theme.textTheme.bodyLarge?.color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -383,22 +404,22 @@ class _SettingsToggleItem extends StatelessWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: AppTheme.titleMedium),
+                      Text(title, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppTheme.textSecondary,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],
                   )
-                : Text(title, style: AppTheme.bodyLarge),
+                : Text(title, style: theme.textTheme.bodyLarge),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
+            activeColor: theme.colorScheme.primary,
           ),
         ],
       ),

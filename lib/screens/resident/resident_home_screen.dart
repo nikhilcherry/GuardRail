@@ -15,8 +15,10 @@ class ResidentHomeScreen extends StatefulWidget {
 class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
@@ -39,12 +41,12 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                             children: [
                               Text(
                                 'Good Evening,',
-                                style: AppTheme.displayMedium,
+                                style: theme.textTheme.displayMedium,
                               ),
                               Text(
                                 residentProvider.residentName,
-                                style: AppTheme.displayMedium.copyWith(
-                                  color: AppTheme.textPrimary.withOpacity(0.9),
+                                style: theme.textTheme.displayMedium?.copyWith(
+                                  color: theme.textTheme.bodyLarge?.color?.withOpacity(0.9),
                                 ),
                               ),
                             ],
@@ -60,18 +62,18 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppTheme.surfaceDark,
+                                color: theme.cardColor,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: AppTheme.borderDark,
+                                  color: theme.dividerColor,
                                 ),
                               ),
                               child: Stack(
                                 children: [
-                                  const Center(
+                                  Center(
                                     child: Icon(
                                       Icons.notifications_outlined,
-                                      color: AppTheme.textPrimary,
+                                      color: theme.iconTheme.color,
                                     ),
                                   ),
                                   if (residentProvider.pendingRequests > 0)
@@ -85,7 +87,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                         color: AppTheme.errorRed,
                                         borderRadius: BorderRadius.circular(4),
                                         border: Border.all(
-                                          color: AppTheme.backgroundDark,
+                                          color: theme.scaffoldBackgroundColor,
                                           width: 2,
                                         ),
                                       ),
@@ -104,25 +106,25 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.surfaceDark,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.borderDark,
+                            color: theme.dividerColor,
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.home_outlined,
                               size: 20,
-                              color: AppTheme.primary,
+                              color: theme.colorScheme.primary,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Flat ${residentProvider.flatNumber}',
-                              style: AppTheme.titleSmall.copyWith(
-                                color: AppTheme.textSecondary,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
                               ),
                             ),
                           ],
@@ -146,7 +148,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                 children: [
                                   Text(
                                     'Pending Request',
-                                    style: AppTheme.titleLarge,
+                                    style: theme.textTheme.titleLarge,
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -173,7 +175,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                         const SizedBox(width: 6),
                                         Text(
                                           'Live',
-                                          style: AppTheme.labelSmall.copyWith(
+                                          style: theme.textTheme.labelSmall?.copyWith(
                                             color: AppTheme.errorRed,
                                             fontSize: 9,
                                           ),
@@ -215,7 +217,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               children: [
                                 Text(
                                   'Recent History',
-                                  style: AppTheme.titleLarge,
+                                  style: theme.textTheme.titleLarge,
                                 ),
                               ],
                             ),
@@ -228,7 +230,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                   ),
                                   child: Text(
                                     'No recent visitors',
-                                    style: AppTheme.labelMedium,
+                                    style: theme.textTheme.labelMedium,
                                   ),
                                 ),
                               ),
@@ -279,12 +281,13 @@ class _PendingVisitorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceDark,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.borderDark),
+        border: Border.all(color: theme.dividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.4),
@@ -302,13 +305,13 @@ class _PendingVisitorCard extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppTheme.borderDark,
+                  color: theme.dividerColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.borderDark.withOpacity(0.5)),
+                  border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_outline,
-                  color: AppTheme.textSecondary,
+                  color: theme.textTheme.bodySmall?.color,
                   size: 32,
                 ),
               ),
@@ -319,7 +322,7 @@ class _PendingVisitorCard extends StatelessWidget {
                   children: [
                     Text(
                       visitor.name,
-                      style: AppTheme.headlineSmall,
+                      style: theme.textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
                     Container(
@@ -328,7 +331,7 @@ class _PendingVisitorCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.2),
+                        color: theme.colorScheme.primary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -336,8 +339,8 @@ class _PendingVisitorCard extends StatelessWidget {
                           visitor.type[0],
                           visitor.type[0].toUpperCase(),
                         ),
-                        style: AppTheme.labelSmall.copyWith(
-                          color: AppTheme.primary,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ),
@@ -349,16 +352,16 @@ class _PendingVisitorCard extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.security,
                 size: 16,
-                color: AppTheme.textSecondary,
+                color: theme.textTheme.bodySmall?.color,
               ),
               const SizedBox(width: 8),
               Text(
                 'Guard: Ramesh',
-                style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.textSecondary,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -366,16 +369,16 @@ class _PendingVisitorCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.schedule,
                 size: 16,
-                color: AppTheme.textSecondary,
+                color: theme.textTheme.bodySmall?.color,
               ),
               const SizedBox(width: 8),
               Text(
                 'Arrived 1 min ago',
-                style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.textSecondary,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -401,7 +404,7 @@ class _PendingVisitorCard extends StatelessWidget {
                   icon: const Icon(Icons.check),
                   label: const Text('Approve'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.black,
                   ),
                 ),
@@ -448,12 +451,13 @@ class _HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceDark.withOpacity(0.5),
+        color: theme.cardColor.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderDark.withOpacity(0.3)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -461,14 +465,14 @@ class _HistoryCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderDark.withOpacity(0.3)),
+              border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
             ),
             child: Icon(
               _getTypeIcon(),
               size: 20,
-              color: AppTheme.textSecondary,
+              color: theme.textTheme.bodySmall?.color,
             ),
           ),
           const SizedBox(width: 12),
@@ -478,12 +482,12 @@ class _HistoryCard extends StatelessWidget {
               children: [
                 Text(
                   visitor.name,
-                  style: AppTheme.titleSmall,
+                  style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   _timeFormatter.format(visitor.date),
-                  style: AppTheme.labelSmall,
+                  style: theme.textTheme.labelSmall,
                 ),
               ],
             ),
@@ -505,7 +509,7 @@ class _HistoryCard extends StatelessWidget {
                 visitor.status[0],
                 visitor.status[0].toUpperCase(),
               ),
-              style: AppTheme.labelSmall.copyWith(
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: _getStatusColor(),
                 fontSize: 9,
               ),
@@ -524,8 +528,9 @@ class _ResidentBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return BottomNavigationBar(
-      backgroundColor: AppTheme.surfaceDark,
+      backgroundColor: theme.cardColor,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       items: const [
@@ -546,8 +551,8 @@ class _ResidentBottomNav extends StatelessWidget {
         ),
       ],
       currentIndex: currentIndex,
-      selectedItemColor: AppTheme.primary,
-      unselectedItemColor: AppTheme.textSecondary,
+      selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.textTheme.bodySmall?.color,
       onTap: (index) {
         if (index == currentIndex) return;
         if (index == 0) {
@@ -561,4 +566,3 @@ class _ResidentBottomNav extends StatelessWidget {
     );
   }
 }
-

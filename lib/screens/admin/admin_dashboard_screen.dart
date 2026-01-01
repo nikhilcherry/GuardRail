@@ -29,10 +29,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         title: Row(
           children: [
@@ -40,19 +43,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.security_outlined,
-                color: AppTheme.primary,
+                color: theme.colorScheme.primary,
                 size: 18,
               ),
             ),
             const SizedBox(width: 12),
             Text(
               'Admin Panel',
-              style: AppTheme.headlineSmall,
+              style: theme.textTheme.headlineSmall,
             ),
           ],
         ),
@@ -62,7 +65,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppTheme.borderDark,
+              color: theme.dividerColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Material(
@@ -78,9 +81,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   }
                 },
                 borderRadius: BorderRadius.circular(16),
-                child: const Icon(
+                child: Icon(
                   Icons.logout,
-                  color: AppTheme.textSecondary,
+                  color: theme.textTheme.bodySmall?.color,
                   size: 16,
                 ),
               ),
@@ -98,8 +101,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               children: [
                 Text(
                   'Overview',
-                  style: AppTheme.labelSmall.copyWith(
-                    color: AppTheme.textSecondary,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -108,7 +111,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   children: [
                     Text(
                       'Dashboard',
-                      style: AppTheme.headlineLarge,
+                      style: theme.textTheme.headlineLarge,
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -116,16 +119,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: AppTheme.primary.withOpacity(0.2),
+                          color: theme.colorScheme.primary.withOpacity(0.2),
                         ),
                       ),
                       child: Text(
                         'Live System',
-                        style: AppTheme.labelSmall.copyWith(
-                          color: AppTheme.primary,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
                           fontSize: 9,
                         ),
                       ),
@@ -143,23 +146,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   children: [
                     _StatCard(
                       label: 'Total Flats',
-                      value: '120',
+                      value: '0',
                       icon: Icons.apartment_outlined,
                     ),
                     _StatCard(
                       label: 'Active Guards',
-                      value: '4',
+                      value: '0',
                       icon: Icons.security_outlined,
                       highlighted: true,
                     ),
                     _StatCard(
                       label: "Today's Visitors",
-                      value: '45',
+                      value: '0',
                       icon: Icons.group_outlined,
                     ),
                     _StatCard(
                       label: 'Pending Approvals',
-                      value: '3',
+                      value: '0',
                       icon: Icons.pending_actions_outlined,
                       isPrimary: true,
                     ),
@@ -168,7 +171,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ],
             ),
           ),
-          // Activity Section
+          // Activity Section Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -176,7 +179,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               children: [
                 Text(
                   'Live Gate Activity',
-                  style: AppTheme.headlineSmall,
+                  style: theme.textTheme.headlineSmall,
                 ),
                 TextButton(
                     onPressed: () {
@@ -186,8 +189,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     },
                   child: Text(
                     'View All',
-                    style: AppTheme.labelSmall.copyWith(
-                      color: AppTheme.primary,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
@@ -196,16 +199,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           ),
           // Activity Feed
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 5,
-              separatorBuilder: (_, __) => const Divider(
-                color: AppTheme.borderDark,
-                height: 1,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 48,
+                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No recent activity',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
               ),
-              itemBuilder: (context, index) {
-                return _ActivityItem(index: index);
-              },
             ),
           ),
         ],
@@ -232,15 +243,18 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final bgColor = isPrimary
-        ? AppTheme.primary.withOpacity(0.1)
+        ? theme.colorScheme.primary.withOpacity(0.1)
         : highlighted
-            ? AppTheme.surfaceDark
-            : AppTheme.surfaceDark;
+            ? theme.cardColor
+            : theme.cardColor;
 
     final borderColor = isPrimary
-        ? AppTheme.primary.withOpacity(0.2)
-        : AppTheme.borderDark;
+        ? theme.colorScheme.primary.withOpacity(0.2)
+        : theme.dividerColor;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -259,148 +273,21 @@ class _StatCard extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.textSecondary,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
               Icon(
                 icon,
-                color: AppTheme.textSecondary.withOpacity(0.3),
+                color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                 size: 28,
               ),
             ],
           ),
           Text(
             value,
-            style: AppTheme.displayMedium.copyWith(
-              color: isPrimary ? AppTheme.primary : AppTheme.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActivityItem extends StatelessWidget {
-  final int index;
-
-  const _ActivityItem({required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    final activities = [
-      {
-        'icon': Icons.local_shipping_outlined,
-        'color': AppTheme.successGreen,
-        'title': 'Delivery for Flat 401',
-        'time': '10:02 AM',
-        'status': 'Approved',
-        'statusColor': AppTheme.successGreen,
-      },
-      {
-        'icon': Icons.person_outline,
-        'color': AppTheme.primary,
-        'title': 'Guest: John Doe',
-        'time': '09:55 AM',
-        'status': 'Waiting Approval (102)',
-        'statusColor': AppTheme.primary,
-      },
-      {
-        'icon': Icons.local_taxi_outlined,
-        'color': AppTheme.textSecondary,
-        'title': 'Taxi Drop-off',
-        'time': '09:45 AM',
-        'status': 'Exited',
-        'statusColor': AppTheme.textSecondary,
-      },
-      {
-        'icon': Icons.block_outlined,
-        'color': AppTheme.errorRed,
-        'title': 'Unknown Vehicle',
-        'time': '09:30 AM',
-        'status': 'Entry Denied',
-        'statusColor': AppTheme.errorRed,
-      },
-      {
-        'icon': Icons.cleaning_services_outlined,
-        'color': AppTheme.textSecondary,
-        'title': 'Housekeeping Staff',
-        'time': '08:15 AM',
-        'status': 'Entry Approved',
-        'statusColor': AppTheme.successGreen,
-      },
-    ];
-
-    final activity = activities[index];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderDark.withOpacity(0.3)),
-            ),
-            child: Icon(
-              activity['icon'] as IconData,
-              color: activity['color'] as Color,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity['title'] as String,
-                  style: AppTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      activity['time'] as String,
-                      style: AppTheme.labelSmall,
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppTheme.borderDark,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      activity['status'] as String,
-                      style: AppTheme.labelSmall.copyWith(
-                        color: activity['statusColor'] as Color,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: activity['statusColor'] as Color,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: (activity['statusColor'] as Color).withOpacity(0.4),
-                  blurRadius: 8,
-                ),
-              ],
+            style: theme.textTheme.displayMedium?.copyWith(
+              color: isPrimary ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
             ),
           ),
         ],
@@ -416,13 +303,15 @@ class _AdminBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BottomNavigationBar(
-      backgroundColor: AppTheme.surfaceDark,
+      backgroundColor: theme.cardColor,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
-      selectedItemColor: AppTheme.primary,
-      unselectedItemColor: AppTheme.textSecondary,
+      selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.textTheme.bodySmall?.color,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard_outlined),
@@ -469,4 +358,3 @@ class _AdminBottomNav extends StatelessWidget {
     );
   }
 }
-

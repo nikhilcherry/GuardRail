@@ -9,14 +9,16 @@ class ResidentVisitorsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
           'Visitors',
-          style: AppTheme.headlineSmall,
+          style: theme.textTheme.headlineSmall,
         ),
       ),
       body: SafeArea(
@@ -30,8 +32,8 @@ class ResidentVisitorsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(24),
                   child: Text(
                     'No visitors yet.\nYou’ll see your full visitor history here.',
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -56,10 +58,10 @@ class ResidentVisitorsScreen extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark.withOpacity(0.5),
+                    color: theme.cardColor.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.borderDark.withOpacity(0.3),
+                      color: theme.dividerColor.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -68,15 +70,15 @@ class ResidentVisitorsScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppTheme.surfaceDark,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.borderDark.withOpacity(0.3),
+                            color: theme.dividerColor.withOpacity(0.3),
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person_outline,
-                          color: AppTheme.textSecondary,
+                          color: theme.textTheme.bodySmall?.color,
                           size: 20,
                         ),
                       ),
@@ -87,12 +89,12 @@ class ResidentVisitorsScreen extends StatelessWidget {
                           children: [
                             Text(
                               visitor.name,
-                              style: AppTheme.titleSmall,
+                              style: theme.textTheme.titleSmall,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '$typeLabel • $statusLabel • $timeLabel',
-                              style: AppTheme.labelSmall,
+                              style: theme.textTheme.labelSmall,
                             ),
                           ],
                         ),
@@ -117,8 +119,9 @@ class _ResidentBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return BottomNavigationBar(
-      backgroundColor: AppTheme.surfaceDark,
+      backgroundColor: theme.cardColor,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       items: const [
@@ -139,8 +142,8 @@ class _ResidentBottomNav extends StatelessWidget {
         ),
       ],
       currentIndex: currentIndex,
-      selectedItemColor: AppTheme.primary,
-      unselectedItemColor: AppTheme.textSecondary,
+      selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.textTheme.bodySmall?.color,
       onTap: (index) {
         if (index == currentIndex) return;
         if (index == 0) {
@@ -154,4 +157,3 @@ class _ResidentBottomNav extends StatelessWidget {
     );
   }
 }
-

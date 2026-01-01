@@ -23,7 +23,14 @@ class AppTheme {
   
   static const Color primaryBlue = Color(0xFF135BEC);
   static const Color blueDark = Color(0xFF1E3A8A);
-  
+
+  // Light Theme Colors
+  static const Color backgroundLight = Color(0xFFF9FAFB);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color borderLight = Color(0xFFE5E7EB);
+  static const Color textPrimaryLight = Color(0xFF111827);
+  static const Color textSecondaryLight = Color(0xFF6B7280);
+
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primary, primaryDark],
@@ -224,5 +231,111 @@ class AppTheme {
         ),
         dividerColor: borderDark,
         canvasColor: backgroundDark,
+      );
+
+  static ThemeData get lightTheme => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: backgroundLight,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: backgroundLight,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          iconTheme: IconThemeData(color: textPrimaryLight),
+        ),
+        colorScheme: const ColorScheme.light(
+          primary: primary,
+          secondary: primaryBlue,
+          surface: surfaceLight,
+          error: errorRed,
+          background: backgroundLight,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: surfaceLight,
+          contentPadding: const EdgeInsets.all(16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: borderLight),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: errorRed),
+          ),
+          hintStyle: GoogleFonts.inter(
+            color: textSecondaryLight,
+            fontSize: 14,
+          ),
+          labelStyle: GoogleFonts.inter(
+            color: textSecondaryLight,
+            fontSize: 12,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primary,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            textStyle: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: textSecondaryLight,
+            side: const BorderSide(color: borderLight),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: primary,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            textStyle: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: surfaceLight,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: borderLight),
+          ),
+        ),
+        dividerColor: borderLight,
+        canvasColor: backgroundLight,
+        // Override text styles to use dark text
+        textTheme: TextTheme(
+          displayLarge: displayLarge.copyWith(color: textPrimaryLight),
+          displayMedium: displayMedium.copyWith(color: textPrimaryLight),
+          headlineLarge: headlineLarge.copyWith(color: textPrimaryLight),
+          headlineMedium: headlineMedium.copyWith(color: textPrimaryLight),
+          headlineSmall: headlineSmall.copyWith(color: textPrimaryLight),
+          titleLarge: titleLarge.copyWith(color: textPrimaryLight),
+          titleMedium: titleMedium.copyWith(color: textPrimaryLight),
+          titleSmall: titleSmall.copyWith(color: textPrimaryLight),
+          bodyLarge: bodyLarge.copyWith(color: textPrimaryLight),
+          bodyMedium: bodyMedium.copyWith(color: textPrimaryLight),
+          bodySmall: bodySmall.copyWith(color: textSecondaryLight),
+          labelLarge: labelLarge.copyWith(color: textSecondaryLight),
+          labelMedium: labelMedium.copyWith(color: textSecondaryLight),
+          labelSmall: labelSmall.copyWith(color: textSecondaryLight),
+        ),
       );
 }

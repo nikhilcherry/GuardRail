@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/contact_support_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -114,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final authProvider = context.watch<AuthProvider>();
     final selectedRole = authProvider.selectedRole;
     final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -141,13 +143,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: AppTheme.surfaceDark,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.borderDark),
+                        border: Border.all(color: theme.dividerColor),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.security_outlined,
-                        color: AppTheme.primary,
+                        color: theme.colorScheme.primary,
                         size: 32,
                       ),
                     ),
@@ -155,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Headline
                     Text(
                       '$roleTitle Login',
-                      style: AppTheme.displayMedium,
+                      style: theme.textTheme.displayMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -165,8 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         'Change Role',
-                        style: AppTheme.labelMedium.copyWith(
-                          color: AppTheme.primary,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ),
@@ -177,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Phone Number', style: AppTheme.labelLarge),
+                          Text('Phone Number', style: theme.textTheme.labelLarge),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _phoneController,
@@ -186,21 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.call),
                               hintText: '(555) 000-0000',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppTheme.borderDark,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppTheme.primary,
-                                  width: 2,
-                                ),
-                              ),
                             ),
-                            style: AppTheme.bodyLarge,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ],
                       ),
@@ -215,14 +204,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [
                                 Text(
                                   'One-Time Password',
-                                  style: AppTheme.labelLarge,
+                                  style: theme.textTheme.labelLarge,
                                 ),
                                 TextButton(
                                   onPressed: _resendOTP,
                                   child: Text(
                                     'Resend Code',
-                                    style: AppTheme.labelSmall.copyWith(
-                                      color: AppTheme.primary,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme.colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -238,12 +227,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 fieldHeight: 50,
                                 fieldWidth: 45,
-                                activeFillColor: AppTheme.surfaceDark,
-                                inactiveFillColor: AppTheme.surfaceDark,
-                                selectedFillColor: AppTheme.surfaceDark,
-                                activeColor: AppTheme.primary,
-                                inactiveColor: AppTheme.borderDark,
-                                selectedColor: AppTheme.primary,
+                                activeFillColor: theme.cardColor,
+                                inactiveFillColor: theme.cardColor,
+                                selectedFillColor: theme.cardColor,
+                                activeColor: theme.colorScheme.primary,
+                                inactiveColor: theme.dividerColor,
+                                selectedColor: theme.colorScheme.primary,
+                                textStyle: theme.textTheme.titleLarge,
                               ),
                               controller: _otpController,
                               keyboardType: TextInputType.number,
@@ -258,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Email', style: AppTheme.labelLarge),
+                          Text('Email', style: theme.textTheme.labelLarge),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _emailController,
@@ -266,11 +256,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.email_outlined),
                               hintText: 'your@email.com',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                             ),
-                            style: AppTheme.bodyLarge,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ],
                       ),
@@ -279,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Password', style: AppTheme.labelLarge),
+                          Text('Password', style: theme.textTheme.labelLarge),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _passwordController,
@@ -287,11 +274,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.lock_outlined),
                               hintText: 'Enter password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                             ),
-                            style: AppTheme.bodyLarge,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ],
                       ),
@@ -310,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? _handleOTPVerification
                                     : _handlePhoneLogin)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: theme.colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -331,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   Text(
                                     _showOTPInput ? 'Verify' : 'Log In',
-                                    style: AppTheme.titleLarge.copyWith(
+                                    style: theme.textTheme.titleLarge?.copyWith(
                                       color: Colors.black,
                                     ),
                                   ),
@@ -361,8 +345,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text(
                             _useEmail ? 'Use phone instead' : 'Use email instead',
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: AppTheme.textSecondary,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.textTheme.bodySmall?.color,
                             ),
                           ),
                         ),
@@ -371,10 +355,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             Navigator.pushNamed(context, '/forgot_password');
                           },
-                          icon: const Icon(Icons.help_outline),
+                          icon: Icon(Icons.help_outline, color: theme.iconTheme.color),
                           label: Text(
-                            'Trouble logging in?',
-                            style: AppTheme.bodySmall,
+                            'Forgot Password?',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () => showContactSupportDialog(context),
+                          icon: Icon(Icons.support_agent, color: theme.iconTheme.color),
+                          label: Text(
+                            'Contact Support',
+                            style: theme.textTheme.bodySmall,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -383,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Text(
                               "Don't have an account? ",
-                              style: AppTheme.bodySmall,
+                              style: theme.textTheme.bodySmall,
                             ),
                             TextButton(
                               onPressed: () {
@@ -391,8 +384,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                               child: Text(
                                 'Sign Up',
-                                style: AppTheme.labelMedium.copyWith(
-                                  color: AppTheme.primary,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
                             ),
