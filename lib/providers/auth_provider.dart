@@ -5,17 +5,26 @@ import '../services/logger_service.dart';
 class AuthProvider extends ChangeNotifier {
   final _logger = LoggerService();
   bool _isLoggedIn = false;
+  bool _isInitializing = true;
   String? _selectedRole;
   String? _userPhone;
   String? _userName;
 
   bool get isLoggedIn => _isLoggedIn;
+  bool get isInitializing => _isInitializing;
   String? get selectedRole => _selectedRole;
   String? get userPhone => _userPhone;
   String? get userName => _userName;
 
   // Check login status on app start
   Future<void> checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    _selectedRole = prefs.getString('selectedRole');
+    _userPhone = prefs.getString('userPhone');
+    _userName = prefs.getString('userName');
+    _isInitializing = false;
+    notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
       _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;

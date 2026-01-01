@@ -6,6 +6,7 @@ import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/shimmer_entry_card.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -191,6 +192,24 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                   // Entries List
                   Consumer<GuardProvider>(
                     builder: (context, guardProvider, _) {
+                      if (guardProvider.isLoading) {
+                        return SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                // Handle separator
+                                if (index.isOdd) {
+                                  return const SizedBox(height: 12);
+                                }
+                                return const ShimmerEntryCard();
+                              },
+                              childCount: 5 * 2 - 1, // Show 5 shimmer items
+                            ),
+                          ),
+                        );
+                      }
+
                       return SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList(

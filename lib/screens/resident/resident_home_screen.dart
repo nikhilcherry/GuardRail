@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/shimmer_list_item.dart';
 
 class ResidentHomeScreen extends StatefulWidget {
   const ResidentHomeScreen({Key? key}) : super(key: key);
@@ -249,7 +250,19 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                         ),
                       ),
                       // Virtualized List
-                      if (residentProvider.todaysVisitors.isNotEmpty)
+                      if (residentProvider.isLoading)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                return const ShimmerListItem();
+                              },
+                              childCount: 5,
+                            ),
+                          ),
+                        )
+                      else if (residentProvider.todaysVisitors.isNotEmpty)
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           sliver: SliverList(
