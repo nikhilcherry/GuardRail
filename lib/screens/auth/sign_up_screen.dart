@@ -125,7 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Text(
                             'Email',
                             style: theme.textTheme.labelLarge?.copyWith(
-                              color: _isEmail ? Colors.black : theme.textTheme.bodyLarge?.color,
+                              color: _isEmail ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -149,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Text(
                             'Phone',
                             style: theme.textTheme.labelLarge?.copyWith(
-                              color: !_isEmail ? Colors.black : theme.textTheme.bodyLarge?.color,
+                              color: !_isEmail ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -262,7 +262,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     child: Text(
                       'Sign Up',
-                      style: theme.textTheme.titleLarge?.copyWith(color: Colors.black),
+                      style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
                     ),
                   ),
                 ),

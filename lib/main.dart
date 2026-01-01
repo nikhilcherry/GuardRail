@@ -5,6 +5,9 @@ import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
 import 'providers/resident_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/settings_provider.dart';
+import 'repositories/auth_repository.dart';
+import 'repositories/settings_repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/sign_up_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
@@ -18,16 +21,30 @@ import 'screens/admin/admin_additional_screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final authProvider = AuthProvider();
+
+  // Repositories
+  final authRepository = AuthRepository();
+  final settingsRepository = SettingsRepository();
+
+  // Pre-load critical state
+  final authProvider = AuthProvider(repository: authRepository);
   await authProvider.checkLoginStatus();
 
-  runApp(GuardrailApp(authProvider: authProvider));
+  runApp(GuardrailApp(
+    authProvider: authProvider,
+    settingsRepository: settingsRepository,
+  ));
 }
 
 class GuardrailApp extends StatelessWidget {
   final AuthProvider? authProvider;
+  final SettingsRepository settingsRepository;
 
-  const GuardrailApp({Key? key, this.authProvider}) : super(key: key);
+  const GuardrailApp({
+    Key? key,
+    this.authProvider,
+    required this.settingsRepository,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +53,8 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => authProvider ?? AuthProvider()),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

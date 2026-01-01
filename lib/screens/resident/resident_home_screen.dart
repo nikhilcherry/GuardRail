@@ -290,7 +290,7 @@ class _PendingVisitorCard extends StatelessWidget {
         border: Border.all(color: theme.dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: theme.shadowColor.withOpacity(0.4),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -393,7 +393,7 @@ class _PendingVisitorCard extends StatelessWidget {
                   label: const Text('Reject'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.errorRed,
-                    foregroundColor: Colors.white,
+                    foregroundColor: theme.colorScheme.onError,
                   ),
                 ),
               ),
@@ -405,7 +405,7 @@ class _PendingVisitorCard extends StatelessWidget {
                   label: const Text('Approve'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.black,
+                    foregroundColor: theme.colorScheme.onPrimary,
                   ),
                 ),
               ),
