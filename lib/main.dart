@@ -15,9 +15,16 @@ import 'screens/resident/resident_visitors_screen.dart';
 import 'screens/resident/resident_settings_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/admin/admin_additional_screens.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Fallback if .env is missing (e.g. first run without setup)
+    await dotenv.load(fileName: ".env.example");
+  }
   final authProvider = AuthProvider();
   await authProvider.checkLoginStatus();
 

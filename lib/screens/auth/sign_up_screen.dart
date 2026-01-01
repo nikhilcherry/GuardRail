@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -41,12 +43,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _handleSignUp() {
+  void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
-      // Implement sign up logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign up not implemented yet')),
-      );
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+        // Determine role (default to resident for self-signup, or based on selection logic)
+        // For this demo, we can assume resident or generic user
+        final role = authProvider.selectedRole ?? 'resident';
+
+        await authProvider.register(
+          name: _nameController.text,
+          contact: _contactController.text,
+          password: _passwordController.text,
+          role: role,
+        );
+
+        if (mounted) {
+           Navigator.of(context).pushNamedAndRemoveUntil(
+             _getHomeRoute(role),
+             (route) => false
+           );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Registration failed: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  String _getHomeRoute(String role) {
+    switch (role) {
+      case 'guard':
+        return '/guard_home';
+      case 'resident':
+        return '/resident_home';
+      case 'admin':
+        return '/admin_dashboard';
+      default:
+        return '/role_selection';
     }
   }
 
