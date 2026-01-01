@@ -222,6 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               appContext: context,
                               length: 6,
                               onChanged: (value) {},
+                              textStyle: theme.textTheme.titleLarge,
                               pinTheme: PinTheme(
                                 shape: PinCodeFieldShape.box,
                                 borderRadius: BorderRadius.circular(8),
@@ -233,7 +234,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 activeColor: theme.colorScheme.primary,
                                 inactiveColor: theme.dividerColor,
                                 selectedColor: theme.colorScheme.primary,
-                                textStyle: theme.textTheme.titleLarge,
                               ),
                               controller: _otpController,
                               keyboardType: TextInputType.number,
