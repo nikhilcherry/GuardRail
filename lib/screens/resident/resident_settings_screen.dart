@@ -7,6 +7,7 @@ import '../../providers/settings_provider.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
+import '../../providers/flat_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
 import '../../widgets/coming_soon.dart';
 

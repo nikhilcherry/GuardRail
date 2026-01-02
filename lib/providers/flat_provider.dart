@@ -168,6 +168,22 @@ class FlatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Refresh status
+  void refreshFlatData() {
+    if (_currentFlat != null) {
+       // Just trigger a rebuild to refresh getters
+       notifyListeners();
+    }
+  }
+
+  // Clear state on logout
+  void clearState() {
+    _currentFlat = null;
+    _members = [];
+    _error = null;
+    notifyListeners();
+  }
+
   // Method to check if user is already in a flat (mock implementation)
   // In real app, this would fetch from backend based on auth token
   void checkUserFlatStatus(String userId) {
@@ -179,7 +195,7 @@ class FlatProvider extends ChangeNotifier {
            orElse: () => FlatMember(userId: '', name: '', status: MemberStatus.pending), // Dummy
          );
 
-         if (member.userId.isNotEmpty && member.status == MemberStatus.accepted) {
+         if (member.userId.isNotEmpty) {
            _currentFlat = flat;
            _members = members;
            notifyListeners();
