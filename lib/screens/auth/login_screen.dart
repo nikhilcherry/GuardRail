@@ -65,14 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        context.read<AuthProvider>().selectRole(null);
-        context.go('/');
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
@@ -105,45 +98,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
 
                       // Title
-                      Consumer<AuthProvider>(
-                        builder: (context, auth, _) {
-                          final role = auth.selectedRole ?? 'User';
-                          final displayRole = role[0].toUpperCase() + role.substring(1);
-                          return Column(
-                            children: [
-                              Text(
-                                '$displayRole Login',
-                                style: theme.textTheme.displayMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Please enter your credentials to continue',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      TextButton.icon(
-                        onPressed: () {
-                          context.read<AuthProvider>().selectRole(null);
-                          context.go('/');
-                        },
-                        icon: const Icon(Icons.swap_horiz, size: 18),
-                        label: Text(
-                          'Change Role',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
+                      Column(
+                        children: [
+                          Text(
+                            'Login',
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Please enter your credentials to continue',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 32),

@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
-import '../screens/role_selection_screen.dart';
+import '../screens/welcome_screen.dart';
 import '../screens/guard/guard_home_screen.dart';
 import '../screens/resident/resident_home_screen.dart';
 import '../screens/resident/resident_visitors_screen.dart';
@@ -24,7 +24,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const RoleSelectionScreen(),
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/login',
