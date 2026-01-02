@@ -12,7 +12,6 @@ import 'repositories/settings_repository.dart';
 import 'providers/admin_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
-import 'screens/role_selection_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/crash_reporting_service.dart';
 
@@ -110,10 +109,6 @@ class RootScreen extends StatelessWidget {
         }
 
         // Navigation logic based on auth state
-        if (authProvider.selectedRole == null) {
-          return const RoleSelectionScreen();
-        }
-
         if (!authProvider.isLoggedIn) {
           return const LoginScreen();
         }
