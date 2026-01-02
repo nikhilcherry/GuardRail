@@ -16,6 +16,7 @@ class AuthProvider extends ChangeNotifier {
   String? _userName;
   String? _userEmail;
   bool _biometricsEnabled = false;
+  bool _isVerified = false;
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitializing => _isInitializing;
@@ -24,6 +25,7 @@ class AuthProvider extends ChangeNotifier {
   String? get userName => _userName;
   String? get userEmail => _userEmail;
   bool get biometricsEnabled => _biometricsEnabled;
+  bool get isVerified => _isVerified;
 
   AuthProvider({AuthRepository? repository})
       : _repository = repository ?? AuthRepository();
@@ -36,6 +38,7 @@ class AuthProvider extends ChangeNotifier {
       _selectedRole = status['selectedRole'];
       _userPhone = status['userPhone'];
       _userName = status['userName'];
+      _isVerified = status['isVerified'] ?? false;
 
       final prefs = await SharedPreferences.getInstance();
       _biometricsEnabled = prefs.getBool('biometricsEnabled') ?? false;
@@ -55,7 +58,7 @@ class AuthProvider extends ChangeNotifier {
         }
       }
 
-      _logger.info('Login status checked. LoggedIn: $_isLoggedIn, Role: $_selectedRole');
+      _logger.info('Login status checked. LoggedIn: $_isLoggedIn, Role: $_selectedRole, Verified: $_isVerified');
     } catch (e, stackTrace) {
       _logger.error('Error checking login status', e, stackTrace);
       _isLoggedIn = false;
@@ -89,6 +92,7 @@ class AuthProvider extends ChangeNotifier {
         isLoggedIn: true,
         role: fallbackRole,
         phone: phone,
+        isVerified: true, // Assuming login implies verification
       );
 
       await _authService.saveToken('simulated_token_phone_$phone');
@@ -96,6 +100,7 @@ class AuthProvider extends ChangeNotifier {
       _isLoggedIn = true;
       _selectedRole = fallbackRole;
       _userPhone = phone;
+      _isVerified = true;
       _logger.info('Login successful (fallback) for phone: $phone');
       notifyListeners();
     }
@@ -122,6 +127,7 @@ class AuthProvider extends ChangeNotifier {
        await _repository.saveLoginStatus(
          isLoggedIn: true,
          role: fallbackRole,
+         isVerified: true, // Assuming login implies verification
        );
 
        await _authService.saveToken('simulated_token_email_$email');
@@ -129,6 +135,7 @@ class AuthProvider extends ChangeNotifier {
        _isLoggedIn = true;
        _selectedRole = fallbackRole;
        _userEmail = email;
+       _isVerified = true;
        _logger.info('Login successful (fallback) for email: $email');
        notifyListeners();
     }
@@ -152,10 +159,12 @@ class AuthProvider extends ChangeNotifier {
       
       _selectedRole = role;
 
+      // Note: Verification status will be false initially for new registrations
       await _handleLoginSuccess(response,
         phone: phone,
         email: email,
-        name: name
+        name: name,
+        isVerified: false,
       );
     } catch (e) {
        _logger.info('Attempting register fallback for: $email / $phone');
@@ -166,6 +175,7 @@ class AuthProvider extends ChangeNotifier {
          role: role,
          phone: phone,
          name: name,
+         isVerified: false,
        );
 
        await _authService.saveToken('simulated_token_reg_${email.isNotEmpty ? email : phone}');
@@ -175,12 +185,13 @@ class AuthProvider extends ChangeNotifier {
        _userName = name;
        _userEmail = email;
        _userPhone = phone;
+       _isVerified = false;
 
        notifyListeners();
     }
   }
 
-  Future<void> _handleLoginSuccess(Map<String, dynamic> response, {String? phone, String? email, String? name}) async {
+  Future<void> _handleLoginSuccess(Map<String, dynamic> response, {String? phone, String? email, String? name, bool isVerified = true}) async {
     final token = response['token'];
     if (token != null) {
       await _authService.saveToken(token);
@@ -192,18 +203,42 @@ class AuthProvider extends ChangeNotifier {
       _selectedRole = response['role'];
     }
 
+    // If backend returns verification status, use it
+    if (response.containsKey('isVerified')) {
+      isVerified = response['isVerified'];
+    }
+
     _isLoggedIn = true;
     if (phone != null) _userPhone = phone;
     if (email != null) _userEmail = email;
     if (name != null) _userName = name;
+    _isVerified = isVerified;
 
     await _repository.saveLoginStatus(
       isLoggedIn: true,
       role: _selectedRole,
       phone: _userPhone,
       name: _userName,
+      isVerified: _isVerified,
     );
 
+    notifyListeners();
+  }
+
+  // Verify ID
+  Future<void> verifyId(String id) async {
+    // Simulate verification
+    await Future.delayed(const Duration(seconds: 1));
+    // Here we would validate the ID with the backend
+
+    _isVerified = true;
+    await _repository.saveLoginStatus(
+      isLoggedIn: true,
+      role: _selectedRole,
+      phone: _userPhone,
+      name: _userName,
+      isVerified: true,
+    );
     notifyListeners();
   }
 
@@ -248,6 +283,7 @@ class AuthProvider extends ChangeNotifier {
     _userPhone = null;
     _userName = null;
     _userEmail = null;
+    _isVerified = false;
 
     await _authService.deleteToken();
     await _repository.clearAuth();
