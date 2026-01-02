@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
+import '../../providers/flat_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'resident_notifications_screen.dart';
 import '../../widgets/shimmer_list_item.dart';
@@ -24,10 +25,17 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Consumer<ResidentProvider>(
-          builder: (context, residentProvider, _) {
+        child: Consumer2<ResidentProvider, FlatProvider>(
+          builder: (context, residentProvider, flatProvider, _) {
             final pendingVisitors = residentProvider.getPendingApprovals();
             final hasPendingRequest = pendingVisitors.isNotEmpty;
+
+            // Check flat status
+            final currentFlat = flatProvider.currentFlat;
+            final hasFlat = currentFlat != null;
+            final flatName = hasFlat ? currentFlat.name : 'No Flat';
+            final pendingMembersCount = flatProvider.pendingMembers.length;
+            final isOwner = hasFlat && flatProvider.members.any((m) => m.role == MemberRole.owner && m.userId == (context.read<AuthProvider>().userPhone ?? context.read<AuthProvider>().userEmail ?? 'user'));
 
             return Column(
               children: [
@@ -90,7 +98,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       color: theme.iconTheme.color,
                                     ),
                                   ),
-                                  if (residentProvider.pendingRequests > 0)
+                                  if (residentProvider.pendingRequests > 0 || (isOwner && pendingMembersCount > 0))
                                     Positioned(
                                       top: 8,
                                       right: 8,
@@ -114,34 +122,56 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: theme.dividerColor,
+                      InkWell(
+                        onTap: () => context.go('/resident_home/flat'),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.home_outlined,
-                              size: 20,
-                              color: theme.colorScheme.primary,
+                          decoration: BoxDecoration(
+                            color: theme.cardColor,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: theme.dividerColor,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Flat ${residentProvider.flatNumber}',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                hasFlat ? Icons.home : Icons.add_home_outlined,
+                                size: 20,
+                                color: theme.colorScheme.primary,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                hasFlat ? flatName : 'Create/Join Flat',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color,
+                                ),
+                              ),
+                              if (isOwner && pendingMembersCount > 0) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.errorRed,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    pendingMembersCount.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
