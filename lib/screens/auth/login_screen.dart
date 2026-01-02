@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
@@ -14,66 +13,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late PageController _pageController;
-  late TextEditingController _phoneController;
-  late TextEditingController _otpController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
-  bool _showOTPInput = false;
-  bool _useEmail = false;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    _phoneController = TextEditingController();
-    _otpController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _phoneController.dispose();
-    _otpController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _handlePhoneLogin() async {
-    if (_phoneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your phone number')),
-      );
-      return;
-    }
-    setState(() => _showOTPInput = true);
-  }
-
-  Future<void> _handleOTPVerification() async {
-    if (_otpController.text.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid OTP')),
-      );
-      return;
-    }
-    setState(() => _isLoading = true);
-    try {
-      await context.read<AuthProvider>().loginWithPhoneAndOTP(
-            phone: _phoneController.text,
-            otp: _otpController.text,
-          );
-    } catch (e) {
-      // SECURITY: Prevents leaking internal error details to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please check your OTP and try again.')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 
   Future<void> _handleEmailLogin() async {
@@ -89,48 +44,31 @@ class _LoginScreenState extends State<LoginScreen> {
             email: _emailController.text,
             password: _passwordController.text,
           );
+      // No explicit navigation here; AppRouter listens to AuthProvider
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        const SnackBar(content: Text('Login failed. Please check your credentials.')),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
-
-  Future<void> _resendOTP() async {
-    try {
-      await context.read<AuthProvider>().resendOTP(_phoneController.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP resent successfully')),
-      );
-    } catch (e) {
-      // SECURITY: Prevents leaking internal error details to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to resend OTP. Please try again later.')),
-      );
-    }
-  }
-
-  String _capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authProvider = context.watch<AuthProvider>();
-    final selectedRole = authProvider.selectedRole;
-    final roleTitle = selectedRole != null ? _capitalize(selectedRole) : 'User';
 
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
-        if (didPop) return;
-        context.read<AuthProvider>().selectRole(null);
-        context.pop();
-      },
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: SafeArea(
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -140,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
                     // Logo
                     Container(
                       width: 64,
@@ -159,148 +97,53 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
                     // Headline
                     Text(
-                      '$roleTitle Login',
+                      'Login',
                       style: theme.textTheme.displayMedium,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {
-                        context.read<AuthProvider>().selectRole(null);
-                        context.pop();
-                      },
-                      child: Text(
-                        'Change Role',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Phone or Email Input
-                    if (!_useEmail) ...[
-                      // Phone Input
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Phone Number', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            enabled: !_showOTPInput,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.call),
-                              hintText: '(555) 000-0000',
-                            ),
-                            style: theme.textTheme.bodyLarge,
+                    const SizedBox(height: 32),
+                    // Email Input
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Email', style: theme.textTheme.labelLarge),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.email_outlined),
+                            hintText: 'your@email.com',
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      // OTP Input
-                      if (_showOTPInput) ...[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'One-Time Password',
-                                  style: theme.textTheme.labelLarge,
-                                ),
-                                TextButton(
-                                  onPressed: _resendOTP,
-                                  child: Text(
-                                    'Resend Code',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            PinCodeTextField(
-                              appContext: context,
-                              length: 6,
-                              onChanged: (value) {},
-                              textStyle: theme.textTheme.titleLarge,
-                              pinTheme: PinTheme(
-                                shape: PinCodeFieldShape.box,
-                                borderRadius: BorderRadius.circular(8),
-                                fieldHeight: 50,
-                                fieldWidth: 45,
-                                activeFillColor: theme.cardColor,
-                                inactiveFillColor: theme.cardColor,
-                                selectedFillColor: theme.cardColor,
-                                activeColor: theme.colorScheme.primary,
-                                inactiveColor: theme.dividerColor,
-                                selectedColor: theme.colorScheme.primary,
-                              ),
-                              controller: _otpController,
-                              keyboardType: TextInputType.number,
-                              enableActiveFill: true,
-                            ),
-                          ],
+                          style: theme.textTheme.bodyLarge,
                         ),
-                        const SizedBox(height: 20),
                       ],
-                    ] else ...[
-                      // Email Input
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Email', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.email_outlined),
-                              hintText: 'your@email.com',
-                            ),
-                            style: theme.textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    // Password Input
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Password', style: theme.textTheme.labelLarge),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.lock_outlined),
+                            hintText: 'Enter password',
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Password Input
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Password', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outlined),
-                              hintText: 'Enter password',
-                            ),
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
                     // Login Button
                     SizedBox(
                       width: double.infinity,
                       height: 60,
                       child: ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () {
-                                if (_useEmail) {
-                                  _handleEmailLogin();
-                                } else if (_showOTPInput) {
-                                  _handleOTPVerification();
-                                } else {
-                                  _handlePhoneLogin();
-                                }
-                              },
+                        onPressed: _isLoading ? null : _handleEmailLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.colorScheme.primary,
                           shape: RoundedRectangleBorder(
@@ -322,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _showOTPInput ? 'Verify' : 'Log In',
+                                    'Log In',
                                     style: theme.textTheme.titleLarge?.copyWith(
                                       color: theme.colorScheme.onPrimary,
                                     ),
@@ -337,28 +180,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Use Email/Phone Toggle
+                    // Links
                     Column(
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _useEmail = !_useEmail;
-                              _showOTPInput = false;
-                              _phoneController.clear();
-                              _otpController.clear();
-                              _emailController.clear();
-                              _passwordController.clear();
-                            });
-                          },
-                          child: Text(
-                            _useEmail ? 'Use phone instead' : 'Use email instead',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.textTheme.bodySmall?.color,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
                         TextButton.icon(
                           onPressed: () {
                             context.push('/forgot_password');
@@ -406,7 +230,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-        ),
         ),
       ),
     );
