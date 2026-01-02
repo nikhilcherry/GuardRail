@@ -5,18 +5,21 @@ class AuthRepository {
   static const String _keySelectedRole = 'selectedRole';
   static const String _keyUserPhone = 'userPhone';
   static const String _keyUserName = 'userName';
+  static const String _keyIsVerified = 'isVerified';
 
   Future<void> saveLoginStatus({
     required bool isLoggedIn,
     String? role,
     String? phone,
     String? name,
+    bool? isVerified,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyIsLoggedIn, isLoggedIn);
     if (role != null) await prefs.setString(_keySelectedRole, role);
     if (phone != null) await prefs.setString(_keyUserPhone, phone);
     if (name != null) await prefs.setString(_keyUserName, name);
+    if (isVerified != null) await prefs.setBool(_keyIsVerified, isVerified);
   }
 
   Future<Map<String, dynamic>> getLoginStatus() async {
@@ -26,6 +29,7 @@ class AuthRepository {
       'selectedRole': prefs.getString(_keySelectedRole),
       'userPhone': prefs.getString(_keyUserPhone),
       'userName': prefs.getString(_keyUserName),
+      'isVerified': prefs.getBool(_keyIsVerified) ?? false,
     };
   }
 
@@ -39,6 +43,7 @@ class AuthRepository {
     await prefs.remove(_keySelectedRole);
     await prefs.remove(_keyUserPhone);
     await prefs.remove(_keyUserName);
+    await prefs.remove(_keyIsVerified);
   }
 
   // Simulation methods can also reside here or remain in Provider if they are purely business logic.

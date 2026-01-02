@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
+import '../screens/auth/id_verification_screen.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/guard/guard_home_screen.dart';
 import '../screens/resident/resident_home_screen.dart';
@@ -37,6 +38,10 @@ class AppRouter {
       GoRoute(
         path: '/forgot_password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/id_verification',
+        builder: (context, state) => const IDVerificationScreen(),
       ),
       GoRoute(
         path: '/guard_home',
@@ -85,14 +90,33 @@ class AppRouter {
     ],
     redirect: (context, state) {
       final isLoggedIn = authProvider.isLoggedIn;
+      final isVerified = authProvider.isVerified;
       final selectedRole = authProvider.selectedRole;
-      final isLoggingIn = state.uri.toString() == '/login';
-      final isRoleSelection = state.uri.toString() == '/';
-      final isSignUp = state.uri.toString() == '/sign_up';
 
-      // If logged in, redirect to respective home if trying to access auth screens
+      final currentPath = state.uri.toString();
+      final isLoggingIn = currentPath == '/login';
+      final isRoleSelection = currentPath == '/';
+      final isSignUp = currentPath == '/sign_up';
+      final isVerification = currentPath == '/id_verification';
+
+      // If logged in
       if (isLoggedIn) {
-        if (isLoggingIn || isRoleSelection || isSignUp) {
+        // If not verified and trying to go somewhere other than verification, redirect to verification.
+        // We exclude admin from this check if we assume admins don't need this flow,
+        // but based on implementation, register sets isVerified=false.
+        // If role is admin, let's assume auto-verified or handled elsewhere, but for now we enforce it if it's false.
+        // Actually, let's assume only Guard and Resident need this screen as requested.
+        bool requiresVerification = selectedRole == 'guard' || selectedRole == 'resident';
+
+        if (requiresVerification && !isVerified) {
+           if (!isVerification) {
+             return '/id_verification';
+           }
+           return null; // Stay on verification
+        }
+
+        // If verified (or not required), but trying to access auth/verification screens, redirect to home.
+        if (isLoggingIn || isRoleSelection || isSignUp || isVerification) {
           switch (selectedRole) {
             case 'guard':
               return '/guard_home';
@@ -101,10 +125,6 @@ class AppRouter {
             case 'admin':
               return '/admin_dashboard';
             default:
-              // If logged in but no role, maybe we should stay on Welcome or show an error?
-              // Or force role selection? But we removed standalone role selection.
-              // We'll redirect to Resident Home as a safe fallback or stay at root.
-              // For now, let's assume valid role. If not, maybe log out.
               return '/resident_home';
           }
         }
@@ -112,7 +132,7 @@ class AppRouter {
         // If not logged in
         // If trying to access protected routes, redirect to welcome screen
         final publicRoutes = ['/', '/login', '/sign_up', '/forgot_password'];
-        if (!publicRoutes.contains(state.uri.toString())) {
+        if (!publicRoutes.contains(currentPath)) {
            return '/';
         }
       }
