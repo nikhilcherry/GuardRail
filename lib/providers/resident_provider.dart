@@ -52,6 +52,9 @@ class ResidentProvider extends ChangeNotifier {
     ),
   ];
 
+  // Cache for pending approvals to avoid O(N) filtering on every build
+  List<Visitor>? _cachedPendingApprovals;
+
   final List<Visitor> _pastVisitors = [
     Visitor(
       id: '3',
@@ -123,6 +126,7 @@ class ResidentProvider extends ChangeNotifier {
           profileImage: visitor.profileImage,
         );
         _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
+        _cachedPendingApprovals = null; // Invalidate cache
         notifyListeners();
       }
     } catch (e) {
@@ -147,6 +151,7 @@ class ResidentProvider extends ChangeNotifier {
           profileImage: visitor.profileImage,
         );
         _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
+        _cachedPendingApprovals = null; // Invalidate cache
         notifyListeners();
       }
     } catch (e) {
@@ -192,7 +197,12 @@ class ResidentProvider extends ChangeNotifier {
 
   // Get all notifications
   List<Visitor> getPendingApprovals() {
-    return _todaysVisitors.where((v) => v.status == 'pending').toList();
+    // OPTIMIZE: Return cached list if available
+    if (_cachedPendingApprovals != null) {
+      return _cachedPendingApprovals!;
+    }
+    _cachedPendingApprovals = _todaysVisitors.where((v) => v.status == 'pending').toList();
+    return _cachedPendingApprovals!;
   }
 
   void updateResidentInfo({
