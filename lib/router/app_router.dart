@@ -24,7 +24,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const RoleSelectionScreen(),
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/login',
@@ -88,10 +88,11 @@ class AppRouter {
       final selectedRole = authProvider.selectedRole;
       final isLoggingIn = state.uri.toString() == '/login';
       final isRoleSelection = state.uri.toString() == '/';
+      final isSignUp = state.uri.toString() == '/sign_up';
 
       // If logged in, redirect to respective home if trying to access auth screens
       if (isLoggedIn) {
-        if (isLoggingIn || isRoleSelection || state.uri.toString() == '/sign_up') {
+        if (isLoggingIn || isRoleSelection || isSignUp) {
           switch (selectedRole) {
             case 'guard':
               return '/guard_home';
@@ -100,17 +101,18 @@ class AppRouter {
             case 'admin':
               return '/admin_dashboard';
             default:
-              return '/';
+              // If logged in but no role, maybe we should stay on Welcome or show an error?
+              // Or force role selection? But we removed standalone role selection.
+              // We'll redirect to Resident Home as a safe fallback or stay at root.
+              // For now, let's assume valid role. If not, maybe log out.
+              return '/resident_home';
           }
         }
       } else {
         // If not logged in
-        // If trying to access protected routes, redirect to role selection
-        // Note: We allow /login, /sign_up, /forgot_password
+        // If trying to access protected routes, redirect to welcome screen
         final publicRoutes = ['/', '/login', '/sign_up', '/forgot_password'];
         if (!publicRoutes.contains(state.uri.toString())) {
-           // We might want to save the intended location to redirect back after login
-           // For now, simpler approach: go to role selection
            return '/';
         }
       }

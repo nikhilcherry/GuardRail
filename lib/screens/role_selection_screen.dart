@@ -1,167 +1,106 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../theme/app_theme.dart';
 
-class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
-
-  void _selectRole(BuildContext context, String role) {
-    context.read<AuthProvider>().selectRole(role);
-    context.push('/login');
-  }
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Logo
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Icon(
-                      Icons.security_outlined,
-                      size: 60,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  // Headline
-                  Text(
-                    'Continue as',
-                    style: AppTheme.displayMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  // Role Cards
-                  _RoleCard(
-                    icon: Icons.home_outlined,
-                    title: 'Resident',
-                    description: 'Access your home and manage guests',
-                    onTap: () => _selectRole(context, 'resident'),
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    icon: Icons.security_outlined,
-                    title: 'Guard',
-                    description: 'Monitor entries and verify visitors',
-                    onTap: () => _selectRole(context, 'guard'),
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    icon: Icons.admin_panel_settings_outlined,
-                    title: 'Admin',
-                    description: 'System configuration and logs',
-                    onTap: () => _selectRole(context, 'admin'),
-                  ),
-                  const SizedBox(height: 40),
-                  // Support Link
-                  Text(
-                    'Need help with your account?',
-                    style: AppTheme.labelSmall.copyWith(
-                      color: AppTheme.textTertiary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Contact Support',
-                      style: AppTheme.labelMedium.copyWith(
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoleCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final VoidCallback onTap;
-
-  const _RoleCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppTheme.surfaceDark,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: AppTheme.borderDark,
-            ),
-          ),
-          child: Row(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(),
+              // Logo or App Name
               Container(
-                width: 40,
-                height: 40,
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: AppTheme.bodySmall,
+                  color: theme.colorScheme.surface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
+                child: Icon(
+                  Icons.shield_outlined,
+                  size: 64,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: AppTheme.primary,
-                size: 20,
+              const SizedBox(height: 32),
+              Text(
+                'GuardRail',
+                style: theme.textTheme.displayLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onBackground,
+                ),
               ),
+              const SizedBox(height: 12),
+              Text(
+                'Residential Security Management',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
+              ),
+              const Spacer(),
+              // Actions
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => context.push('/sign_up'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Sign Up',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: () => context.push('/login'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: theme.colorScheme.primary, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Login',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

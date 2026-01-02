@@ -50,10 +50,7 @@ class AuthProvider extends ChangeNotifier {
           // Enforce biometrics if enabled
           final authenticated = await _authService.authenticate();
           if (!authenticated) {
-             // For simplicity in this flow, we mark as logged out if bio fails on startup
-             // In a real app, we might just stay on a lock screen.
              _isLoggedIn = false;
-             // We don't clear prefs immediately to allow retry, but strictly here we force re-login
           }
         }
       }
@@ -78,21 +75,26 @@ class AuthProvider extends ChangeNotifier {
       await _handleLoginSuccess(response, phone: phone);
     } catch (e) {
       _logger.info('Attempting login fallback for phone: $phone');
-      // Fallback simulation
       await Future.delayed(const Duration(seconds: 1));
       
-      // Allow login even if API fails (for demo/offline/mock purposes)
-      // This matches the previous logic found in the bad merge.
+      // Determine role if stored, else default to resident for fallback
+      // In real scenario, backend returns role.
+      // Here we check if we have a stored role from previous session? No, we don't.
+      // We will assume 'resident' if no role is found in fallback, or check repository if possible.
+      // But we are logging in, so we don't know the role yet.
+      // Let's assume 'resident' for fallback simplicity unless we want to query a mock DB.
+      final fallbackRole = 'resident';
+
       await _repository.saveLoginStatus(
         isLoggedIn: true,
-        role: _selectedRole,
+        role: fallbackRole,
         phone: phone,
       );
 
-      // Save dummy token for persistence during simulation
       await _authService.saveToken('simulated_token_phone_$phone');
 
       _isLoggedIn = true;
+      _selectedRole = fallbackRole;
       _userPhone = phone;
       _logger.info('Login successful (fallback) for phone: $phone');
       notifyListeners();
@@ -111,16 +113,21 @@ class AuthProvider extends ChangeNotifier {
        _logger.info('Attempting login fallback for email: $email');
        await Future.delayed(const Duration(seconds: 1));
 
-       // Fallback simulation
+       // In a real app, the backend returns the role.
+       // For fallback, we default to 'resident' unless it looks like an admin email
+       String fallbackRole = 'resident';
+       if (email.contains('admin')) fallbackRole = 'admin';
+       if (email.contains('guard')) fallbackRole = 'guard';
+
        await _repository.saveLoginStatus(
          isLoggedIn: true,
-         role: _selectedRole,
+         role: fallbackRole,
        );
 
-       // Save dummy token for persistence during simulation
        await _authService.saveToken('simulated_token_email_$email');
 
        _isLoggedIn = true;
+       _selectedRole = fallbackRole;
        _userEmail = email;
        _logger.info('Login successful (fallback) for email: $email');
        notifyListeners();
@@ -130,44 +137,44 @@ class AuthProvider extends ChangeNotifier {
   // Register
   Future<void> register({
     required String name,
-    required String contact,
+    required String email,
+    required String phone,
     required String password,
     required String role,
   }) async {
     try {
       final response = await _authService.register(
         name: name,
-        contact: contact,
+        contact: email.isNotEmpty ? email : phone, // Use email as primary contact if available for backend
         password: password,
         role: role,
       );
       
-      // Auto login after registration
+      _selectedRole = role;
+
       await _handleLoginSuccess(response,
-        phone: role != 'admin' ? contact : null,
-        email: role == 'admin' ? contact : null,
+        phone: phone,
+        email: email,
         name: name
       );
     } catch (e) {
-       _logger.info('Attempting register fallback for: $contact');
+       _logger.info('Attempting register fallback for: $email / $phone');
        await Future.delayed(const Duration(seconds: 1));
 
-       // Fallback simulation
        await _repository.saveLoginStatus(
          isLoggedIn: true,
          role: role,
-         phone: role != 'admin' ? contact : null,
+         phone: phone,
          name: name,
        );
 
-       // Save dummy token for persistence during simulation
-       await _authService.saveToken('simulated_token_reg_$contact');
+       await _authService.saveToken('simulated_token_reg_${email.isNotEmpty ? email : phone}');
 
        _isLoggedIn = true;
        _selectedRole = role;
        _userName = name;
-       if (role != 'admin') _userPhone = contact;
-       else _userEmail = contact;
+       _userEmail = email;
+       _userPhone = phone;
 
        notifyListeners();
     }
@@ -177,6 +184,12 @@ class AuthProvider extends ChangeNotifier {
     final token = response['token'];
     if (token != null) {
       await _authService.saveToken(token);
+    }
+
+    // In a real app, response should contain the role.
+    // If response has role, update _selectedRole
+    if (response.containsKey('role')) {
+      _selectedRole = response['role'];
     }
 
     _isLoggedIn = true;
@@ -190,10 +203,6 @@ class AuthProvider extends ChangeNotifier {
       phone: _userPhone,
       name: _userName,
     );
-
-    // Also update generic prefs if needed, but repository should handle it.
-    // The messy file had direct SharedPreferences calls here too.
-    // We stick to Repository for consistency where possible.
 
     notifyListeners();
   }
@@ -223,7 +232,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Select user role
+  // Select user role - Mainly used for Role Selection screen, but now less relevant.
+  // Can be kept if needed for manual overrides or during signup flow if we wanted.
   void selectRole(String? role) {
     _logger.info('Role selected: $role');
     _selectedRole = role;
@@ -248,11 +258,9 @@ class AuthProvider extends ChangeNotifier {
   // Resend OTP
   Future<void> resendOTP(String phone) async {
     try {
-      // If repository has real logic or service has it
        await _repository.resendOTP(phone);
     } catch (e, stackTrace) {
       _logger.error('Failed to resend OTP to: $phone', e, stackTrace);
-      // Fallback
       await Future.delayed(const Duration(seconds: 1));
     }
   }

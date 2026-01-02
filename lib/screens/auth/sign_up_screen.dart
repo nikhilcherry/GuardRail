@@ -14,17 +14,22 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _contactController = TextEditingController();
+  final _contactController = TextEditingController(); // Only storing email now
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _isEmail = true;
+  // New: Role Selection
+  String? _selectedRole;
+
   DateTime? _selectedDate;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _contactController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -33,7 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)), // Default 18 years ago
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
@@ -46,46 +51,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedRole == null) {
+         ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a role to continue')),
+         );
+         return;
+      }
+
+      setState(() => _isLoading = true);
+
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-        // Determine role (default to resident for self-signup, or based on selection logic)
-        // For this demo, we can assume resident or generic user
-        final role = authProvider.selectedRole ?? 'resident';
-
         await authProvider.register(
           name: _nameController.text,
-          contact: _contactController.text,
+          email: _contactController.text,
+          phone: _phoneController.text,
           password: _passwordController.text,
-          role: role,
+          role: _selectedRole!,
         );
-
-        if (mounted) {
-           Navigator.of(context).pushNamedAndRemoveUntil(
-             _getHomeRoute(role),
-             (route) => false
-           );
-        }
+        // AppRouter handles redirection
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Registration failed: $e')),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
-    }
-  }
-
-  String _getHomeRoute(String role) {
-    switch (role) {
-      case 'guard':
-        return '/guard_home';
-      case 'resident':
-        return '/resident_home';
-      case 'admin':
-        return '/admin_dashboard';
-      default:
-        return '/role_selection';
     }
   }
 
@@ -129,9 +123,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'John Doe',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    prefixIcon: Icon(Icons.person_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: (value) {
@@ -143,78 +137,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Login Identifier Toggle
-                Text('Sign up using', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => setState(() => _isEmail = true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: _isEmail ? theme.colorScheme.primary : theme.cardColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _isEmail ? theme.colorScheme.primary : theme.dividerColor,
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Email',
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: _isEmail ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => setState(() => _isEmail = false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: !_isEmail ? theme.colorScheme.primary : theme.cardColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: !_isEmail ? theme.colorScheme.primary : theme.dividerColor,
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Phone',
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: !_isEmail ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Contact Field
-                Text(_isEmail ? 'Email Address' : 'Phone Number', style: theme.textTheme.labelLarge),
+                // Email
+                Text('Email Address', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _contactController,
-                  keyboardType: _isEmail ? TextInputType.emailAddress : TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: _isEmail ? 'john@example.com' : '+1234567890',
-                    prefixIcon: Icon(_isEmail ? Icons.email_outlined : Icons.phone_outlined),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: 'john@example.com',
+                    prefixIcon: Icon(Icons.email_outlined),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your ${_isEmail ? 'email' : 'phone number'}';
+                      return 'Please enter your email';
                     }
-                    if (_isEmail && !value.contains('@')) {
+                    if (!value.contains('@')) {
                       return 'Please enter a valid email';
                     }
                     return null;
@@ -222,14 +160,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Date of Birth (Optional)
-                Text('Date of Birth (Optional)', style: theme.textTheme.labelLarge),
+                // Phone
+                Text('Phone Number', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    hintText: '+1234567890',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  style: theme.textTheme.bodyLarge,
+                  validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return 'Please enter your phone number';
+                     }
+                     return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Date of Birth
+                Text('Date of Birth', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.calendar_today_outlined),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
                     ),
                     child: Text(
                       _selectedDate == null
@@ -247,9 +205,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Create a password',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: (value) {
@@ -270,9 +228,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Confirm your password',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: (value) {
@@ -285,6 +243,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 24),
+
+                // Role Selection
+                Text('Continue as', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 12),
+                Row(
+                   children: [
+                     _buildRoleCard('resident', 'Resident', Icons.home_outlined, theme),
+                     const SizedBox(width: 12),
+                     _buildRoleCard('guard', 'Guard', Icons.security_outlined, theme),
+                   ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                   children: [
+                     _buildRoleCard('admin', 'Admin', Icons.admin_panel_settings_outlined, theme),
+                   ],
+                ),
+
                 const SizedBox(height: 32),
 
                 // Sign Up Button
@@ -292,17 +269,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _handleSignUp,
+                    onPressed: _isLoading ? null : _handleSignUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: Text(
-                      'Sign Up',
-                      style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
-                    ),
+                    child: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: theme.colorScheme.onPrimary, strokeWidth: 2)
+                        )
+                      : Text(
+                        'Sign Up',
+                        style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
+                      ),
                   ),
                 ),
               ],
@@ -311,5 +294,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildRoleCard(String role, String label, IconData icon, ThemeData theme) {
+     final isSelected = _selectedRole == role;
+     return Expanded(
+       child: GestureDetector(
+         onTap: () => setState(() => _selectedRole = role),
+         child: Container(
+           padding: const EdgeInsets.symmetric(vertical: 16),
+           decoration: BoxDecoration(
+             color: isSelected ? theme.colorScheme.primary.withOpacity(0.1) : theme.cardColor,
+             borderRadius: BorderRadius.circular(12),
+             border: Border.all(
+               color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
+               width: 2,
+             ),
+           ),
+           child: Column(
+             children: [
+               Icon(icon, color: isSelected ? theme.colorScheme.primary : theme.iconTheme.color),
+               const SizedBox(height: 8),
+               Text(
+                 label,
+                 style: theme.textTheme.labelLarge?.copyWith(
+                   color: isSelected ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
+                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                 )
+               ),
+             ],
+           ),
+         ),
+       ),
+     );
   }
 }
