@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
 import '../../widgets/coming_soon.dart';
-import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/guard_provider.dart';
+import '../../main.dart'; // To access RootScreen
 
 class AdminFlatsScreen extends StatefulWidget {
   const AdminFlatsScreen({Key? key}) : super(key: key);
@@ -63,13 +63,6 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
-  Widget build(BuildContext context) {
-    return const _AdminScaffold(
-      title: 'Flats',
-      body: ComingSoonView(
-        title: 'Flats Management',
-        message: 'Configure families, units, and resident details here.',
-        icon: Icons.apartment_outlined,
       ),
     );
   }
@@ -80,6 +73,11 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
       builder: (context, adminProvider, _) {
         return _AdminScaffold(
           title: 'Flats',
+          currentIndex: 1,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddEditFlatDialog(adminProvider),
+            child: const Icon(Icons.add),
+          ),
           body: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: adminProvider.flats.length,
@@ -99,11 +97,6 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
               );
             },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddEditFlatDialog(adminProvider),
-            child: const Icon(Icons.add),
-          ),
-          currentIndex: 1,
         );
       },
     );
@@ -165,13 +158,6 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
             child: Text(isEditing ? 'Save' : 'Add'),
           ),
         ],
-  Widget build(BuildContext context) {
-    return const _AdminScaffold(
-      title: 'Guards',
-      body: ComingSoonView(
-        title: 'Guard Management',
-        message: 'Assign, enable or disable guard accounts and manage shifts.',
-        icon: Icons.security_outlined,
       ),
     );
   }
@@ -182,6 +168,11 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
       builder: (context, adminProvider, _) {
         return _AdminScaffold(
           title: 'Guards',
+          currentIndex: 2,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddEditGuardDialog(adminProvider),
+            child: const Icon(Icons.add),
+          ),
           body: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: adminProvider.guards.length,
@@ -193,7 +184,7 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 leading: const Icon(Icons.security),
                 title: Text(guard['name']!),
-                subtitle: Text('ID: ${guard['id']}'),
+                subtitle: Text('ID: ${guard['id']} (Status: ${guard['status']})'),
                 trailing: IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard, index: index),
@@ -201,21 +192,8 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
               );
             },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddEditGuardDialog(adminProvider),
-            child: const Icon(Icons.add),
-          ),
-          currentIndex: 2,
         );
       },
-    return const _AdminScaffold(
-      title: 'Visitor Logs',
-      body: ComingSoonView(
-        title: 'Visitor Logs',
-        message: 'Review all visitor entries and filter by flat, guard or status.',
-        icon: Icons.history_outlined,
-      ),
-      currentIndex: 3,
     );
   }
 }
@@ -254,36 +232,46 @@ class AdminVisitorLogsScreen extends StatelessWidget {
     logs.sort((a, b) => (b['time'] as DateTime).compareTo(a['time'] as DateTime));
 
     return _AdminScaffold(
-      title: 'Audit Logs',
+      title: 'Visitor Logs',
+      currentIndex: 3,
       body: logs.isEmpty
         ? Center(child: Text('No activity logs found', style: Theme.of(context).textTheme.bodyMedium))
         : ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: logs.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final log = logs[index];
-            return ListTile(
-              tileColor: Theme.of(context).cardColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-              title: Text(log['action']),
-              subtitle: Text('${log['user']} • ${log['details']}'),
-              trailing: Text(
-                DateFormat('MMM d, h:mm a').format(log['time']),
-                style: Theme.of(context).textTheme.bodySmall
-              ),
-            );
-          },
-        ),
+            padding: const EdgeInsets.all(16),
+            itemCount: logs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final log = logs[index];
+              return ListTile(
+                tileColor: Theme.of(context).cardColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                title: Text(log['action']),
+                subtitle: Text('${log['user']} • ${log['details']}'),
+                trailing: Text(
+                  DateFormat('MMM d, h:mm a').format(log['time']),
+                  style: Theme.of(context).textTheme.bodySmall
+                ),
+              );
+            },
+          ),
+    );
+  }
+}
+
+class AdminActivityLogsScreen extends StatelessWidget {
+  const AdminActivityLogsScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return const _AdminScaffold(
       title: 'Activity Logs',
+      currentIndex: 3, // Grouped with logs
       body: ComingSoonView(
         title: 'System Activity',
         message: 'Full audit trail of system activity will appear here.',
         icon: Icons.list_alt_outlined,
       ),
-      currentIndex: 3,
     );
   }
 }
@@ -297,6 +285,7 @@ class AdminSettingsScreen extends StatelessWidget {
 
     return _AdminScaffold(
       title: 'Settings',
+      currentIndex: 4,
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -344,14 +333,12 @@ class AdminSettingsScreen extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: theme.dialogBackgroundColor,
                   title: Text(
                     'Logout',
                     style: theme.textTheme.headlineSmall,
                   ),
-                  content: Text(
+                  content: const Text(
                     'Are you sure you want to logout as Admin?',
-                    style: theme.textTheme.bodyMedium,
                   ),
                   actions: [
                     TextButton(
@@ -361,11 +348,8 @@ class AdminSettingsScreen extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         context.read<AuthProvider>().logout();
-                        Navigator.pop(context);
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const RootScreen()),
-                          (route) => false,
-                        );
+                        Navigator.pop(context); // Close dialog
+                        context.go('/');
                       },
                       child: Text(
                         'Logout',
@@ -381,7 +365,6 @@ class AdminSettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-      currentIndex: 4,
     );
   }
 }
@@ -406,12 +389,7 @@ class _AdminScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        elevation: 0,
-        title: Text(
-          title,
-          style: theme.textTheme.headlineSmall,
-        ),
+        title: Text(title),
       ),
       body: body,
       floatingActionButton: floatingActionButton,
@@ -436,8 +414,8 @@ class _AdminScaffold extends StatelessWidget {
             label: 'Guards',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history), // Changed from group_outlined to history
-            label: 'Logs', // Changed from Visitors to Logs
+            icon: Icon(Icons.history),
+            label: 'Logs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
@@ -448,19 +426,19 @@ class _AdminScaffold extends StatelessWidget {
           if (index == currentIndex) return;
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, '/admin_dashboard');
+              context.go('/admin_dashboard');
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/admin_flats');
+              context.go('/admin_dashboard/flats');
               break;
             case 2:
-              Navigator.pushReplacementNamed(context, '/admin_guards');
+              context.go('/admin_dashboard/guards');
               break;
             case 3:
-              Navigator.pushReplacementNamed(context, '/admin_visitor_logs');
+              context.go('/admin_dashboard/visitor_logs');
               break;
             case 4:
-              Navigator.pushReplacementNamed(context, '/admin_settings');
+              context.go('/admin_dashboard/settings');
               break;
           }
         },

@@ -110,10 +110,6 @@ class AuthService {
     try {
       return await _localAuth.authenticate(
         localizedReason: 'Please authenticate to access Guardrail',
-        options: const AuthenticationOptions(
-          biometricOnly: false, // Allow PIN/Pattern fallback
-          stickyAuth: true,
-        ),
       );
     } catch (e) {
       return false;

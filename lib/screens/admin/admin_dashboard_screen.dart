@@ -73,9 +73,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             child: Material(
               color: Colors.transparent, // Correct: Transparent is fine here for ripple effect
               child: InkWell(
-                onTap: () {
-                  context.read<AuthProvider>().logout();
-                  // AuthProvider listener in AppRouter will handle redirect to login
+                onTap: () async {
+                  await context.read<AuthProvider>().logout();
+                  if (context.mounted) {
+                    context.go('/');
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Icon(
