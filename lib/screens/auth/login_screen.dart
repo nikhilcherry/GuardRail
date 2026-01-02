@@ -123,10 +123,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
+        // Clear role and navigate to role selection
         context.read<AuthProvider>().selectRole(null);
-        context.pop();
+        context.go('/');
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -167,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         context.read<AuthProvider>().selectRole(null);
-                        context.pop();
+                        context.go('/');
                       },
                       child: Text(
                         'Change Role',
