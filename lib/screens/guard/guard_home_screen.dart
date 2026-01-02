@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
-import '../../main.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
@@ -34,13 +34,12 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar
+            // Top Bar
             Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo
                   Container(
                     width: 40,
                     height: 40,
@@ -52,159 +51,53 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                     child: Icon(
                       Icons.security_outlined,
                       color: theme.colorScheme.primary,
-                      size: 24,
                     ),
                   ),
-                  // Title
-                  Text(
-                    'Gate Control',
-                    style: theme.textTheme.headlineMedium,
-                  ),
-                  Row(
-                    children: [
-                      // Time
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: theme.dividerColor),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: AppTheme.successGreen,
-                                borderRadius: BorderRadius.circular(4),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.successGreen.withOpacity(0.6),
-                                    blurRadius: 8,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Logout Button
-                      InkWell(
-                        onTap: () async {
-                          await context.read<AuthProvider>().logout();
-                          if (mounted) {
-                            context.go('/');
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                                color: theme.colorScheme.error.withOpacity(0.5)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.logout,
-                                color: theme.colorScheme.error,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Logout',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.error,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  Text('Gate Control', style: theme.textTheme.headlineMedium),
+                  InkWell(
+                    onTap: () async {
+                      await context.read<AuthProvider>().logout();
+                      if (mounted) context.go('/');
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: theme.colorScheme.error, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Logout',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.error,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            // Main Content
+
             Expanded(
               child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
-                        children: [
-                          // Register New Visitor Button
-                          const _RegisterVisitorButton(),
-                          const SizedBox(height: 32),
-                          // Recent Entries Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Recent Entries',
-                                style: theme.textTheme.headlineSmall,
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  showComingSoonDialog(
-                                    context,
-                                    title: 'Visitor History',
-                                    message: 'A complete history of all visitor entries will be available here.',
-                                  );
-                                },
-                                child: Text(
-                                  'View All',
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
+                        children: const [
+                          _RegisterVisitorButton(),
+                          SizedBox(height: 32),
                         ],
                       ),
                     ),
                   ),
-                  // Entries List
+
                   Consumer<GuardProvider>(
                     builder: (context, guardProvider, _) {
                       if (guardProvider.isLoading) {
-                        return SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                // Handle separator
-                                if (index.isOdd) {
-                                  return const SizedBox(height: 12);
-                                }
-                                return const ShimmerEntryCard();
-                                // ignore: dead_code
-                                return const SizedBox.shrink(); // Fix for potential index issues
-                              },
-                              childCount: 5 * 2 - 1, // Show 5 shimmer items
-                            ),
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (_, __) => const ShimmerEntryCard(),
+                            childCount: 5,
                           ),
                         );
                       }
@@ -214,86 +107,22 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              // Handle separator
-                              if (index.isOdd) {
-                                return const SizedBox(height: 12);
-                              }
-                              // Handle item
-                              final itemIndex = index ~/ 2;
-                              if (itemIndex >= guardProvider.entries.length) return null;
-
-                              final entry = guardProvider.entries[itemIndex];
-                              return InkWell(
-                                onTap: () => _showVisitorDialog(context, entry: entry),
-                                child: _EntryCard(entry: entry),
+                              final entry = guardProvider.entries[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: InkWell(
+                                  onTap: () => _showVisitorDialog(context, entry: entry),
+                                  child: _EntryCard(entry: entry),
+                                ),
                               );
                             },
-                            childCount: guardProvider.entries.isEmpty
-                                ? 0
-                                : guardProvider.entries.length * 2 - 1,
+                            childCount: guardProvider.entries.length,
                           ),
                         ),
                       );
                     },
                   ),
-                  // Bottom padding for scroll
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 ],
-              ),
-            ),
-            // Bottom Patrol Check Bar
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor.withOpacity(0.95),
-                border: Border(
-                  top: BorderSide(color: theme.dividerColor),
-                ),
-              ),
-              child: Consumer<GuardProvider>(
-                builder: (context, guardProvider, _) {
-                  final lastCheck = guardProvider.lastPatrolCheck;
-                  final minutesAgo = DateTime.now().difference(lastCheck).inMinutes;
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Patrol Checkpoint',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Last check: ${minutesAgo}m ago',
-                            style: theme.textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          await guardProvider.patrolCheckIn();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Patrol check-in recorded'),
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.check_circle),
-                        label: const Text('Check In'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.cardColor,
-                          foregroundColor: theme.textTheme.bodyLarge?.color,
-                          side: BorderSide(color: theme.dividerColor),
-                        ),
-                      ),
-                    ],
-                  );
-                },
               ),
             ),
           ],
@@ -302,29 +131,10 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
     );
   }
 
-  void _showVisitorDialog(BuildContext context, {required VisitorEntry entry}) {
+  void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Visitor Details'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _DetailItem(label: 'Name', value: entry.name),
-            _DetailItem(label: 'Flat', value: entry.flatNumber),
-            _DetailItem(label: 'Purpose', value: entry.purpose),
-            _DetailItem(label: 'Status', value: entry.status.toUpperCase()),
-            _DetailItem(label: 'Time', value: DateFormat('h:mm a, MMM d').format(entry.time)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+      builder: (context) => _VisitorDialog(entry: entry),
     );
   }
 }
@@ -335,245 +145,128 @@ class _RegisterVisitorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+
+    return InkWell(
+      onTap: () => showDialog(
+        context: context,
+        builder: (context) => const _VisitorDialog(),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _showAddVisitorDialog(context),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    color: theme.colorScheme.onPrimary,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Register New Visitor',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tap when a visitor arrives',
-                  style: theme.textTheme.labelSmall,
-                ),
-              ],
-            ),
-          ),
+          border: Border.all(color: theme.dividerColor),
         ),
-      ),
-    );
-  }
-
-  void _showAddVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
-    final nameController = TextEditingController(text: entry?.name ?? '');
-    final flatController = TextEditingController(text: entry?.flatNumber ?? '');
-    String selectedPurpose = entry?.purpose.toLowerCase() ?? 'guest';
-    final isEditing = entry != null;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          final theme = Theme.of(context);
-          bool isLoading = false;
-
-          return Dialog(
-            backgroundColor: theme.dialogBackgroundColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(isEditing ? 'Edit Visitor' : 'Register Visitor', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 24),
-                  Text('Flat Number', style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: flatController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'e.g. 402',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Visitor Name', style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Purpose', style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _PurposeChip(
-                        label: 'Guest',
-                        icon: Icons.person,
-                        selected: selectedPurpose == 'guest',
-                        onSelected: () => setState(() => selectedPurpose = 'guest'),
-                      ),
-                      _PurposeChip(
-                        label: 'Delivery',
-                        icon: Icons.local_shipping,
-                        selected: selectedPurpose == 'delivery',
-                        onSelected: () => setState(() => selectedPurpose = 'delivery'),
-                      ),
-                      _PurposeChip(
-                        label: 'Service',
-                        icon: Icons.build,
-                        selected: selectedPurpose == 'service',
-                        onSelected: () => setState(() => selectedPurpose = 'service'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () async {
-                              if (nameController.text.isEmpty ||
-                                  flatController.text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please fill in all fields'),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              setState(() => isLoading = true);
-
-                              try {
-                                if (isEditing) {
-                                  await context.read<GuardProvider>().updateVisitorEntry(
-                                        id: entry!.id,
-                                        name: nameController.text,
-                                        flatNumber: flatController.text,
-                                        purpose: selectedPurpose,
-                                      );
-                                } else {
-                                  await context.read<GuardProvider>().registerNewVisitor(
-                                        name: nameController.text,
-                                        flatNumber: flatController.text,
-                                        purpose: selectedPurpose,
-                                      );
-                                }
-
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(isEditing
-                                          ? 'Visitor updated successfully'
-                                          : 'Visitor registered successfully'),
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error: $e')),
-                                  );
-                                  setState(() => isLoading = false);
-                                }
-                              }
-                            },
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(isEditing ? 'Save Changes' : 'Register Visitor'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        child: Column(
+          children: [
+            Icon(Icons.add, size: 40, color: theme.colorScheme.primary),
+            const SizedBox(height: 8),
+            Text('Register New Visitor', style: theme.textTheme.titleMedium),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _PurposeChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onSelected;
+class _VisitorDialog extends StatefulWidget {
+  final VisitorEntry? entry;
+  const _VisitorDialog({this.entry});
 
-  const _PurposeChip({
-    Key? key,
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onSelected,
-  }) : super(key: key);
+  @override
+  State<_VisitorDialog> createState() => _VisitorDialogState();
+}
+
+class _VisitorDialogState extends State<_VisitorDialog> {
+  late TextEditingController nameCtrl;
+  late TextEditingController flatCtrl;
+  String purpose = 'guest';
+  bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
+    flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
+    purpose = widget.entry?.purpose ?? 'guest';
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    flatCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      color: selected ? theme.colorScheme.primary.withOpacity(0.1) : theme.cardColor,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onSelected,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? theme.colorScheme.primary : theme.dividerColor,
+    final editing = widget.entry != null;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(editing ? 'Edit Visitor' : 'Register Visitor',
+                style: theme.textTheme.headlineSmall),
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: flatCtrl,
+              decoration: const InputDecoration(labelText: 'Flat Number'),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: selected ? theme.colorScheme.primary : theme.textTheme.bodySmall?.color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: selected ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
-                ),
-              ),
-            ],
-          ),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: 'Visitor Name'),
+            ),
+            const SizedBox(height: 12),
+
+            DropdownButtonFormField<String>(
+              value: purpose,
+              items: const [
+                DropdownMenuItem(value: 'guest', child: Text('Guest')),
+                DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                DropdownMenuItem(value: 'service', child: Text('Service')),
+              ],
+              onChanged: (v) => setState(() => purpose = v!),
+            ),
+
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: loading
+                  ? null
+                  : () async {
+                      setState(() => loading = true);
+
+                      final guard = context.read<GuardProvider>();
+                      if (editing) {
+                        await guard.updateVisitorEntry(
+                          id: widget.entry!.id,
+                          name: nameCtrl.text,
+                          flatNumber: flatCtrl.text,
+                          purpose: purpose,
+                        );
+                      } else {
+                        await guard.registerNewVisitor(
+                          name: nameCtrl.text,
+                          flatNumber: flatCtrl.text,
+                          purpose: purpose,
+                        );
+                      }
+
+                      if (context.mounted) Navigator.pop(context);
+                    },
+              child: loading
+                  ? const CircularProgressIndicator()
+                  : Text(editing ? 'Save' : 'Register'),
+            ),
+          ],
         ),
       ),
     );
@@ -582,23 +275,11 @@ class _PurposeChip extends StatelessWidget {
 
 class _EntryCard extends StatelessWidget {
   final VisitorEntry entry;
-  static final _timeFormatter = DateFormat('HH:mm');
-
-  const _EntryCard({Key? key, required this.entry}) : super(key: key);
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'approved': return AppTheme.successGreen;
-      case 'pending': return AppTheme.pending;
-      case 'rejected': return AppTheme.errorRed;
-      default: return AppTheme.textSecondary;
-    }
-  }
+  const _EntryCard({required this.entry});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final statusColor = _getStatusColor(entry.status);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -609,68 +290,20 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: theme.dividerColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.person_outline, color: theme.textTheme.bodySmall?.color, size: 20),
-          ),
+          const Icon(Icons.person_outline),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(entry.name, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 2),
-                Text('Flat ${entry.flatNumber}', style: theme.textTheme.labelSmall),
+                Text('Flat ${entry.flatNumber}',
+                    style: theme.textTheme.labelSmall),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  entry.status.toUpperCase(),
-                  style: theme.textTheme.labelSmall?.copyWith(color: statusColor, fontSize: 10),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(_timeFormatter.format(entry.time), style: theme.textTheme.labelSmall),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailItem extends StatelessWidget {
-  final String label;
-  final String value;
-  const _DetailItem({Key? key, required this.label, required this.value}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text('$label:', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
+          Text(DateFormat('HH:mm').format(entry.time),
+              style: theme.textTheme.labelSmall),
         ],
       ),
     );
