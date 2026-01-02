@@ -84,15 +84,59 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final flat = adminProvider.flats[index];
+              final residentId = flat['residentId'] ?? '';
+              final hasId = residentId.isNotEmpty;
               return ListTile(
                 tileColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 leading: const Icon(Icons.home),
                 title: Text('Flat ${flat['flat']}'),
-                subtitle: Text(flat['resident']!),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat, index: index),
+                subtitle: Text('${flat['resident']} • ID: ${hasId ? residentId : 'Not Generated'}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!hasId)
+                      IconButton(
+                        icon: const Icon(Icons.autorenew),
+                        tooltip: 'Generate ID',
+                        onPressed: () => adminProvider.generateResidentId(index),
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Regenerate ID',
+                        onPressed: () => adminProvider.generateResidentId(index),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat, index: index),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Flat'),
+                            content: Text('Are you sure you want to delete Flat ${flat['flat']}?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  adminProvider.deleteFlat(index);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               );
             },
@@ -185,9 +229,39 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                 leading: const Icon(Icons.security),
                 title: Text(guard['name']!),
                 subtitle: Text('ID: ${guard['id']} (Status: ${guard['status']})'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard, index: index),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard, index: index),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Guard'),
+                            content: Text('Are you sure you want to delete ${guard['name']}?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  adminProvider.deleteGuard(index);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               );
             },
