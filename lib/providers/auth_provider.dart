@@ -4,6 +4,7 @@ import '../repositories/auth_repository.dart';
 import '../repositories/guard_repository.dart';
 import '../services/auth_service.dart';
 import '../services/logger_service.dart';
+import '../services/mock/mock_auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
@@ -110,23 +111,30 @@ class AuthProvider extends ChangeNotifier {
       _logger.info('Attempting login fallback for phone: $phone');
       await Future.delayed(const Duration(seconds: 1));
       
-      final fallbackRole = 'resident';
+      // SECURITY: Validate against mock credentials instead of allowing any input
+      final fallbackRole = MockAuthService.validatePhoneLogin(phone, otp);
 
-      await _repository.saveLoginStatus(
-        isLoggedIn: true,
-        role: fallbackRole,
-        phone: phone,
-        isVerified: true,
-      );
+      if (fallbackRole != null) {
+        await _repository.saveLoginStatus(
+          isLoggedIn: true,
+          role: fallbackRole,
+          phone: phone,
+          isVerified: true,
+        );
 
-      await _authService.saveToken('simulated_token_phone_$phone');
+        await _authService.saveToken('simulated_token_phone_$phone');
 
-      _isLoggedIn = true;
-      _selectedRole = fallbackRole;
-      _userPhone = phone;
-      _isVerified = true;
-      _logger.info('Login successful (fallback) for phone: $phone');
-      notifyListeners();
+        _isLoggedIn = true;
+        _selectedRole = fallbackRole;
+        _userPhone = phone;
+        _isVerified = true;
+        _logger.info('Login successful (fallback) for phone: $phone');
+        notifyListeners();
+      } else {
+        _logger.warning('Login fallback failed: Invalid mock credentials for $phone');
+        // Rethrow to show error in UI
+        throw Exception('Invalid phone or OTP (Mock Mode)');
+      }
     }
   }
 
@@ -142,39 +150,47 @@ class AuthProvider extends ChangeNotifier {
        _logger.info('Attempting login fallback for email: $email');
        await Future.delayed(const Duration(seconds: 1));
 
-       // Determine role logic for fallback
-       String fallbackRole = 'resident';
-       // Check if this email is a guard in repo
-       final guard = _guardRepository.getGuardByEmail(email);
-       if (guard != null) {
-         fallbackRole = 'guard';
-       } else if (email.contains('admin')) {
-         fallbackRole = 'admin';
-       }
+       // SECURITY: Validate against mock credentials instead of allowing any input
+       // We first check the MockAuthService for explicit admin/resident matches
+       String? fallbackRole = MockAuthService.validateEmailLogin(email, password);
 
-       // Check status if guard
-       bool isVerified = true;
-       if (fallbackRole == 'guard') {
-         if (guard != null && guard['status'] != 'active') {
-           isVerified = false; // Send to verification/status screen
+       // If not found in basic mock service, check if it's a known Guard in the repo
+       final guard = _guardRepository.getGuardByEmail(email);
+       if (fallbackRole == null && guard != null) {
+         // It's a known guard email. Validate using allowed test passwords.
+         if (MockAuthService.validateGuardPassword(password)) {
+            fallbackRole = 'guard';
          }
        }
 
-       await _repository.saveLoginStatus(
-         isLoggedIn: true,
-         role: fallbackRole,
-         isVerified: isVerified,
-         name: guard?['name'], // Try to get name if available
-       );
+       if (fallbackRole != null) {
+         // Check status if guard
+         bool isVerified = true;
+         if (fallbackRole == 'guard') {
+           if (guard != null && guard['status'] != 'active') {
+             isVerified = false; // Send to verification/status screen
+           }
+         }
 
-       await _authService.saveToken('simulated_token_email_$email');
+         await _repository.saveLoginStatus(
+           isLoggedIn: true,
+           role: fallbackRole,
+           isVerified: isVerified,
+           name: guard?['name'], // Try to get name if available
+         );
 
-       _isLoggedIn = true;
-       _selectedRole = fallbackRole;
-       _userEmail = email;
-       _isVerified = isVerified;
-       _logger.info('Login successful (fallback) for email: $email');
-       notifyListeners();
+         await _authService.saveToken('simulated_token_email_$email');
+
+         _isLoggedIn = true;
+         _selectedRole = fallbackRole;
+         _userEmail = email;
+         _isVerified = isVerified;
+         _logger.info('Login successful (fallback) for email: $email');
+         notifyListeners();
+       } else {
+          _logger.warning('Login fallback failed: Invalid mock credentials for $email');
+          throw Exception('Invalid email or password (Mock Mode)');
+       }
     }
   }
 
