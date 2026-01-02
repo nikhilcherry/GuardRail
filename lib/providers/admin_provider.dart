@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../repositories/guard_repository.dart';
 
 class AdminProvider extends ChangeNotifier {
+  final GuardRepository _guardRepository = GuardRepository();
+
   final List<Map<String, String>> _flats = [
     {'flat': '101', 'resident': 'Alice Smith', 'residentId': ''},
     {'flat': '102', 'resident': 'Bob Johnson', 'residentId': ''},
   ];
 
-  final List<Map<String, String>> _guards = [
-    {'name': 'Ramesh', 'id': 'G001', 'status': 'Active'},
-    {'name': 'Suresh', 'id': 'G002', 'status': 'Inactive'},
-  ];
+  // We expose guards from repository, converting to the map structure UI expects if needed,
+  // or better, just exposing the list from repository.
+  List<Map<String, dynamic>> get guards => _guardRepository.getAllGuards();
 
   List<Map<String, String>> get flats => _flats;
-  List<Map<String, String>> get guards => _guards;
 
   String _generateRandomId() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -36,11 +37,6 @@ class AdminProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteGuard(int index) {
-    _guards.removeAt(index);
-    notifyListeners();
-  }
-
   // Add Flat
   void addFlat(String flat, String resident) {
     _flats.add({'flat': flat, 'resident': resident, 'residentId': ''});
@@ -54,16 +50,30 @@ class AdminProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Add Guard
-  void addGuard(String name, String id) {
-    _guards.add({'name': name, 'id': id, 'status': 'Active'});
+  // --- Guard Management using Repository ---
+
+  // Create Guard (Admin) - Generates ID
+  String createGuardInvite(String name) {
+    final id = _guardRepository.createGuard(name);
+    notifyListeners();
+    return id;
+  }
+
+  // Approve Guard
+  void approveGuard(String id) {
+    _guardRepository.updateGuardStatus(id, 'active');
     notifyListeners();
   }
 
-  // Update Guard
-  void updateGuard(int index, String name, String id) {
-    final oldStatus = _guards[index]['status']!;
-    _guards[index] = {'name': name, 'id': id, 'status': oldStatus};
+  // Reject Guard
+  void rejectGuard(String id) {
+    _guardRepository.updateGuardStatus(id, 'rejected');
+    notifyListeners();
+  }
+
+  // Delete Guard
+  void deleteGuard(String id) {
+    _guardRepository.deleteGuard(id);
     notifyListeners();
   }
 }

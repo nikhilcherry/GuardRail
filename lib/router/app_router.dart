@@ -78,14 +78,7 @@ class AppRouter {
             path: 'guards',
             builder: (context, state) => const AdminGuardsScreen(),
           ),
-          GoRoute(
-            path: 'visitor_logs',
-            builder: (context, state) => const AdminVisitorLogsScreen(),
-          ),
-          GoRoute(
-            path: 'activity_logs',
-            builder: (context, state) => const AdminActivityLogsScreen(),
-          ),
+          // Removed Logs Routes
           GoRoute(
             path: 'settings',
             builder: (context, state) => const AdminSettingsScreen(),
@@ -107,10 +100,7 @@ class AppRouter {
       // If logged in
       if (isLoggedIn) {
         // If not verified and trying to go somewhere other than verification, redirect to verification.
-        // We exclude admin from this check if we assume admins don't need this flow,
-        // but based on implementation, register sets isVerified=false.
-        // If role is admin, let's assume auto-verified or handled elsewhere, but for now we enforce it if it's false.
-        // Actually, let's assume only Guard and Resident need this screen as requested.
+        // For guards, isVerified is false until approved. ID Verification screen will handle the "Pending" message.
         bool requiresVerification = selectedRole == 'guard' || selectedRole == 'resident';
 
         if (requiresVerification && !isVerified) {
