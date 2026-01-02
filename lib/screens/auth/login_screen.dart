@@ -292,11 +292,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading
                             ? null
-                            : (_useEmail
-                                ? _handleEmailLogin
-                                : (_showOTPInput
-                                    ? _handleOTPVerification
-                                    : _handlePhoneLogin)),
+                            : () {
+                                if (_useEmail) {
+                                  _handleEmailLogin();
+                                } else if (_showOTPInput) {
+                                  _handleOTPVerification();
+                                } else {
+                                  _handlePhoneLogin();
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.colorScheme.primary,
                           shape: RoundedRectangleBorder(
@@ -304,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(

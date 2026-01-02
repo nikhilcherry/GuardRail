@@ -1,0 +1,213 @@
+﻿Analyzing GuardRail...                                          
+
+warning - 'iterable_contains_unrelated_type' was removed in Dart '3.3.0' - analysis_options.yaml:34:5 - removed_lint
+warning - 'list_remove_unrelated_type' was removed in Dart '3.3.0' - analysis_options.yaml:35:5 - removed_lint
+warning - 'prefer_equal_for_default_values' was removed in Dart '3.0.0' - analysis_options.yaml:58:5 - removed_lint
+   info - Unnecessary use of double quotes - lib\main.dart:28:33 - prefer_single_quotes
+   info - Unnecessary use of double quotes - lib\main.dart:31:33 - prefer_single_quotes
+   info - Parameter 'key' could be a super parameter - lib\main.dart:53:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\main.dart:97:9 - use_super_parameters
+   info - Unnecessary use of double quotes - lib\main.dart:123:56 - prefer_single_quotes
+   info - Statements in an if should be enclosed in a block - lib\providers\auth_provider.dart:169:29 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\providers\auth_provider.dart:170:13 - curly_braces_in_flow_control_structures
+warning - Unused import: 'package:provider/provider.dart' - lib\router\app_router.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_additional_screens.dart:12:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_additional_screens.dart:107:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_additional_screens.dart:202:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_additional_screens.dart:263:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_additional_screens.dart:280:9 - use_super_parameters
+warning - Unused import: '../../theme/app_theme.dart' - lib\screens\admin\admin_dashboard_screen.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\admin\admin_dashboard_screen.dart:10:9 - use_super_parameters
+warning - The value of the local variable 'isDark' isn't used - lib\screens\admin\admin_dashboard_screen.dart:35:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:48:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:124:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:127:60 - deprecated_member_use
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\admin\admin_dashboard_screen.dart:148:29 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\admin\admin_dashboard_screen.dart:149:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\admin\admin_dashboard_screen.dart:154:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\admin\admin_dashboard_screen.dart:160:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\admin\admin_dashboard_screen.dart:165:21 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:213:62 - deprecated_member_use
+warning - The value of the local variable 'isDark' isn't used - lib\screens\admin\admin_dashboard_screen.dart:251:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:254:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:260:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\admin\admin_dashboard_screen.dart:286:58 - deprecated_member_use
+warning - Unused import: '../../theme/app_theme.dart' - lib\screens\auth\forgot_password_screen.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\auth\forgot_password_screen.dart:6:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\auth\forgot_password_screen.dart:43:54 - deprecated_member_use
+warning - Unused import: '../../theme/app_theme.dart' - lib\screens\auth\login_screen.dart:5:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\auth\login_screen.dart:10:9 - use_super_parameters
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\login_screen.dart:71:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\login_screen.dart:93:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\login_screen.dart:104:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\auth\login_screen.dart:109:28 - use_build_context_synchronously
+   info - 'onPopInvoked' is deprecated and shouldn't be used. Use onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre - lib\screens\auth\login_screen.dart:126:7 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\login_screen.dart:192:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\login_screen.dart:260:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\login_screen.dart:278:41 - prefer_const_constructors
+warning - Unused import: '../../theme/app_theme.dart' - lib\screens\auth\sign_up_screen.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\auth\sign_up_screen.dart:8:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\auth\sign_up_screen.dart:122:56 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\sign_up_screen.dart:132:31 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\sign_up_screen.dart:231:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\sign_up_screen.dart:250:31 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\auth\sign_up_screen.dart:273:31 - prefer_const_constructors
+   info - Parameter 'key' could be a super parameter - lib\screens\guard\guard_home_screen.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:87:66 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\guard\guard_home_screen.dart:110:42 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:125:64 - deprecated_member_use
+  error - The name '_RegisterVisitorButton' isn't a class - lib\screens\guard\guard_home_screen.dart:161:33 - creation_with_non_type
+  error - Local variable '_showVisitorDialog' can't be referenced before it is declared - lib\screens\guard\guard_home_screen.dart:229:46 - referenced_before_declaration
+  error - The method '_EntryCard' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:230:40 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:250:40 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\screens\guard\guard_home_screen.dart:280:48 - use_build_context_synchronously
+warning - Dead code - lib\screens\guard\guard_home_screen.dart:303:3 - dead_code
+   info - The local variable '_showVisitorDialog' starts with an underscore - lib\screens\guard\guard_home_screen.dart:303:8 - no_leading_underscores_for_local_identifiers
+warning - The value of the local variable 'theme' isn't used - lib\screens\guard\guard_home_screen.dart:304:11 - unused_local_variable
+  error - The method '_DetailItem' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:313:13 - undefined_method
+  error - The method '_DetailItem' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:314:13 - undefined_method
+  error - The method '_DetailItem' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:315:13 - undefined_method
+  error - The method '_DetailItem' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:316:13 - undefined_method
+  error - The method '_DetailItem' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:317:13 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\guard\guard_home_screen.dart:331:1 - class_in_class
+  error - Expected a class member - lib\screens\guard\guard_home_screen.dart:331:30 - expected_class_member
+   info - The method 'StatelessWidget' should have a return type but doesn't - lib\screens\guard\guard_home_screen.dart:331:38 - always_declare_return_types
+   info - The variable name 'StatelessWidget' isn't a lowerCamelCase identifier - lib\screens\guard\guard_home_screen.dart:331:38 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\guard\guard_home_screen.dart:331:38 - missing_method_parameters
+  error - The name '_RegisterVisitorButton' isn't a class - lib\screens\guard\guard_home_screen.dart:332:9 - creation_with_non_type
+warning - The declaration 'build' isn't referenced - lib\screens\guard\guard_home_screen.dart:335:10 - unused_element
+  error - Local variable '_showVisitorDialog' can't be referenced before it is declared - lib\screens\guard\guard_home_screen.dart:346:24 - referenced_before_declaration
+   info - The local variable '_showVisitorDialog' starts with an underscore - lib\screens\guard\guard_home_screen.dart:383:8 - no_leading_underscores_for_local_identifiers
+   info - 'dialogBackgroundColor' is deprecated and shouldn't be used. Use DialogThemeData.backgroundColor instead. This feature was deprecated after v3.27.0-0.1.pre - lib\screens\guard\guard_home_screen.dart:396:36 - deprecated_member_use
+  error - The method '_PurposeChip' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:435:21 - undefined_method
+  error - The method '_PurposeChip' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:442:21 - undefined_method
+  error - The method '_PurposeChip' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:449:21 - undefined_method
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\guard\guard_home_screen.dart:479:48 - unnecessary_non_null_assertion
+  error - Classes can't be declared inside other classes - lib\screens\guard\guard_home_screen.dart:533:1 - class_in_class
+  error - Expected a class member - lib\screens\guard\guard_home_screen.dart:533:20 - expected_class_member
+   info - The method 'StatelessWidget' should have a return type but doesn't - lib\screens\guard\guard_home_screen.dart:533:28 - always_declare_return_types
+   info - The variable name 'StatelessWidget' isn't a lowerCamelCase identifier - lib\screens\guard\guard_home_screen.dart:533:28 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\guard\guard_home_screen.dart:533:28 - missing_method_parameters
+  error - The name 'StatelessWidget' is already defined - lib\screens\guard\guard_home_screen.dart:533:28 - duplicate_definition
+  error - The name '_PurposeChip' isn't a class - lib\screens\guard\guard_home_screen.dart:539:9 - creation_with_non_type
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:540:14 - expected_token
+  error - The getter 'label' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:540:19 - undefined_getter
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:541:14 - expected_token
+  error - The getter 'icon' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:541:19 - undefined_getter
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:542:14 - expected_token
+  error - The getter 'selected' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:542:19 - undefined_getter
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:543:14 - expected_token
+  error - The getter 'onSelected' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:543:19 - undefined_getter
+warning - The declaration 'build' isn't referenced - lib\screens\guard\guard_home_screen.dart:547:10 - unused_element
+  error - The final variable 'selected' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:550:14 - read_potentially_unassigned_final
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:550:51 - deprecated_member_use
+  error - The final variable 'onSelected' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:553:16 - read_potentially_unassigned_final
+  error - The final variable 'selected' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:560:22 - read_potentially_unassigned_final
+  error - The final variable 'icon' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:565:20 - read_potentially_unassigned_final
+  error - The final variable 'selected' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:565:33 - read_potentially_unassigned_final
+  error - The final variable 'label' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:568:17 - read_potentially_unassigned_final
+  error - The final variable 'selected' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:570:26 - read_potentially_unassigned_final
+  error - Classes can't be declared inside other classes - lib\screens\guard\guard_home_screen.dart:581:1 - class_in_class
+  error - Expected a class member - lib\screens\guard\guard_home_screen.dart:581:18 - expected_class_member
+   info - The method 'StatelessWidget' should have a return type but doesn't - lib\screens\guard\guard_home_screen.dart:581:26 - always_declare_return_types
+   info - The variable name 'StatelessWidget' isn't a lowerCamelCase identifier - lib\screens\guard\guard_home_screen.dart:581:26 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\guard\guard_home_screen.dart:581:26 - missing_method_parameters
+  error - The name 'StatelessWidget' is already defined - lib\screens\guard\guard_home_screen.dart:581:26 - duplicate_definition
+  error - Can't have modifier 'static' here - lib\screens\guard\guard_home_screen.dart:585:3 - extraneous_modifier
+   info - The local variable '_timeFormatter' starts with an underscore - lib\screens\guard\guard_home_screen.dart:585:16 - no_leading_underscores_for_local_identifiers
+  error - The name '_EntryCard' isn't a class - lib\screens\guard\guard_home_screen.dart:587:9 - creation_with_non_type
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:587:30 - expected_token
+  error - The getter 'entry' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:587:35 - undefined_getter
+   info - The local variable '_getStatusColor' starts with an underscore - lib\screens\guard\guard_home_screen.dart:589:9 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_getStatusLabel' starts with an underscore - lib\screens\guard\guard_home_screen.dart:602:10 - no_leading_underscores_for_local_identifiers
+warning - The declaration 'build' isn't referenced - lib\screens\guard\guard_home_screen.dart:607:10 - unused_element
+  error - The final variable 'entry' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:609:41 - read_potentially_unassigned_final
+  error - The final variable 'entry' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:640:19 - read_potentially_unassigned_final
+  error - The final variable 'entry' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:645:27 - read_potentially_unassigned_final
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:660:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\guard\guard_home_screen.dart:663:40 - deprecated_member_use
+  error - The final variable 'entry' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:667:35 - read_potentially_unassigned_final
+  error - The final variable 'entry' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:676:39 - read_potentially_unassigned_final
+  error - Classes can't be declared inside other classes - lib\screens\guard\guard_home_screen.dart:687:1 - class_in_class
+  error - Expected a class member - lib\screens\guard\guard_home_screen.dart:687:19 - expected_class_member
+   info - The method 'StatelessWidget' should have a return type but doesn't - lib\screens\guard\guard_home_screen.dart:687:27 - always_declare_return_types
+   info - The variable name 'StatelessWidget' isn't a lowerCamelCase identifier - lib\screens\guard\guard_home_screen.dart:687:27 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\guard\guard_home_screen.dart:687:27 - missing_method_parameters
+  error - The name 'StatelessWidget' is already defined - lib\screens\guard\guard_home_screen.dart:687:27 - duplicate_definition
+  error - The name '_DetailItem' isn't a class - lib\screens\guard\guard_home_screen.dart:691:9 - creation_with_non_type
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:691:31 - expected_token
+  error - The getter 'label' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:691:36 - undefined_getter
+  error - Expected to find ',' - lib\screens\guard\guard_home_screen.dart:691:52 - expected_token
+  error - The getter 'value' isn't defined for the type '_GuardHomeScreenState' - lib\screens\guard\guard_home_screen.dart:691:57 - undefined_getter
+warning - The declaration 'build' isn't referenced - lib\screens\guard\guard_home_screen.dart:694:10 - unused_element
+  error - The final variable 'label' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:704:17 - read_potentially_unassigned_final
+  error - The final variable 'value' can't be read because it's potentially unassigned at this point - lib\screens\guard\guard_home_screen.dart:710:15 - read_potentially_unassigned_final
+  error - Expected to find '}' - lib\screens\guard\guard_home_screen.dart:719:1 - expected_token
+warning - Unused import: '../../providers/auth_provider.dart' - lib\screens\resident\resident_home_screen.dart:8:8 - unused_import
+warning - Unused import: 'resident_notifications_screen.dart' - lib\screens\resident\resident_home_screen.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\resident\resident_home_screen.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:61:76 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:173:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:176:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:349:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:364:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:366:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:390:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:525:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:527:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:537:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:568:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_home_screen.dart:571:42 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\screens\resident\resident_notifications_screen.dart:8:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_notifications_screen.dart:107:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_notifications_screen.dart:122:52 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\resident\resident_notifications_screen.dart:163:27 - prefer_const_constructors
+   info - Parameter 'key' could be a super parameter - lib\screens\resident\resident_settings_screen.dart:14:9 - use_super_parameters
+warning - The declaration '_savePreference' isn't referenced - lib\screens\resident\resident_settings_screen.dart:29:16 - unused_element
+   info - 'dialogBackgroundColor' is deprecated and shouldn't be used. Use DialogThemeData.backgroundColor instead. This feature was deprecated after v3.27.0-0.1.pre - lib\screens\resident\resident_settings_screen.dart:39:32 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\screens\resident\resident_settings_screen.dart:64:13 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:316:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:349:50 - deprecated_member_use
+warning - A value for optional parameter 'trailing' isn't ever given - lib\screens\resident\resident_settings_screen.dart:382:10 - unused_element_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:412:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:428:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:441:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:485:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_settings_screen.dart:501:62 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\screens\resident\resident_settings_screen.dart:511:13 - deprecated_member_use
+warning - Unused import: '../../theme/app_theme.dart' - lib\screens\resident\resident_visitors_screen.dart:5:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\screens\resident\resident_visitors_screen.dart:9:9 - use_super_parameters
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\resident\resident_visitors_screen.dart:63:21 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\screens\resident\resident_visitors_screen.dart:95:29 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:245:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:248:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:260:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:324:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:327:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\resident\resident_visitors_screen.dart:339:47 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\screens\role_selection_screen.dart:8:9 - use_super_parameters
+   info - Use 'const' with the constructor to improve performance - lib\screens\role_selection_screen.dart:160:15 - prefer_const_constructors
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\theme\app_theme.dart:162:11 - deprecated_member_use
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\theme\app_theme.dart:251:11 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\widgets\coming_soon.dart:7:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\coming_soon.dart:30:50 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\widgets\coming_soon.dart:83:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\coming_soon.dart:103:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\coming_soon.dart:109:50 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\widgets\contact_support_dialog.dart:4:9 - use_super_parameters
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\widgets\contact_support_dialog.dart:39:15 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\widgets\shimmer_entry_card.dart:5:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\widgets\shimmer_list_item.dart:5:9 - use_super_parameters
+  error - The getter 'pendingVisitors' isn't defined for the type 'ResidentProvider' - test\unit\providers\resident_provider_test.dart:24:42 - undefined_getter
+  error - The getter 'pendingVisitors' isn't defined for the type 'ResidentProvider' - test\unit\providers\resident_provider_test.dart:29:31 - undefined_getter
+  error - The getter 'pendingVisitors' isn't defined for the type 'ResidentProvider' - test\unit\providers\resident_provider_test.dart:37:42 - undefined_getter
+  error - The getter 'pendingVisitors' isn't defined for the type 'ResidentProvider' - test\unit\providers\resident_provider_test.dart:40:31 - undefined_getter
+  error - The method 'loadTheme' isn't defined for the type 'ThemeProvider' - test\unit\providers\theme_provider_test.dart:44:25 - undefined_method
+  error - The getter 'pendingVisitors' isn't defined for the type 'ResidentProvider' - test\widget\screens\resident_home_screen_test.dart:39:24 - undefined_getter
+  error - The method 'loadTheme' isn't defined for the type 'ThemeProvider' - test\widget\screens\resident_settings_screen_test.dart:21:27 - undefined_method
+warning - The value of the local variable 'switchFinder' isn't used - test\widget\screens\resident_settings_screen_test.dart:56:13 - unused_local_variable
+warning - The value of the local variable 'darkModeItem' isn't used - test\widget\screens\resident_settings_screen_test.dart:58:13 - unused_local_variable
+warning - Unused import: 'package:flutter/material.dart' - test\widget_test.dart:8:8 - unused_import
+  error - The named parameter 'authProvider' is required, but there's no corresponding argument - test\widget_test.dart:16:35 - missing_required_argument
+  error - The named parameter 'settingsRepository' is required, but there's no corresponding argument - test\widget_test.dart:16:35 - missing_required_argument
+

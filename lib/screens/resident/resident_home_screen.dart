@@ -65,11 +65,6 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ResidentNotificationsScreen(),
-                                ),
                               showComingSoonDialog(
                                 context,
                                 title: 'Notifications',
@@ -344,19 +339,6 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: theme.cardColor,
@@ -364,9 +346,9 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
           border: Border.all(color: theme.dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2), // Reduced opacity for subtler shadow
-              blurRadius: 30,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -448,32 +430,6 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                   size: 16,
                   color: theme.textTheme.bodySmall?.color,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onReject,
-                  icon: const Icon(Icons.close),
-                  label: const Text('Reject'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.errorRed,
-                    foregroundColor: theme.colorScheme.onError,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onApprove,
-                  icon: const Icon(Icons.check),
-                  label: const Text('Approve'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
                 const SizedBox(width: 8),
                 Text(
                   'Arrived 1 min ago', // Ideally dynamic

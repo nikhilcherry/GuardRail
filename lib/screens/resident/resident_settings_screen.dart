@@ -8,6 +8,7 @@ import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
+import '../../widgets/coming_soon.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
   const ResidentSettingsScreen({Key? key}) : super(key: key);
@@ -23,15 +24,6 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   void initState() {
     super.initState();
     // Settings are loaded in provider initialization
-    _loadPreferences();
-  }
-
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // _biometricsEnabled is now managed by AuthProvider
-      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
-    });
   }
 
   Future<void> _savePreference(String key, bool value) async {
@@ -69,17 +61,11 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     );
 
     if (confirmed == true) {
-      if (mounted) {
-        await context.read<AuthProvider>().logout();
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const RootScreen()),
-            (route) => false,
-          );
-        }
-      }
       await context.read<AuthProvider>().logout();
-      // AuthProvider listener in AppRouter will handle redirect to login
+      if (mounted) {
+        // Use go_router to navigate - don't mix with Navigator
+        context.go('/');
+      }
     }
   }
 
@@ -217,16 +203,20 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                     _SettingsItem(
                       icon: Icons.lock,
                       title: 'Change Password',
-                      onTap: () {
-                        // Empty state/hidden for now
-                      },
+                      onTap: () => showComingSoonDialog(
+                        context,
+                        title: 'Change Password',
+                        message: 'Update your security credentials here.',
+                      ),
                     ),
                     _SettingsItem(
                       icon: Icons.apartment,
                       title: 'Flat Management',
-                      onTap: () {
-                         // Empty state/hidden for now
-                      },
+                      onTap: () => showComingSoonDialog(
+                        context,
+                        title: 'Flat Management',
+                        message: 'Manage your flat and members.',
+                      ),
                     ),
                   ],
                 ),
@@ -239,7 +229,11 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.assignment_ind,
                       title: 'Visitor Management',
                       subtitle: 'Pre-approvals & Guests',
-                      onTap: () {},
+                      onTap: () => showComingSoonDialog(
+                        context,
+                        title: 'Visitor Management',
+                        message: 'Track and manage your visitors.',
+                      ),
                     ),
                     _SettingsToggleItem(
                       icon: Icons.face,
@@ -248,20 +242,6 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       onChanged: (value) {
                         settingsProvider.setBiometricsEnabled(value);
                       },
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, _) => _SettingsToggleItem(
-                        icon: Icons.face,
-                        title: 'Face ID Login',
-                        value: authProvider.biometricsEnabled,
-                        onChanged: (value) async {
-                          final success = await authProvider.toggleBiometrics(value);
-                          if (!success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Biometrics not available or authentication failed')),
-                            );
-                          }
-                        },
-                      ),
                     ),
                   ],
                 ),

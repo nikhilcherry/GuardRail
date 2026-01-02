@@ -89,6 +89,9 @@ class AuthProvider extends ChangeNotifier {
         phone: phone,
       );
 
+      // Save dummy token for persistence during simulation
+      await _authService.saveToken('simulated_token_phone_$phone');
+
       _isLoggedIn = true;
       _userPhone = phone;
       _logger.info('Login successful (fallback) for phone: $phone');
@@ -113,6 +116,9 @@ class AuthProvider extends ChangeNotifier {
          isLoggedIn: true,
          role: _selectedRole,
        );
+
+       // Save dummy token for persistence during simulation
+       await _authService.saveToken('simulated_token_email_$email');
 
        _isLoggedIn = true;
        _userEmail = email;
@@ -153,6 +159,9 @@ class AuthProvider extends ChangeNotifier {
          phone: role != 'admin' ? contact : null,
          name: name,
        );
+
+       // Save dummy token for persistence during simulation
+       await _authService.saveToken('simulated_token_reg_$contact');
 
        _isLoggedIn = true;
        _selectedRole = role;
