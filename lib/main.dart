@@ -10,6 +10,7 @@ import 'providers/settings_provider.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/settings_repository.dart';
 import 'providers/admin_provider.dart';
+import 'providers/flat_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,6 +66,7 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
         ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
         ChangeNotifierProvider(create: (_) => AdminProvider()),
+        ChangeNotifierProvider(create: (_) => FlatProvider()),
       ],
       child: Builder(
         builder: (context) {

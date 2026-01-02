@@ -61,6 +61,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     );
 
     if (confirmed == true) {
+      context.read<FlatProvider>().clearState();
       await context.read<AuthProvider>().logout();
       if (mounted) {
         // Use go_router to navigate - don't mix with Navigator
