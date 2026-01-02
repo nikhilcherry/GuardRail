@@ -18,6 +18,12 @@ class _ContactSupportDialogState extends State<ContactSupportDialog> {
   ];
 
   @override
+  void dispose() {
+    _issueController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
