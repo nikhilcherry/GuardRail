@@ -67,6 +67,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
+            onPressed: () => context.pop(),
+          ),
+        ),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -251,7 +259,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-            ),
           ),
         ),
       ),

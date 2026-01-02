@@ -93,7 +93,7 @@ class WelcomeScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () => context.go('/login'),
+                      onPressed: () => context.push('/login'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.black,
@@ -115,7 +115,7 @@ class WelcomeScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton(
-                      onPressed: () => context.go('/sign_up'),
+                      onPressed: () => context.push('/sign_up'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: isDark ? Colors.white : Colors.black,
                         side: BorderSide(
