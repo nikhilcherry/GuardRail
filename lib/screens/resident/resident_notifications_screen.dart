@@ -1,3 +1,4 @@
+// PERF: Optimized DateFormat usage and const constructors in ResidentNotificationsScreen
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -85,6 +86,9 @@ class _NotificationCard extends StatelessWidget {
   final VoidCallback onApprove;
   final VoidCallback onReject;
 
+  // PERF: Cache formatter to avoid recreation on every list item build
+  static final DateFormat _timeFormatter = DateFormat('h:mm a');
+
   const _NotificationCard({
     required this.visitor,
     required this.onApprove,
@@ -94,7 +98,7 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final timeLabel = DateFormat('h:mm a').format(visitor.date);
+    final timeLabel = _timeFormatter.format(visitor.date);
 
     return Container(
       padding: const EdgeInsets.all(16),
