@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/admin_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -13,26 +14,10 @@ class AdminDashboardScreen extends StatefulWidget {
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -71,7 +56,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               borderRadius: BorderRadius.circular(16),
             ),
             child: Material(
-              color: Colors.transparent, // Correct: Transparent is fine here for ripple effect
+              color: Colors.transparent,
               child: InkWell(
                 onTap: () async {
                   await context.read<AuthProvider>().logout();
@@ -90,137 +75,67 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Dashboard Stats
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Overview',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Consumer<AdminProvider>(
+        builder: (context, adminProvider, _) {
+          final pendingCount = adminProvider.guards.where((g) => g['status'] == 'pending').length;
+          final activeGuards = adminProvider.guards.where((g) => g['status'] == 'active').length;
+          final totalFlats = adminProvider.flats.length;
+
+          return Column(
+            children: [
+              // Dashboard Stats
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      'Overview',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       'Dashboard',
                       style: theme.textTheme.headlineLarge,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.2),
+                    const SizedBox(height: 20),
+                    // Stats Grid
+                    GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _StatCard(
+                          label: 'Total Flats',
+                          value: '$totalFlats',
+                          icon: Icons.apartment_outlined,
                         ),
-                      ),
-                      child: Text(
-                        'Live System',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontSize: 9,
+                        _StatCard(
+                          label: 'Active Guards',
+                          value: '$activeGuards',
+                          icon: Icons.security_outlined,
+                          highlighted: true,
                         ),
-                      ),
+                        // Removed Visitor Stats as we are cleaning up placeholders
+                        _StatCard(
+                          label: 'Pending Approvals',
+                          value: '$pendingCount',
+                          icon: Icons.pending_actions_outlined,
+                          isPrimary: true,
+                          onTap: () => context.go('/admin_dashboard/guards'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Stats Grid
-                GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _StatCard(
-                      label: 'Total Flats',
-                      value: '0',
-                      icon: Icons.apartment_outlined,
-                    ),
-                    _StatCard(
-                      label: 'Active Guards',
-                      value: '0',
-                      icon: Icons.security_outlined,
-                      highlighted: true,
-                    ),
-                    _StatCard(
-                      label: "Today's Visitors",
-                      value: '0',
-                      icon: Icons.group_outlined,
-                    ),
-                    _StatCard(
-                      label: 'Pending Approvals',
-                      value: '0',
-                      icon: Icons.pending_actions_outlined,
-                      isPrimary: true,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Activity Section Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Live Gate Activity',
-                  style: theme.textTheme.headlineSmall,
-                ),
-                TextButton(
-                    onPressed: () {
-                      showComingSoonDialog(
-                        context,
-                        title: 'Activity Logs',
-                        message: 'Detailed activity logs with filtering capabilities are coming soon.',
-                      );
-                    },
-                  child: Text(
-                    'View All',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Activity Feed
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 48,
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No recent activity',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
-                  ),
-                ],
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
       bottomNavigationBar: const _AdminBottomNav(currentIndex: 0),
     );
@@ -233,6 +148,7 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final bool highlighted;
   final bool isPrimary;
+  final VoidCallback? onTap;
 
   const _StatCard({
     required this.label,
@@ -240,6 +156,7 @@ class _StatCard extends StatelessWidget {
     required this.icon,
     this.highlighted = false,
     this.isPrimary = false,
+    this.onTap,
   });
 
   @override
@@ -257,41 +174,47 @@ class _StatCard extends StatelessWidget {
         ? theme.colorScheme.primary.withOpacity(0.2)
         : theme.dividerColor;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                    maxLines: 2,
+                  ),
                 ),
-              ),
-              Icon(
-                icon,
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
-                size: 28,
-              ),
-            ],
-          ),
-          Text(
-            value,
-            style: theme.textTheme.displayMedium?.copyWith(
-              color: isPrimary ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
+                Icon(
+                  icon,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
+                  size: 28,
+                ),
+              ],
             ),
-          ),
-        ],
+            Text(
+              value,
+              style: theme.textTheme.displayMedium?.copyWith(
+                color: isPrimary ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -328,10 +251,6 @@ class _AdminBottomNav extends StatelessWidget {
           label: 'Guards',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'Logs',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.settings_outlined),
           label: 'Settings',
         ),
@@ -349,9 +268,6 @@ class _AdminBottomNav extends StatelessWidget {
             context.go('/admin_dashboard/guards');
             break;
           case 3:
-            context.go('/admin_dashboard/visitor_logs');
-            break;
-          case 4:
             context.go('/admin_dashboard/settings');
             break;
         }

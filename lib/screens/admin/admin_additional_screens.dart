@@ -6,7 +6,7 @@ import '../../widgets/coming_soon.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/guard_provider.dart';
-import '../../main.dart'; // To access RootScreen
+import '../../main.dart';
 
 class AdminFlatsScreen extends StatefulWidget {
   const AdminFlatsScreen({Key? key}) : super(key: key);
@@ -155,26 +155,25 @@ class AdminGuardsScreen extends StatefulWidget {
 }
 
 class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
-  void _showAddEditGuardDialog(AdminProvider provider, {Map<String, String>? guard, int? index}) {
-    final isEditing = guard != null;
-    final nameController = TextEditingController(text: guard?['name'] ?? '');
-    final idController = TextEditingController(text: guard?['id'] ?? '');
+  void _showAddGuardDialog(AdminProvider provider) {
+    final nameController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Edit Guard' : 'Add Guard'),
+        title: const Text('Create Guard Invite'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
+            const Text('Enter the name for the new guard profile. A unique Guard ID will be generated.'),
             const SizedBox(height: 16),
             TextField(
-              controller: idController,
-              decoration: const InputDecoration(labelText: 'Guard ID'),
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Guard Name',
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
         ),
@@ -185,21 +184,48 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (isEditing) {
-                provider.updateGuard(
-                  index!,
-                  nameController.text,
-                  idController.text,
-                );
-              } else {
-                provider.addGuard(
-                  nameController.text,
-                  idController.text,
+              if (nameController.text.trim().isNotEmpty) {
+                final id = provider.createGuardInvite(nameController.text.trim());
+                Navigator.pop(context); // Close input dialog
+
+                // Show Generated ID
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Guard Created'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Share this ID with the guard to allow them to enroll.'),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Theme.of(context).colorScheme.primary),
+                          ),
+                          child: Text(
+                            id,
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Done'),
+                      ),
+                    ],
+                  ),
                 );
               }
-              Navigator.pop(context);
             },
-            child: Text(isEditing ? 'Save' : 'Add'),
+            child: const Text('Create'),
           ),
         ],
       ),
@@ -210,33 +236,70 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
       builder: (context, adminProvider, _) {
+        final guards = adminProvider.guards;
+
         return _AdminScaffold(
           title: 'Guards',
           currentIndex: 2,
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddEditGuardDialog(adminProvider),
-            child: const Icon(Icons.add),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _showAddGuardDialog(adminProvider),
+            icon: const Icon(Icons.add),
+            label: const Text('Create Guard'),
           ),
-          body: ListView.separated(
+          body: guards.isEmpty
+            ? const Center(child: Text('No guards found'))
+            : ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: adminProvider.guards.length,
+            itemCount: guards.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final guard = adminProvider.guards[index];
+              final guard = guards[index];
+              final status = guard['status'] as String;
+              final isPending = status == 'pending';
+
+              Color statusColor;
+              switch (status) {
+                case 'active': statusColor = Colors.green; break;
+                case 'pending': statusColor = Colors.orange; break;
+                case 'rejected': statusColor = Colors.red; break;
+                default: statusColor = Colors.grey;
+              }
+
               return ListTile(
                 tileColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                leading: const Icon(Icons.security),
-                title: Text(guard['name']!),
-                subtitle: Text('ID: ${guard['id']} (Status: ${guard['status']})'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+                leading: CircleAvatar(
+                  backgroundColor: statusColor.withOpacity(0.1),
+                  child: Icon(Icons.security, color: statusColor),
+                ),
+                title: Text(guard['name'] ?? 'Unknown'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard, index: index),
-                    ),
-                    IconButton(
+                    Text('ID: ${guard['id']}'),
+                    if (guard['linkedUserName'] != null)
+                      Text('User: ${guard['linkedUserName']} (${guard['linkedUserEmail']})'),
+                    Text('Status: ${status.toUpperCase()}', style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                isThreeLine: true,
+                trailing: isPending
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                          tooltip: 'Approve',
+                          onPressed: () => adminProvider.approveGuard(guard['id']),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                          tooltip: 'Reject',
+                          onPressed: () => adminProvider.rejectGuard(guard['id']),
+                        ),
+                      ],
+                    )
+                  : IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
                         showDialog(
@@ -251,7 +314,7 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  adminProvider.deleteGuard(index);
+                                  adminProvider.deleteGuard(guard['id']);
                                   Navigator.pop(context);
                                 },
                                 child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -261,91 +324,11 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                         );
                       },
                     ),
-                  ],
-                ),
               );
             },
           ),
         );
       },
-    );
-  }
-}
-
-class AdminVisitorLogsScreen extends StatelessWidget {
-  const AdminVisitorLogsScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final guardProvider = Provider.of<GuardProvider>(context);
-
-    // Combine logs from different sources
-    final List<Map<String, dynamic>> logs = [];
-
-    // Add Patrol Logs
-    for (var date in guardProvider.patrolLogs) {
-      logs.add({
-        'action': 'Patrol Check',
-        'user': 'Guard',
-        'details': 'Checkpoint Recorded',
-        'time': date,
-      });
-    }
-
-    // Add Entry Logs
-    for (var entry in guardProvider.entries) {
-      logs.add({
-        'action': 'Visitor ${entry.status == 'approved' ? 'Entry' : 'Request'}',
-        'user': entry.guardName ?? 'Guard',
-        'details': '${entry.name} (${entry.purpose}) -> Flat ${entry.flatNumber}',
-        'time': entry.time,
-      });
-    }
-
-    // Sort by time descending
-    logs.sort((a, b) => (b['time'] as DateTime).compareTo(a['time'] as DateTime));
-
-    return _AdminScaffold(
-      title: 'Visitor Logs',
-      currentIndex: 3,
-      body: logs.isEmpty
-        ? Center(child: Text('No activity logs found', style: Theme.of(context).textTheme.bodyMedium))
-        : ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: logs.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final log = logs[index];
-              return ListTile(
-                tileColor: Theme.of(context).cardColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-                title: Text(log['action']),
-                subtitle: Text('${log['user']} • ${log['details']}'),
-                trailing: Text(
-                  DateFormat('MMM d, h:mm a').format(log['time']),
-                  style: Theme.of(context).textTheme.bodySmall
-                ),
-              );
-            },
-          ),
-    );
-  }
-}
-
-class AdminActivityLogsScreen extends StatelessWidget {
-  const AdminActivityLogsScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const _AdminScaffold(
-      title: 'Activity Logs',
-      currentIndex: 3, // Grouped with logs
-      body: ComingSoonView(
-        title: 'System Activity',
-        message: 'Full audit trail of system activity will appear here.',
-        icon: Icons.list_alt_outlined,
-      ),
     );
   }
 }
@@ -359,46 +342,11 @@ class AdminSettingsScreen extends StatelessWidget {
 
     return _AdminScaffold(
       title: 'Settings',
-      currentIndex: 4,
+      currentIndex: 3, // Adjusted index since Logs are removed
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _SettingsTile(
-            icon: Icons.tune,
-            label: 'Gate configuration',
-            onTap: () {
-              showComingSoonDialog(
-                context,
-                title: 'Gate Configuration',
-                message: 'Advanced gate settings and hardware integration options are coming soon.',
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          _SettingsTile(
-            icon: Icons.notifications_active_outlined,
-            label: 'Alerts & notifications',
-            onTap: () {
-              showComingSoonDialog(
-                context,
-                title: 'Alert Settings',
-                message: 'Customize system-wide alerts and notification preferences.',
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          _SettingsTile(
-            icon: Icons.security_outlined,
-            label: 'Security policies',
-            onTap: () {
-              showComingSoonDialog(
-                context,
-                title: 'Security Policies',
-                message: 'Define and manage security protocols and access levels.',
-              );
-            },
-          ),
-          const SizedBox(height: 24),
+          // Removed "Coming Soon" settings for cleanup
           _SettingsTile(
             icon: Icons.logout,
             label: 'Logout',
@@ -488,10 +436,6 @@ class _AdminScaffold extends StatelessWidget {
             label: 'Guards',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Logs',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             label: 'Settings',
           ),
@@ -509,9 +453,6 @@ class _AdminScaffold extends StatelessWidget {
               context.go('/admin_dashboard/guards');
               break;
             case 3:
-              context.go('/admin_dashboard/visitor_logs');
-              break;
-            case 4:
               context.go('/admin_dashboard/settings');
               break;
           }

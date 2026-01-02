@@ -13,6 +13,7 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
   final _idController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isPendingApproval = false;
 
   @override
   void dispose() {
@@ -39,9 +40,17 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
       await authProvider.verifyId(id);
       // Navigation is handled by AppRouter based on isVerified state change
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Verification failed. Please try again.';
-      });
+      String msg = e.toString().replaceAll('Exception: ', '');
+      if (msg == 'PENDING_APPROVAL') {
+        setState(() {
+          _isPendingApproval = true;
+          _errorMessage = null;
+        });
+      } else {
+        setState(() {
+          _errorMessage = msg;
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -79,7 +88,9 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
+              child: _isPendingApproval
+              ? _buildPendingState(primaryColor, textSecondary)
+              : Column(
                 children: [
                    const Spacer(flex: 1),
 
@@ -188,6 +199,45 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPendingState(Color primaryColor, Color textSecondary) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.hourglass_empty, size: 64, color: primaryColor),
+        const SizedBox(height: 24),
+        const Text(
+          'Verification Pending',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Your ID has been submitted and is waiting for Admin approval. You will be able to access the dashboard once approved.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: textSecondary,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 32),
+        OutlinedButton(
+          onPressed: () {
+            // Check status again
+            _handleVerification();
+          },
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: primaryColor),
+            foregroundColor: primaryColor,
+          ),
+          child: const Text('Check Status'),
+        )
+      ],
     );
   }
 }

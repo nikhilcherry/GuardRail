@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/auth_repository.dart';
+import '../repositories/guard_repository.dart';
 import '../services/auth_service.dart';
 import '../services/logger_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
+  final GuardRepository _guardRepository = GuardRepository();
   final AuthService _authService = AuthService();
   final _logger = LoggerService();
 
@@ -38,10 +40,38 @@ class AuthProvider extends ChangeNotifier {
       _selectedRole = status['selectedRole'];
       _userPhone = status['userPhone'];
       _userName = status['userName'];
+      _userEmail = status['userEmail']; // Ensure we load email if saved
       _isVerified = status['isVerified'] ?? false;
 
       final prefs = await SharedPreferences.getInstance();
       _biometricsEnabled = prefs.getBool('biometricsEnabled') ?? false;
+
+      // Check Guard Status if user is a Guard
+      if (_isLoggedIn && _selectedRole == 'guard') {
+        final email = _userEmail ?? _userPhone; // Fallback
+        if (email != null) {
+          final guard = _guardRepository.getGuardByEmail(email);
+          if (guard != null) {
+            final guardStatus = guard['status'];
+            if (guardStatus != 'active') {
+              // If not active (pending or rejected), they are technically verified (linked) but not allowed in.
+              // However, app flow depends on isVerified to bypass ID screen.
+              // If we set isVerified = false, they go to ID screen.
+              // We need a way to tell ID screen "You are pending".
+              // For now, let's keep isVerified = true if pending, but maybe logout or handle in router?
+              // The router checks isVerified.
+              // If we set isVerified = false, they go to ID screen.
+              // ID screen can check status.
+              _isVerified = false;
+            } else {
+              _isVerified = true;
+            }
+          } else {
+             // Guard not found?
+             _isVerified = false;
+          }
+        }
+      }
 
       // Verify token exists if logged in
       if (_isLoggedIn) {
@@ -80,19 +110,13 @@ class AuthProvider extends ChangeNotifier {
       _logger.info('Attempting login fallback for phone: $phone');
       await Future.delayed(const Duration(seconds: 1));
       
-      // Determine role if stored, else default to resident for fallback
-      // In real scenario, backend returns role.
-      // Here we check if we have a stored role from previous session? No, we don't.
-      // We will assume 'resident' if no role is found in fallback, or check repository if possible.
-      // But we are logging in, so we don't know the role yet.
-      // Let's assume 'resident' for fallback simplicity unless we want to query a mock DB.
       final fallbackRole = 'resident';
 
       await _repository.saveLoginStatus(
         isLoggedIn: true,
         role: fallbackRole,
         phone: phone,
-        isVerified: true, // Assuming login implies verification
+        isVerified: true,
       );
 
       await _authService.saveToken('simulated_token_phone_$phone');
@@ -118,16 +142,29 @@ class AuthProvider extends ChangeNotifier {
        _logger.info('Attempting login fallback for email: $email');
        await Future.delayed(const Duration(seconds: 1));
 
-       // In a real app, the backend returns the role.
-       // For fallback, we default to 'resident' unless it looks like an admin email
+       // Determine role logic for fallback
        String fallbackRole = 'resident';
-       if (email.contains('admin')) fallbackRole = 'admin';
-       if (email.contains('guard')) fallbackRole = 'guard';
+       // Check if this email is a guard in repo
+       final guard = _guardRepository.getGuardByEmail(email);
+       if (guard != null) {
+         fallbackRole = 'guard';
+       } else if (email.contains('admin')) {
+         fallbackRole = 'admin';
+       }
+
+       // Check status if guard
+       bool isVerified = true;
+       if (fallbackRole == 'guard') {
+         if (guard != null && guard['status'] != 'active') {
+           isVerified = false; // Send to verification/status screen
+         }
+       }
 
        await _repository.saveLoginStatus(
          isLoggedIn: true,
          role: fallbackRole,
-         isVerified: true, // Assuming login implies verification
+         isVerified: isVerified,
+         name: guard?['name'], // Try to get name if available
        );
 
        await _authService.saveToken('simulated_token_email_$email');
@@ -135,7 +172,7 @@ class AuthProvider extends ChangeNotifier {
        _isLoggedIn = true;
        _selectedRole = fallbackRole;
        _userEmail = email;
-       _isVerified = true;
+       _isVerified = isVerified;
        _logger.info('Login successful (fallback) for email: $email');
        notifyListeners();
     }
@@ -152,14 +189,13 @@ class AuthProvider extends ChangeNotifier {
     try {
       final response = await _authService.register(
         name: name,
-        contact: email.isNotEmpty ? email : phone, // Use email as primary contact if available for backend
+        contact: email.isNotEmpty ? email : phone,
         password: password,
         role: role,
       );
       
       _selectedRole = role;
 
-      // Note: Verification status will be false initially for new registrations
       await _handleLoginSuccess(response,
         phone: phone,
         email: email,
@@ -197,15 +233,21 @@ class AuthProvider extends ChangeNotifier {
       await _authService.saveToken(token);
     }
 
-    // In a real app, response should contain the role.
-    // If response has role, update _selectedRole
     if (response.containsKey('role')) {
       _selectedRole = response['role'];
     }
 
-    // If backend returns verification status, use it
     if (response.containsKey('isVerified')) {
       isVerified = response['isVerified'];
+    }
+
+    // Additional check for Guard status
+    if (_selectedRole == 'guard') {
+       final userIdentifier = email ?? phone ?? '';
+       final guard = _guardRepository.getGuardByEmail(userIdentifier);
+       if (guard != null && guard['status'] != 'active') {
+         isVerified = false;
+       }
     }
 
     _isLoggedIn = true;
@@ -226,19 +268,69 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Verify ID
+  // Throws exception with message if verification fails or pending
   Future<void> verifyId(String id) async {
-    // Simulate verification
+    // Simulate verification delay
     await Future.delayed(const Duration(seconds: 1));
-    // Here we would validate the ID with the backend
 
-    _isVerified = true;
-    await _repository.saveLoginStatus(
-      isLoggedIn: true,
-      role: _selectedRole,
-      phone: _userPhone,
-      name: _userName,
-      isVerified: true,
-    );
+    if (_selectedRole == 'guard') {
+       final userIdentifier = _userEmail ?? _userPhone;
+       if (userIdentifier == null) throw Exception('User contact info missing');
+
+       // Check repository
+       final guard = _guardRepository.getGuardById(id);
+
+       if (guard == null) {
+         throw Exception('Invalid Guard ID');
+       }
+
+       if (guard['status'] == 'created') {
+         // Link user
+         final success = _guardRepository.linkUserToGuard(id, userIdentifier, _userName ?? 'Unknown');
+         if (!success) throw Exception('Guard ID unavailable');
+
+         // Set status to pending (isVerified = false, but maybe we need to communicate this to UI)
+         // We will throw an exception that is actually a status message?
+         // Or we can return a status string? verifyId returns Future<void>.
+         // I will throw an exception with a specific prefix or message the UI can handle.
+         throw Exception('PENDING_APPROVAL');
+       } else if (guard['status'] == 'pending') {
+          // Check if it's this user
+          if (guard['linkedUserEmail'] == userIdentifier) {
+             throw Exception('PENDING_APPROVAL');
+          } else {
+             throw Exception('Guard ID already in use');
+          }
+       } else if (guard['status'] == 'active') {
+          if (guard['linkedUserEmail'] == userIdentifier) {
+             _isVerified = true;
+          } else if (guard['linkedUserEmail'] == null) {
+             // Maybe it was activated manually without link? (Not in current flow)
+             // Link it now?
+             _guardRepository.linkUserToGuard(id, userIdentifier, _userName ?? 'Unknown');
+             _guardRepository.updateGuardStatus(id, 'active'); // Ensure active
+             _isVerified = true;
+          } else {
+             throw Exception('Guard ID already in use');
+          }
+       } else if (guard['status'] == 'rejected') {
+          throw Exception('Account Rejected');
+       }
+    } else {
+      // Resident Logic (Placeholder)
+      _isVerified = true;
+    }
+
+    if (_isVerified) {
+      await _repository.saveLoginStatus(
+        isLoggedIn: true,
+        role: _selectedRole,
+        phone: _userPhone,
+        name: _userName,
+        isVerified: true,
+      );
+    }
+
     notifyListeners();
   }
 
@@ -267,8 +359,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Select user role - Mainly used for Role Selection screen, but now less relevant.
-  // Can be kept if needed for manual overrides or during signup flow if we wanted.
   void selectRole(String? role) {
     _logger.info('Role selected: $role');
     _selectedRole = role;
