@@ -51,6 +51,43 @@ class FlatProvider extends ChangeNotifier {
   static final List<Flat> _allFlats = [];
   static final Map<String, List<FlatMember>> _flatMembers = {};
 
+  // Admin access to all flats
+  List<Flat> getAllFlats() => List.from(_allFlats);
+
+  // Admin: Update flat details
+  Future<void> updateFlat(String id, String name, String ownerName) async {
+    final index = _allFlats.indexWhere((f) => f.id == id);
+    if (index != -1) {
+      final oldFlat = _allFlats[index];
+      // Update flat name (Owner ID remains same for now)
+      _allFlats[index] = Flat(id: oldFlat.id, name: name, ownerId: oldFlat.ownerId);
+
+      // Update owner name in members list
+      final members = _flatMembers[id] ?? [];
+      final ownerIndex = members.indexWhere((m) => m.userId == oldFlat.ownerId);
+      if (ownerIndex != -1) {
+        members[ownerIndex] = FlatMember(
+          userId: members[ownerIndex].userId,
+          name: ownerName,
+          status: members[ownerIndex].status,
+          role: members[ownerIndex].role,
+        );
+        _flatMembers[id] = members;
+      }
+      notifyListeners();
+    }
+  }
+
+  // Admin: Delete flat
+  Future<void> deleteFlat(String id) async {
+    _allFlats.removeWhere((f) => f.id == id);
+    _flatMembers.remove(id);
+    if (_currentFlat?.id == id) {
+      clearState();
+    }
+    notifyListeners();
+  }
+
   // Create a new flat
   Future<void> createFlat(String name, String ownerId, String ownerName) async {
     _setLoading(true);
