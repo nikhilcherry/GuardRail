@@ -15,131 +15,210 @@ class AdminFlatsScreen extends StatefulWidget {
   State<AdminFlatsScreen> createState() => _AdminFlatsScreenState();
 }
 
-class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
-  void _showAddEditFlatDialog(AdminProvider provider, {Map<String, String>? flat, int? index}) {
-    final isEditing = flat != null;
-    final flatController = TextEditingController(text: flat?['flat'] ?? '');
-    final residentController = TextEditingController(text: flat?['resident'] ?? '');
+class _AdminFlatsScreenState extends State<AdminFlatsScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: flatController,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: residentController,
-              decoration: const InputDecoration(labelText: 'Resident Name'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (isEditing) {
-                provider.updateFlat(
-                  index!,
-                  flatController.text,
-                  residentController.text,
-                );
-              } else {
-                provider.addFlat(
-                  flatController.text,
-                  residentController.text,
-                );
-              }
-              Navigator.pop(context);
-            },
-            child: Text(isEditing ? 'Save' : 'Add'),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
       builder: (context, adminProvider, _) {
+        final pendingFlats = adminProvider.pendingFlats;
+        final activeFlats = adminProvider.activeFlats;
+
         return _AdminScaffold(
           title: 'Flats',
           currentIndex: 1,
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddEditFlatDialog(adminProvider),
-            child: const Icon(Icons.add),
-          ),
-          body: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: adminProvider.flats.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final flat = adminProvider.flats[index];
-              final residentId = flat['residentId'] ?? '';
-              final hasId = residentId.isNotEmpty;
-              return ListTile(
-                tileColor: Theme.of(context).cardColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                leading: const Icon(Icons.home),
-                title: Text('Flat ${flat['flat']}'),
-                subtitle: Text('${flat['resident']} • ID: ${hasId ? residentId : 'Not Generated'}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!hasId)
-                      IconButton(
-                        icon: const Icon(Icons.autorenew),
-                        tooltip: 'Generate ID',
-                        onPressed: () => adminProvider.generateResidentId(index),
-                      )
-                    else
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        tooltip: 'Regenerate ID',
-                        onPressed: () => adminProvider.generateResidentId(index),
-                      ),
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat, index: index),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Delete Flat'),
-                            content: Text('Are you sure you want to delete Flat ${flat['flat']}?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  adminProvider.deleteFlat(index);
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+          body: Column(
+            children: [
+              Container(
+                color: Theme.of(context).cardColor,
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: Theme.of(context).colorScheme.primary,
+                  unselectedLabelColor: Theme.of(context).textTheme.bodySmall?.color,
+                  indicatorColor: Theme.of(context).colorScheme.primary,
+                  tabs: [
+                    Tab(text: 'Requests (${pendingFlats.length})'),
+                    Tab(text: 'Active (${activeFlats.length})'),
                   ],
                 ),
-              );
-            },
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Pending Requests
+                    pendingFlats.isEmpty
+                        ? const Center(child: Text('No pending requests'))
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: pendingFlats.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final flat = pendingFlats[index];
+                              return Card(
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                color: Theme.of(context).cardColor,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            flat.name,
+                                            style: Theme.of(context).textTheme.titleLarge,
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange.withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              'PENDING',
+                                              style: TextStyle(
+                                                color: Colors.orange,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text('Owner ID: ${flat.ownerId}'),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            tooltip: 'Edit Request',
+                                            onPressed: () {
+                                                // Edit Pending Flat Name Dialog
+                                                final controller = TextEditingController(text: flat.name);
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text('Edit Request Details'),
+                                                    content: TextField(
+                                                      controller: controller,
+                                                      decoration: const InputDecoration(labelText: 'Flat Name'),
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context),
+                                                        child: const Text('Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          adminProvider.updateFlatName(flat.id, controller.text);
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text('Save'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                            },
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              onPressed: () => adminProvider.rejectFlat(flat.id),
+                                              style: OutlinedButton.styleFrom(
+                                                foregroundColor: Colors.red,
+                                                side: const BorderSide(color: Colors.red),
+                                              ),
+                                              child: const Text('Reject'),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () => adminProvider.approveFlat(flat.id),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green,
+                                              ),
+                                              child: const Text('Approve'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                    // Active Flats
+                    activeFlats.isEmpty
+                        ? const Center(child: Text('No active flats'))
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: activeFlats.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final flat = activeFlats[index];
+                              return ListTile(
+                                tileColor: Theme.of(context).cardColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                leading: const Icon(Icons.apartment),
+                                title: Text(flat.name),
+                                subtitle: Text('ID: ${flat.id}'),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    // Edit Flat Name Dialog
+                                    final controller = TextEditingController(text: flat.name);
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Edit Flat Name'),
+                                        content: TextField(
+                                          controller: controller,
+                                          decoration: const InputDecoration(labelText: 'Flat Name'),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              adminProvider.updateFlatName(flat.id, controller.text);
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Save'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },

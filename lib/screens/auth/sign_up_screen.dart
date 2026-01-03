@@ -21,6 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   // New: Role Selection
   String? _selectedRole;
+  final _residenceIdController = TextEditingController();
 
   DateTime? _selectedDate;
   bool _isLoading = false;
@@ -32,6 +33,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _residenceIdController.dispose();
     super.dispose();
   }
 
@@ -69,6 +71,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           phone: _phoneController.text,
           password: _passwordController.text,
           role: _selectedRole!,
+          residenceId: _residenceIdController.text.isNotEmpty ? _residenceIdController.text : null,
         );
         // AppRouter handles redirection
       } catch (e) {
@@ -261,6 +264,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                      _buildRoleCard('admin', 'Admin', Icons.admin_panel_settings_outlined, theme),
                    ],
                 ),
+
+                // Residence ID (Optional)
+                if (_selectedRole == 'resident') ...[
+                  const SizedBox(height: 24),
+                  Text('Residence ID (Optional)', style: theme.textTheme.labelLarge),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _residenceIdController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter Residence ID to join',
+                      prefixIcon: Icon(Icons.apartment),
+                      helperText: 'Leave empty if you want to create a new flat',
+                    ),
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ],
 
                 const SizedBox(height: 32),
 

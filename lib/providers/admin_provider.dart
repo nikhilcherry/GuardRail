@@ -1,52 +1,32 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import '../repositories/guard_repository.dart';
+import '../repositories/flat_repository.dart';
 
 class AdminProvider extends ChangeNotifier {
   final GuardRepository _guardRepository = GuardRepository();
+  final FlatRepository _flatRepository = FlatRepository();
 
-  final List<Map<String, String>> _flats = [
-    {'flat': '101', 'resident': 'Alice Smith', 'residentId': ''},
-    {'flat': '102', 'resident': 'Bob Johnson', 'residentId': ''},
-  ];
-
-  // We expose guards from repository, converting to the map structure UI expects if needed,
-  // or better, just exposing the list from repository.
+  // Guards
   List<Map<String, dynamic>> get guards => _guardRepository.getAllGuards();
 
-  List<Map<String, String>> get flats => _flats;
+  // Flats
+  List<Flat> get allFlats => _flatRepository.allFlats;
+  List<Flat> get pendingFlats => _flatRepository.getPendingFlats();
+  List<Flat> get activeFlats => _flatRepository.getActiveFlats();
 
-  String _generateRandomId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    final rnd = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-  }
-
-  void generateResidentId(int index) {
-    final flat = _flats[index];
-    _flats[index] = {
-      ...flat,
-      'residentId': _generateRandomId(),
-    };
+  // Flat Operations
+  void approveFlat(String flatId) {
+    _flatRepository.approveFlat(flatId);
     notifyListeners();
   }
 
-  void deleteFlat(int index) {
-    _flats.removeAt(index);
+  void rejectFlat(String flatId) {
+    _flatRepository.rejectFlat(flatId);
     notifyListeners();
   }
 
-  // Add Flat
-  void addFlat(String flat, String resident) {
-    _flats.add({'flat': flat, 'resident': resident, 'residentId': ''});
-    notifyListeners();
-  }
-
-  // Update Flat
-  void updateFlat(int index, String flat, String resident) {
-    final oldId = _flats[index]['residentId'] ?? '';
-    _flats[index] = {'flat': flat, 'resident': resident, 'residentId': oldId};
+  void updateFlatName(String flatId, String newName) {
+    _flatRepository.updateFlatName(flatId, newName);
     notifyListeners();
   }
 

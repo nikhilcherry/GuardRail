@@ -79,7 +79,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         builder: (context, adminProvider, _) {
           final pendingCount = adminProvider.guards.where((g) => g['status'] == 'pending').length;
           final activeGuards = adminProvider.guards.where((g) => g['status'] == 'active').length;
-          final totalFlats = adminProvider.flats.length;
+          final totalFlats = adminProvider.allFlats.length;
+          final pendingFlatsCount = adminProvider.pendingFlats.length;
 
           return Column(
             children: [
@@ -128,6 +129,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           isPrimary: true,
                           onTap: () => context.go('/admin_dashboard/guards'),
                         ),
+                        if (pendingFlatsCount > 0)
+                          _StatCard(
+                            label: 'Pending Flats',
+                            value: '$pendingFlatsCount',
+                            icon: Icons.home_work_outlined,
+                            isPrimary: true,
+                            onTap: () => context.go('/admin_dashboard/flats'),
+                          ),
                       ],
                     ),
                   ],
