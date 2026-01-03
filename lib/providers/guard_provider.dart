@@ -20,7 +20,24 @@ class VisitorEntry {
   });
 }
 
+class GuardCheck {
+  final String id;
+  final String locationId;
+  final String guardId;
+  final DateTime timestamp;
+  final String photoPath;
+
+  GuardCheck({
+    required this.id,
+    required this.locationId,
+    required this.guardId,
+    required this.timestamp,
+    required this.photoPath,
+  });
+}
+
 class GuardProvider extends ChangeNotifier {
+  final List<GuardCheck> _checks = [];
   final List<VisitorEntry> _entries = [
     VisitorEntry(
       id: '1',
@@ -55,6 +72,7 @@ class GuardProvider extends ChangeNotifier {
   final List<DateTime> _patrolLogs = [];
   
   List<VisitorEntry> get entries => _entries;
+  List<GuardCheck> get checks => _checks;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
   bool get isLoading => _isLoading;
@@ -192,5 +210,54 @@ class GuardProvider extends ChangeNotifier {
   // Get entries by status
   List<VisitorEntry> getEntriesByStatus(String status) {
     return _entries.where((entry) => entry.status == status).toList();
+  }
+
+  // Process a new guard check scan
+  Future<void> processScan({
+    required String qrCode,
+    required String photoPath,
+    required String guardId,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      // Simulate network validation delay
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Simple parsing: assuming qrCode is the location ID for this MVP
+      // In a real app, this would be a signed token that we verify with the backend
+      final locationId = qrCode;
+
+      // Duplicate Scan Protection
+      // Block same guard from scanning same QR twice per day
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+
+      final isDuplicate = _checks.any((check) =>
+          check.guardId == guardId &&
+          check.locationId == locationId &&
+          check.timestamp.isAfter(todayStart));
+
+      if (isDuplicate) {
+        throw Exception('Duplicate scan: You have already checked this location today.');
+      }
+
+      // Add check
+      _checks.insert(
+          0,
+          GuardCheck(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            locationId: locationId,
+            guardId: guardId,
+            timestamp: now,
+            photoPath: photoPath,
+          ));
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
