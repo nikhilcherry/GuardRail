@@ -8,6 +8,7 @@ import '../../widgets/coming_soon.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
+import 'guard_check_screen.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -17,13 +18,7 @@ class GuardHomeScreen extends StatefulWidget {
 }
 
 class _GuardHomeScreenState extends State<GuardHomeScreen> {
-  late TimeOfDay currentTime;
-
-  @override
-  void initState() {
-    super.initState();
-    currentTime = TimeOfDay.now();
-  }
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -31,102 +26,141 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: Icon(
-                      Icons.security_outlined,
-                      color: theme.colorScheme.primary,
-                    ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: theme.cardColor,
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: theme.disabledColor,
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.security),
+            label: 'Gate Control',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'Guard Checks',
+          ),
+        ],
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [
+          _GateControlView(),
+          GuardCheckScreen(),
+        ],
+      ),
+    );
+  }
+}
+
+class _GateControlView extends StatefulWidget {
+  const _GateControlView();
+
+  @override
+  State<_GateControlView> createState() => _GateControlViewState();
+}
+
+class _GateControlViewState extends State<_GateControlView> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: Column(
+        children: [
+          // Top Bar
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: theme.dividerColor),
                   ),
-                  Text('Gate Control', style: theme.textTheme.headlineMedium),
-                  InkWell(
-                    onTap: () async {
-                      await context.read<AuthProvider>().logout();
-                      if (mounted) context.go('/');
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout, color: theme.colorScheme.error, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Logout',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.error,
-                          ),
+                  child: Icon(
+                    Icons.security_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                Text('Gate Control', style: theme.textTheme.headlineMedium),
+                InkWell(
+                  onTap: () async {
+                    await context.read<AuthProvider>().logout();
+                    if (mounted) context.go('/');
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: theme.colorScheme.error, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Logout',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.error,
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: const [
+                        _RegisterVisitorButton(),
+                        SizedBox(height: 32),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: const [
-                          _RegisterVisitorButton(),
-                          SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Consumer<GuardProvider>(
-                    builder: (context, guardProvider, _) {
-                      if (guardProvider.isLoading) {
-                        return SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (_, __) => const ShimmerEntryCard(),
-                            childCount: 5,
-                          ),
-                        );
-                      }
-
-                      return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final entry = guardProvider.entries[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: InkWell(
-                                  onTap: () => _showVisitorDialog(context, entry: entry),
-                                  child: _EntryCard(entry: entry),
-                                ),
-                              );
-                            },
-                            childCount: guardProvider.entries.length,
-                          ),
+                Consumer<GuardProvider>(
+                  builder: (context, guardProvider, _) {
+                    if (guardProvider.isLoading) {
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (_, __) => const ShimmerEntryCard(),
+                          childCount: 5,
                         ),
                       );
-                    },
-                  ),
-                ],
-              ),
+                    }
+
+                    return SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final entry = guardProvider.entries[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: InkWell(
+                                onTap: () => _showVisitorDialog(context, entry: entry),
+                                child: _EntryCard(entry: entry),
+                              ),
+                            );
+                          },
+                          childCount: guardProvider.entries.length,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

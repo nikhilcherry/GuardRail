@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
+import '../../providers/guard_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -75,76 +77,148 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-      body: Consumer<AdminProvider>(
-        builder: (context, adminProvider, _) {
-          final pendingCount = adminProvider.guards.where((g) => g['status'] == 'pending').length;
-          final activeGuards = adminProvider.guards.where((g) => g['status'] == 'active').length;
-          final totalFlats = adminProvider.allFlats.length;
-          final pendingFlatsCount = adminProvider.pendingFlats.length;
+      body: SingleChildScrollView(
+        child: Consumer2<AdminProvider, GuardProvider>(
+          builder: (context, adminProvider, guardProvider, _) {
+            final pendingCount = adminProvider.guards
+                .where((g) => g['status'] == 'pending')
+                .length;
+            final activeGuards = adminProvider.guards
+                .where((g) => g['status'] == 'active')
+                .length;
+            final totalFlats = adminProvider.allFlats.length;
+            final pendingFlatsCount = adminProvider.pendingFlats.length;
+            final recentChecks = guardProvider.checks;
 
-          return Column(
-            children: [
-              // Dashboard Stats
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Overview',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.textTheme.bodySmall?.color,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Dashboard Stats
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Overview',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Dashboard',
-                      style: theme.textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 20),
-                    // Stats Grid
-                    GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _StatCard(
-                          label: 'Total Flats',
-                          value: '$totalFlats',
-                          icon: Icons.apartment_outlined,
-                        ),
-                        _StatCard(
-                          label: 'Active Guards',
-                          value: '$activeGuards',
-                          icon: Icons.security_outlined,
-                          highlighted: true,
-                        ),
-                        // Removed Visitor Stats as we are cleaning up placeholders
-                        _StatCard(
-                          label: 'Pending Approvals',
-                          value: '$pendingCount',
-                          icon: Icons.pending_actions_outlined,
-                          isPrimary: true,
-                          onTap: () => context.go('/admin_dashboard/guards'),
-                        ),
-                        if (pendingFlatsCount > 0)
+                      const SizedBox(height: 8),
+                      Text(
+                        'Dashboard',
+                        style: theme.textTheme.headlineLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      // Stats Grid
+                      GridView.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
                           _StatCard(
-                            label: 'Pending Flats',
-                            value: '$pendingFlatsCount',
-                            icon: Icons.home_work_outlined,
-                            isPrimary: true,
-                            onTap: () => context.go('/admin_dashboard/flats'),
+                            label: 'Total Flats',
+                            value: '$totalFlats',
+                            icon: Icons.apartment_outlined,
                           ),
-                      ],
-                    ),
-                  ],
+                          _StatCard(
+                            label: 'Active Guards',
+                            value: '$activeGuards',
+                            icon: Icons.security_outlined,
+                            highlighted: true,
+                          ),
+                          _StatCard(
+                            label: 'Pending Approvals',
+                            value: '$pendingCount',
+                            icon: Icons.pending_actions_outlined,
+                            isPrimary: true,
+                            onTap: () =>
+                                context.go('/admin_dashboard/guards'),
+                          ),
+                          if (pendingFlatsCount > 0)
+                            _StatCard(
+                              label: 'Pending Flats',
+                              value: '$pendingFlatsCount',
+                              icon: Icons.home_work_outlined,
+                              isPrimary: true,
+                              onTap: () =>
+                                  context.go('/admin_dashboard/flats'),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+
+                const Divider(),
+
+                // Recent Guard Checks
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Recent Guard Checks',
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      if (recentChecks.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: theme.cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: theme.dividerColor),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'No recent checks',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.disabledColor,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: recentChecks.length > 5
+                              ? 5
+                              : recentChecks.length,
+                          itemBuilder: (context, index) {
+                            final check = recentChecks[index];
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                leading: const Icon(Icons.check_circle,
+                                    color: Colors.green),
+                                title: Text(
+                                    'Location: ${check.locationId}'),
+                                subtitle: Text(
+                                  DateFormat('MMM d, HH:mm')
+                                      .format(check.timestamp),
+                                ),
+                                trailing: Text(
+                                  'Guard: ${check.guardId.length > 6 ? check.guardId.substring(0, 6) : check.guardId}...',
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       bottomNavigationBar: const _AdminBottomNav(currentIndex: 0),
     );
@@ -211,7 +285,8 @@ class _StatCard extends StatelessWidget {
                 ),
                 Icon(
                   icon,
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
+                  color:
+                      theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                   size: 28,
                 ),
               ],
@@ -219,7 +294,9 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: theme.textTheme.displayMedium?.copyWith(
-                color: isPrimary ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
+                color: isPrimary
+                    ? theme.colorScheme.primary
+                    : theme.textTheme.bodyLarge?.color,
               ),
             ),
           ],
