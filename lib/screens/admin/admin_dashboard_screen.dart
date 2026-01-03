@@ -80,9 +80,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       body: SingleChildScrollView(
         child: Consumer2<AdminProvider, GuardProvider>(
           builder: (context, adminProvider, guardProvider, _) {
-            final pendingCount = adminProvider.guards.where((g) => g['status'] == 'pending').length;
-            final activeGuards = adminProvider.guards.where((g) => g['status'] == 'active').length;
-            final totalFlats = adminProvider.flats.length;
+            final pendingCount = adminProvider.guards
+                .where((g) => g['status'] == 'pending')
+                .length;
+            final activeGuards = adminProvider.guards
+                .where((g) => g['status'] == 'active')
+                .length;
+            final totalFlats = adminProvider.allFlats.length;
+            final pendingFlatsCount = adminProvider.pendingFlats.length;
             final recentChecks = guardProvider.checks;
 
             return Column(
@@ -130,8 +135,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             value: '$pendingCount',
                             icon: Icons.pending_actions_outlined,
                             isPrimary: true,
-                            onTap: () => context.go('/admin_dashboard/guards'),
+                            onTap: () =>
+                                context.go('/admin_dashboard/guards'),
                           ),
+                          if (pendingFlatsCount > 0)
+                            _StatCard(
+                              label: 'Pending Flats',
+                              value: '$pendingFlatsCount',
+                              icon: Icons.home_work_outlined,
+                              isPrimary: true,
+                              onTap: () =>
+                                  context.go('/admin_dashboard/flats'),
+                            ),
                         ],
                       ),
                     ],
@@ -173,16 +188,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: recentChecks.length > 5 ? 5 : recentChecks.length,
+                          itemCount: recentChecks.length > 5
+                              ? 5
+                              : recentChecks.length,
                           itemBuilder: (context, index) {
                             final check = recentChecks[index];
                             return Card(
                               margin: const EdgeInsets.only(bottom: 8),
                               child: ListTile(
-                                leading: const Icon(Icons.check_circle, color: Colors.green),
-                                title: Text('Location: ${check.locationId}'),
+                                leading: const Icon(Icons.check_circle,
+                                    color: Colors.green),
+                                title: Text(
+                                    'Location: ${check.locationId}'),
                                 subtitle: Text(
-                                  DateFormat('MMM d, HH:mm').format(check.timestamp),
+                                  DateFormat('MMM d, HH:mm')
+                                      .format(check.timestamp),
                                 ),
                                 trailing: Text(
                                   'Guard: ${check.guardId.length > 6 ? check.guardId.substring(0, 6) : check.guardId}...',
@@ -265,7 +285,8 @@ class _StatCard extends StatelessWidget {
                 ),
                 Icon(
                   icon,
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.3),
+                  color:
+                      theme.textTheme.bodySmall?.color?.withOpacity(0.3),
                   size: 28,
                 ),
               ],
@@ -273,7 +294,9 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: theme.textTheme.displayMedium?.copyWith(
-                color: isPrimary ? theme.colorScheme.primary : theme.textTheme.bodyLarge?.color,
+                color: isPrimary
+                    ? theme.colorScheme.primary
+                    : theme.textTheme.bodyLarge?.color,
               ),
             ),
           ],

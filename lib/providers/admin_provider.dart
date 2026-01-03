@@ -1,62 +1,31 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import '../repositories/guard_repository.dart';
+import '../repositories/flat_repository.dart';
+import '../providers/flat_provider.dart';
 
 class AdminProvider extends ChangeNotifier {
   final GuardRepository _guardRepository = GuardRepository();
+  final FlatRepository _flatRepository = FlatRepository();
+  final FlatProvider _flatProvider;
 
-  final List<Map<String, String>> _flats = [
-    {'flat': '101', 'resident': 'Alice Smith', 'residentId': ''},
-    {'flat': '102', 'resident': 'Bob Johnson', 'residentId': ''},
-  ];
+  AdminProvider(this._flatProvider);
 
-  // We expose guards from repository, converting to the map structure UI expects if needed,
-  // or better, just exposing the list from repository.
+  // ============ GUARDS MANAGEMENT ============
+  
+  // Get all guards
   List<Map<String, dynamic>> get guards => _guardRepository.getAllGuards();
 
-  List<Map<String, String>> get flats => _flats;
-
-  String _generateRandomId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    final rnd = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-  }
-
-  void generateResidentId(int index) {
-    final flat = _flats[index];
-    _flats[index] = {
-      ...flat,
-      'residentId': _generateRandomId(),
-    };
-    notifyListeners();
-  }
-
-  void deleteFlat(int index) {
-    _flats.removeAt(index);
-    notifyListeners();
-  }
-
-  // Add Flat
-  void addFlat(String flat, String resident) {
-    _flats.add({'flat': flat, 'resident': resident, 'residentId': ''});
-    notifyListeners();
-  }
-
-  // Update Flat
-  void updateFlat(int index, String flat, String resident) {
-    final oldId = _flats[index]['residentId'] ?? '';
-    _flats[index] = {'flat': flat, 'resident': resident, 'residentId': oldId};
-    notifyListeners();
-  }
-
-  // --- Guard Management using Repository ---
-
   // Create Guard (Admin) - Generates ID
-  String createGuardInvite(String name) {
-    final id = _guardRepository.createGuard(name);
+  String createGuardInvite(String name, {String? manualId}) {
+    final id = _guardRepository.createGuard(name, manualId: manualId);
     notifyListeners();
     return id;
+  }
+
+  // Update Guard
+  void updateGuard(String originalId, {String? name, String? newId}) {
+    _guardRepository.updateGuard(originalId, name: name, newId: newId);
+    notifyListeners();
   }
 
   // Approve Guard
@@ -74,6 +43,68 @@ class AdminProvider extends ChangeNotifier {
   // Delete Guard
   void deleteGuard(String id) {
     _guardRepository.deleteGuard(id);
+    notifyListeners();
+  }
+
+  // ============ FLATS MANAGEMENT ============
+
+  // Get all flats
+  List<Map<String, dynamic>> get allFlats => _flatRepository.allFlats;
+
+  // Get pending flats
+  List<String> get pendingFlats => _flatRepository.getPendingFlats();
+
+  // Get active flats
+  List<String> get activeFlats => _flatRepository.getActiveFlats();
+
+  // Get flats from FlatProvider with mapping
+  List<Map<String, dynamic>> get flats {
+    final allFlats = _flatProvider.getAllFlats();
+    return allFlats.map((flat) {
+      return {
+        'id': flat.id,
+        'flat': flat.name,
+        'resident': 'Owner ID: ${flat.ownerId}',
+        'residentId': flat.id,
+      };
+    }).toList();
+  }
+
+  // Add flat using FlatProvider
+  Future<void> addFlat(String flatName, String ownerName) async {
+    final dummyOwnerId =
+        'admin_created_${DateTime.now().millisecondsSinceEpoch}';
+    await _flatProvider.createFlat(flatName, dummyOwnerId, ownerName);
+    notifyListeners();
+  }
+
+  // Update flat using FlatProvider
+  Future<void> updateFlat(String id, String flatName, String ownerName) async {
+    await _flatProvider.updateFlat(id, flatName, ownerName);
+    notifyListeners();
+  }
+
+  // Delete flat using FlatProvider
+  Future<void> deleteFlat(String id) async {
+    await _flatProvider.deleteFlat(id);
+    notifyListeners();
+  }
+
+  // Approve flat using FlatRepository
+  void approveFlat(String flatId) {
+    _flatRepository.approveFlat(flatId);
+    notifyListeners();
+  }
+
+  // Reject flat using FlatRepository
+  void rejectFlat(String flatId) {
+    _flatRepository.rejectFlat(flatId);
+    notifyListeners();
+  }
+
+  // Update flat name using FlatRepository
+  void updateFlatName(String flatId, String newName) {
+    _flatRepository.updateFlatName(flatId, newName);
     notifyListeners();
   }
 }

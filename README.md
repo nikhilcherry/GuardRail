@@ -1,6 +1,8 @@
 # Guardrail - Residential Security Access Management App
 
-A comprehensive Flutter-based mobile application for managing residential security access, visitor verification, and gate control. Built with Flutter for Android and iOS platforms.
+A comprehensive Flutter-based mobile application for managing residential security access, visitor verification, and gate control. Developed by **ARVYO**. Built with Flutter for Android (future deployment planned for Google Play Store).
+
+> **Project Status**: Under Development / Pre-release.
 
 ## 🎯 Features
 
@@ -39,11 +41,14 @@ guardrail_flutter/
 │   │   ├── guard_provider.dart  # Guard-specific state
 │   │   └── resident_provider.dart # Resident-specific state
 │   └── screens/
+│       ├── welcome_screen.dart   # Initial landing screen (Login/Sign Up)
 │       ├── auth/
-│       │   └── login_screen.dart # Phone/Email login
-│       ├── role_selection_screen.dart # Role selection
+│       │   ├── login_screen.dart        # Email/Password login
+│       │   ├── sign_up_screen.dart      # Registration screen
+│       │   ├── forgot_password_screen.dart # Password recovery
+│       │   └── id_verification_screen.dart # Guard ID check
 │       ├── guard/
-│       │   └── guard_home_screen.dart # Guard dashboard
+│       │   └── guard_home_screen.dart   # Guard dashboard
 │       ├── resident/
 │       │   └── resident_home_screen.dart # Resident home
 │       └── admin/
@@ -115,14 +120,17 @@ flutter build appbundle --release
 ## 📱 Screen Flow
 
 ### Authentication Flow
-1. **Login Screen**
-   - Phone number + OTP verification
-   - Email + Password option
-   - Resend OTP functionality
-
-2. **Role Selection**
-   - Choose role: Resident, Guard, or Admin
-   - Role-specific home screens
+1. **Welcome Screen**
+   - Options to Login or Sign Up
+2. **Sign Up Screen**
+   - Enter Name, Email, Phone, Password
+   - Select Role (Resident, Guard, Admin)
+3. **Login Screen**
+   - Email + Password authentication
+4. **ID Verification Screen**
+   - For Guards: ID check and approval status
+5. **Dashboard**
+   - Role-specific home screens upon successful login/verification
 
 ### Guard Flow
 - Home Dashboard with recent entries
@@ -160,7 +168,7 @@ Edit `lib/theme/app_theme.dart` to customize:
 Replace mock data in providers with actual API calls:
 ```dart
 // Example in auth_provider.dart
-Future<void> loginWithPhoneAndOTP({...}) async {
+Future<void> loginWithEmail({...}) async {
   // Replace with actual API call
   final response = await http.post(
     Uri.parse('https://api.example.com/login'),
@@ -182,7 +190,7 @@ Future<void> loginWithPhoneAndOTP({...}) async {
 
 ## 🔒 Security Features
 
-- Secure OTP verification flow
+- Secure authentication flow
 - Password hashing (implement in production)
 - JWT token management (to be implemented)
 - Role-based access control
@@ -220,6 +228,8 @@ Add language support:
 ## 🚀 Deployment
 
 ### Android Release
+Future deployment planned for Google Play Store.
+
 ```bash
 # Create signing key (first time only)
 keytool -genkey -v -keystore ~/my-release-key.jks \
@@ -232,11 +242,6 @@ flutter build apk --release
 # Or build App Bundle for Play Store
 flutter build appbundle --release
 ```
-
-### App Store Submission
-1. Configure signing certificates
-2. Build for iOS
-3. Submit via Xcode or TestFlight
 
 ## 📝 API Endpoints (To be implemented)
 
@@ -263,7 +268,7 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## 👥 Support
 
-For support, email support@guardrail.com or open an issue in the repository.
+For support, please contact via email below or open an issue in the repository.
 
 ## 🎓 Learning Resources
 
@@ -274,12 +279,11 @@ For support, email support@guardrail.com or open an issue in the repository.
 
 ## 📞 Contact
 
-- Email: dev@guardrail.com
-- Website: https://guardrail.com
-- Support: https://support.guardrail.com
+- **Company**: ARVYO
+- **Email**: nikhil.ammisetty@gmail.com (GitHub Integration)
+- **Project Status**: Under Development (Android)
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2024  
-**Status**: Production Ready ✅
+**Version**: 1.0.0
+**Status**: Pre-release
