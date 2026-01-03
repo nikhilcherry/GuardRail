@@ -54,6 +54,8 @@ class ResidentProvider extends ChangeNotifier {
 
   // Cache for pending approvals to avoid O(N) filtering on every build
   List<Visitor>? _cachedPendingApprovals;
+  // Cache for all visitors to avoid O(N log N) sorting on every build
+  List<Visitor>? _cachedAllVisitors;
 
   final List<Visitor> _pastVisitors = [
     Visitor(
@@ -84,8 +86,14 @@ class ResidentProvider extends ChangeNotifier {
   List<Visitor> get todaysVisitors => _todaysVisitors;
   List<Visitor> get pastVisitors => _pastVisitors;
   List<PreApprovedVisitor> get preApprovedVisitors => _preApprovedVisitors;
-  List<Visitor> get allVisitors =>
-      [..._todaysVisitors, ..._pastVisitors]..sort((a, b) => b.date.compareTo(a.date));
+  List<Visitor> get allVisitors {
+    if (_cachedAllVisitors != null) {
+      return _cachedAllVisitors!;
+    }
+    _cachedAllVisitors = [..._todaysVisitors, ..._pastVisitors]
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return _cachedAllVisitors!;
+  }
   
   String get residentName => _residentName;
   String get flatNumber => _flatNumber;
@@ -127,6 +135,7 @@ class ResidentProvider extends ChangeNotifier {
         );
         _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
         _cachedPendingApprovals = null; // Invalidate cache
+        _cachedAllVisitors = null; // Invalidate all visitors cache
         notifyListeners();
       }
     } catch (e) {
@@ -152,6 +161,7 @@ class ResidentProvider extends ChangeNotifier {
         );
         _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
         _cachedPendingApprovals = null; // Invalidate cache
+        _cachedAllVisitors = null; // Invalidate all visitors cache
         notifyListeners();
       }
     } catch (e) {
