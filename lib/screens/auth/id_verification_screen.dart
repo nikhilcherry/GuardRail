@@ -135,7 +135,7 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
                        ),
                        textAlign: TextAlign.center,
                        decoration: InputDecoration(
-                         hintText: '$roleTitle ID',
+                         hintText: isGuard ? 'Guard ID' : 'Residence ID',
                          hintStyle: const TextStyle(color: textSecondary),
                          border: InputBorder.none,
                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

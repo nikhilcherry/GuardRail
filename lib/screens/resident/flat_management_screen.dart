@@ -97,16 +97,28 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
       return _buildCreateOrJoin(context, theme, flatProvider, authProvider);
     }
 
-    // 2. Pending -> Show Pending Status
+    // 2. Pending Member -> Show Pending Status (Waiting for Owner)
     if (currentUserMember != null && currentUserMember.status == MemberStatus.pending) {
-       return _buildPendingState(context, theme, flatProvider);
+       return _buildPendingState(context, theme, 'Membership Request Pending',
+         'You have requested to join ${flatProvider.currentFlat?.name ?? "a flat"}.\nWaiting for flat owner approval.');
     }
 
-    // 3. Accepted -> Show Details
+    // 3. Pending Flat -> Show Pending Flat Status (Waiting for Admin)
+    if (flatProvider.currentFlat!.status == FlatStatus.pending) {
+       return _buildPendingState(context, theme, 'Flat Creation Pending',
+         'Your flat "${flatProvider.currentFlat?.name}" is waiting for Admin approval.');
+    }
+
+    // 4. Rejected Flat
+    if (flatProvider.currentFlat!.status == FlatStatus.rejected) {
+       return _buildRejectedState(context, theme, flatProvider);
+    }
+
+    // 5. Accepted -> Show Details
     return _buildFlatDetails(context, theme, flatProvider, authProvider);
   }
 
-  Widget _buildPendingState(BuildContext context, ThemeData theme, FlatProvider flatProvider) {
+  Widget _buildPendingState(BuildContext context, ThemeData theme, String title, String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -115,12 +127,12 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
           Icon(Icons.hourglass_empty, size: 64, color: theme.colorScheme.primary),
           const SizedBox(height: 24),
           Text(
-            'Request Pending',
+            title,
             style: theme.textTheme.headlineMedium,
           ),
           const SizedBox(height: 16),
           Text(
-            'You have requested to join ${flatProvider.currentFlat?.name ?? "a flat"}.\nWaiting for admin approval.',
+            message,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.textTheme.bodySmall?.color,
@@ -129,10 +141,83 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
           const SizedBox(height: 40),
           OutlinedButton(
             onPressed: () {
-              // Optionally allow canceling request
+              // Optionally allow canceling request or going back
                context.pop();
             },
             child: const Text('Back'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRejectedState(BuildContext context, ThemeData theme, FlatProvider flatProvider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+          const SizedBox(height: 24),
+          Text(
+            'Request Rejected',
+            style: theme.textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Your request for flat "${flatProvider.currentFlat?.name}" was rejected.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 40),
+          OutlinedButton(
+            onPressed: () {
+               flatProvider.clearState(); // Allow user to try again
+            },
+            child: const Text('Dismiss'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showShareDialog(BuildContext context, String flatId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Family Member'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Share this Flat ID with your family members to let them join:'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SelectableText(
+                flatId,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'They can enter this ID when creating their account or in the "Join Flat" section.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -385,6 +470,25 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
             ],
           ),
         ),
+
+        const SizedBox(height: 24),
+
+        // Add Family Member Button (Owner Only)
+        if (isOwner)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add Family Member'),
+              onPressed: () {
+                _showShareDialog(context, flat.id);
+              },
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
 
         const SizedBox(height: 32),
 

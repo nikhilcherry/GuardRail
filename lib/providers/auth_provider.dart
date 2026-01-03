@@ -201,6 +201,7 @@ class AuthProvider extends ChangeNotifier {
     required String phone,
     required String password,
     required String role,
+    String? residenceId,
   }) async {
     try {
       final response = await _authService.register(
@@ -218,6 +219,28 @@ class AuthProvider extends ChangeNotifier {
         name: name,
         isVerified: false,
       );
+
+      // If residence ID provided, try to join
+      if (residenceId != null && role == 'resident') {
+        try {
+          // We need FlatProvider for this.
+          // However, AuthProvider shouldn't depend on FlatProvider directly to avoid circular deps if FlatProvider depends on AuthProvider.
+          // But here we can use FlatProvider logic or better, access repository.
+          // But let's assume the UI handles it or we call a service.
+          // For now, I will import FlatProvider only to call join (simulating integration)
+          // Actually, I can use the new FlatRepository.
+          // Let's import FlatRepository.
+
+          final flatRepo = FlatRepository(); // It's a singleton
+          final userId = phone; // Using phone as ID in fallback
+          await flatRepo.joinFlat(residenceId, userId, name);
+
+        } catch (e) {
+          _logger.error('Failed to auto-join flat: $residenceId', e);
+          // Don't fail registration, just log
+        }
+      }
+
     } catch (e) {
        _logger.info('Attempting register fallback for: $email / $phone');
        await Future.delayed(const Duration(seconds: 1));
