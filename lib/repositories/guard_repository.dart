@@ -15,19 +15,24 @@ class GuardRepository {
   //   'linkedUserName': null, // Name from User Signup
   //   'createdAt': DateTime...
   // }
-  final List<Map<String, dynamic>> _guards = [
-    // Initial dummy data matching previous AdminProvider
-    {'id': 'G001', 'name': 'Ramesh', 'status': 'active', 'linkedUserEmail': 'ramesh@guard.com'},
-    {'id': 'G002', 'name': 'Suresh', 'status': 'rejected', 'linkedUserEmail': 'suresh@guard.com'},
-  ];
+  final List<Map<String, dynamic>> _guards = [];
 
   List<Map<String, dynamic>> getAllGuards() {
     return List.from(_guards);
   }
 
   // Create a new guard profile (Admin action)
-  String createGuard(String name) {
-    final id = _generateGuardId();
+  String createGuard(String name, {String? manualId}) {
+    String id;
+    if (manualId != null && manualId.trim().isNotEmpty) {
+      id = manualId.trim();
+      if (_guards.any((g) => g['id'] == id)) {
+        throw Exception('Guard ID already exists');
+      }
+    } else {
+      id = _generateGuardId();
+    }
+
     _guards.add({
       'id': id,
       'name': name,
@@ -37,15 +42,36 @@ class GuardRepository {
     return id;
   }
 
-  // Generate a unique ID
+  // Update existing guard
+  void updateGuard(String originalId, {String? name, String? newId}) {
+    final index = _guards.indexWhere((g) => g['id'] == originalId);
+    if (index == -1) throw Exception('Guard not found');
+
+    var guard = _guards[index];
+
+    if (newId != null && newId != originalId) {
+      if (_guards.any((g) => g['id'] == newId)) {
+        throw Exception('Guard ID already exists');
+      }
+      guard = {...guard, 'id': newId};
+    }
+
+    if (name != null) {
+      guard = {...guard, 'name': name};
+    }
+
+    _guards[index] = guard;
+  }
+
+  // Generate a unique ID (Mixed case + numbers)
   String _generateGuardId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rnd = Random();
     String id;
     do {
       final code = String.fromCharCodes(Iterable.generate(
-          4, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-      id = 'G-$code';
+          6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+      id = code;
     } while (_guards.any((g) => g['id'] == id));
     return id;
   }

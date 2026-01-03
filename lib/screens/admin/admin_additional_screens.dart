@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:math';
 import '../../widgets/coming_soon.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
@@ -16,10 +17,10 @@ class AdminFlatsScreen extends StatefulWidget {
 }
 
 class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
-  void _showAddEditFlatDialog(AdminProvider provider, {Map<String, String>? flat, int? index}) {
+  void _showAddEditFlatDialog(AdminProvider provider, {Map<String, String>? flat}) {
     final isEditing = flat != null;
     final flatController = TextEditingController(text: flat?['flat'] ?? '');
-    final residentController = TextEditingController(text: flat?['resident'] ?? '');
+    final residentController = TextEditingController(text: flat?['resident']?.replaceFirst('Owner ID: ', '') ?? '');
 
     showDialog(
       context: context,
@@ -30,12 +31,12 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
           children: [
             TextField(
               controller: flatController,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
+              decoration: const InputDecoration(labelText: 'Flat Name'),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: residentController,
-              decoration: const InputDecoration(labelText: 'Resident Name'),
+              decoration: const InputDecoration(labelText: 'Owner Name'),
             ),
           ],
         ),
@@ -48,7 +49,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             onPressed: () {
               if (isEditing) {
                 provider.updateFlat(
-                  index!,
+                  flat!['id']!,
                   flatController.text,
                   residentController.text,
                 );
@@ -71,6 +72,8 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
       builder: (context, adminProvider, _) {
+        final flats = adminProvider.flats;
+
         return _AdminScaffold(
           title: 'Flats',
           currentIndex: 1,
@@ -78,38 +81,41 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
             onPressed: () => _showAddEditFlatDialog(adminProvider),
             child: const Icon(Icons.add),
           ),
-          body: ListView.separated(
+          body: flats.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.apartment_outlined, size: 64, color: Theme.of(context).disabledColor),
+                  const SizedBox(height: 16),
+                  Text('No flats found', style: Theme.of(context).textTheme.bodyLarge),
+                ],
+              ),
+            )
+          : ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: adminProvider.flats.length,
+            itemCount: flats.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final flat = adminProvider.flats[index];
+              final flat = flats[index];
               final residentId = flat['residentId'] ?? '';
-              final hasId = residentId.isNotEmpty;
+
               return ListTile(
                 tileColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                leading: const Icon(Icons.home),
-                title: Text('Flat ${flat['flat']}'),
-                subtitle: Text('${flat['resident']} • ID: ${hasId ? residentId : 'Not Generated'}'),
+                leading: CircleAvatar(
+                   backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                   child: Icon(Icons.home, color: Theme.of(context).colorScheme.primary),
+                ),
+                title: Text(flat['flat'] ?? 'Unknown Flat'),
+                subtitle: Text('ID: $residentId\n${flat['resident']}'),
+                isThreeLine: true,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (!hasId)
-                      IconButton(
-                        icon: const Icon(Icons.autorenew),
-                        tooltip: 'Generate ID',
-                        onPressed: () => adminProvider.generateResidentId(index),
-                      )
-                    else
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        tooltip: 'Regenerate ID',
-                        onPressed: () => adminProvider.generateResidentId(index),
-                      ),
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat, index: index),
+                      onPressed: () => _showAddEditFlatDialog(adminProvider, flat: flat),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
@@ -118,7 +124,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Delete Flat'),
-                            content: Text('Are you sure you want to delete Flat ${flat['flat']}?'),
+                            content: Text('Are you sure you want to delete ${flat['flat']}?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -126,7 +132,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  adminProvider.deleteFlat(index);
+                                  adminProvider.deleteFlat(flat['id']!);
                                   Navigator.pop(context);
                                 },
                                 child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -155,79 +161,110 @@ class AdminGuardsScreen extends StatefulWidget {
 }
 
 class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
-  void _showAddGuardDialog(AdminProvider provider) {
-    final nameController = TextEditingController();
+  void _showAddEditGuardDialog(AdminProvider provider, {Map<String, dynamic>? guard}) {
+    final isEditing = guard != null;
+    final nameController = TextEditingController(text: guard?['name'] ?? '');
+    final idController = TextEditingController(text: guard?['id'] ?? '');
+
+    // For manual ID vs Random
+    bool isManualId = isEditing; // Default to manual if editing
+
+    // State for the dialog
+    String? error;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Create Guard Invite'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Enter the name for the new guard profile. A unique Guard ID will be generated.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Guard Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.trim().isNotEmpty) {
-                final id = provider.createGuardInvite(nameController.text.trim());
-                Navigator.pop(context); // Close input dialog
-
-                // Show Generated ID
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Guard Created'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(isEditing ? 'Edit Guard' : 'Create Guard Invite'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Guard Details'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Guard Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (!isEditing) ...[
+                    Row(
                       children: [
-                        const Text('Share this ID with the guard to allow them to enroll.'),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Theme.of(context).colorScheme.primary),
-                          ),
-                          child: Text(
-                            id,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
+                        Checkbox(
+                          value: isManualId,
+                          onChanged: (val) {
+                            setState(() {
+                              isManualId = val ?? false;
+                              if (!isManualId) idController.clear();
+                            });
+                          },
                         ),
+                        const Text('Enter Manual ID'),
                       ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Done'),
+                  ],
+                  if (isManualId || isEditing)
+                    TextField(
+                      controller: idController,
+                      enabled: isEditing || isManualId,
+                      decoration: const InputDecoration(
+                        labelText: 'Guard ID',
+                        border: OutlineInputBorder(),
+                        helperText: 'Leave empty to auto-generate (if creating)',
                       ),
-                    ],
-                  ),
-                );
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
+                    ),
+                  if (error != null)
+                     Padding(
+                       padding: const EdgeInsets.only(top: 8.0),
+                       child: Text(error!, style: const TextStyle(color: Colors.red)),
+                     ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.trim().isEmpty) {
+                    setState(() => error = 'Name is required');
+                    return;
+                  }
+
+                  try {
+                    if (isEditing) {
+                      provider.updateGuard(
+                        guard!['id'],
+                        name: nameController.text.trim(),
+                        newId: idController.text.trim().isNotEmpty ? idController.text.trim() : null,
+                      );
+                    } else {
+                      final id = provider.createGuardInvite(
+                        nameController.text.trim(),
+                        manualId: isManualId && idController.text.trim().isNotEmpty ? idController.text.trim() : null
+                      );
+
+                       // Show Generated ID if it was auto-generated or just confirm
+                       // We'll close this dialog first
+                    }
+                    Navigator.pop(context);
+                  } catch (e) {
+                     setState(() => error = e.toString().replaceAll('Exception: ', ''));
+                  }
+                },
+                child: Text(isEditing ? 'Save' : 'Create'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -242,12 +279,21 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
           title: 'Guards',
           currentIndex: 2,
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showAddGuardDialog(adminProvider),
+            onPressed: () => _showAddEditGuardDialog(adminProvider),
             icon: const Icon(Icons.add),
             label: const Text('Create Guard'),
           ),
           body: guards.isEmpty
-            ? const Center(child: Text('No guards found'))
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.security_outlined, size: 64, color: Theme.of(context).disabledColor),
+                    const SizedBox(height: 16),
+                    Text('No guards found', style: Theme.of(context).textTheme.bodyLarge),
+                  ],
+                ),
+              )
             : ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: guards.length,
@@ -299,31 +345,40 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                         ),
                       ],
                     )
-                  : IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Delete Guard'),
-                            content: Text('Are you sure you want to delete ${guard['name']}?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  adminProvider.deleteGuard(guard['id']);
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                  : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showAddEditGuardDialog(adminProvider, guard: guard),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Guard'),
+                              content: Text('Are you sure you want to delete ${guard['name']}?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    adminProvider.deleteGuard(guard['id']);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
               );
             },
           ),
@@ -342,11 +397,10 @@ class AdminSettingsScreen extends StatelessWidget {
 
     return _AdminScaffold(
       title: 'Settings',
-      currentIndex: 3, // Adjusted index since Logs are removed
+      currentIndex: 3,
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Removed "Coming Soon" settings for cleanup
           _SettingsTile(
             icon: Icons.logout,
             label: 'Logout',

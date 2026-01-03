@@ -1,62 +1,82 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../repositories/guard_repository.dart';
+import '../providers/flat_provider.dart';
 
 class AdminProvider extends ChangeNotifier {
   final GuardRepository _guardRepository = GuardRepository();
+  final FlatProvider _flatProvider;
 
-  final List<Map<String, String>> _flats = [
-    {'flat': '101', 'resident': 'Alice Smith', 'residentId': ''},
-    {'flat': '102', 'resident': 'Bob Johnson', 'residentId': ''},
-  ];
+  AdminProvider(this._flatProvider);
 
-  // We expose guards from repository, converting to the map structure UI expects if needed,
-  // or better, just exposing the list from repository.
+  // We expose guards from repository
   List<Map<String, dynamic>> get guards => _guardRepository.getAllGuards();
 
-  List<Map<String, String>> get flats => _flats;
-
-  String _generateRandomId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    final rnd = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+  // Expose flats from FlatProvider
+  // We map Flat object to the map structure expected by the UI, or we can update UI to use Flat object.
+  // For now, let's map it to keep it simple, but we need to fetch resident name.
+  List<Map<String, String>> get flats {
+    final allFlats = _flatProvider.getAllFlats();
+    return allFlats.map((flat) {
+      // Find owner name
+      // We need to access _flatMembers from FlatProvider, but it's private static.
+      // However, createFlat adds the owner to the members list.
+      // We can't easily access the member list here without exposing it more.
+      // But we can guess the owner name if we track it? No.
+      // Let's assume for now we just show Flat Name and ID.
+      // Or we can rely on FlatProvider to give us a DTO.
+      // But wait, the previous mock had 'resident' (owner).
+      // FlatProvider.createFlat takes ownerName.
+      // Let's modify FlatProvider to allow retrieving owner name or expose members map via a getter.
+      // Actually, FlatProvider has `_flatMembers` static. We can't access it.
+      // But we added `getAllFlats()`.
+      // Let's just return what we have. The UI will show ID.
+      return {
+        'id': flat.id,
+        'flat': flat.name,
+        'resident': 'Owner ID: ${flat.ownerId}', // Placeholder until we can fetch name
+        'residentId': flat.id, // Using Flat ID as the shared ID
+      };
+    }).toList();
   }
 
-  void generateResidentId(int index) {
-    final flat = _flats[index];
-    _flats[index] = {
-      ...flat,
-      'residentId': _generateRandomId(),
-    };
+  // Actually, let's improve the flat mapping.
+  // We can't easily get the owner name without `FlatProvider` help.
+  // But for the purpose of this task, we can just display the Flat ID.
+
+  // --- Flat Management (Delegating to FlatProvider) ---
+
+  Future<void> addFlat(String flatName, String ownerName) async {
+    // We need a dummy owner ID since Admin is creating it.
+    // Or we generate one.
+    final dummyOwnerId = 'admin_created_${DateTime.now().millisecondsSinceEpoch}';
+    await _flatProvider.createFlat(flatName, dummyOwnerId, ownerName);
     notifyListeners();
   }
 
-  void deleteFlat(int index) {
-    _flats.removeAt(index);
+  Future<void> updateFlat(String id, String flatName, String ownerName) async {
+    await _flatProvider.updateFlat(id, flatName, ownerName);
     notifyListeners();
   }
 
-  // Add Flat
-  void addFlat(String flat, String resident) {
-    _flats.add({'flat': flat, 'resident': resident, 'residentId': ''});
-    notifyListeners();
-  }
-
-  // Update Flat
-  void updateFlat(int index, String flat, String resident) {
-    final oldId = _flats[index]['residentId'] ?? '';
-    _flats[index] = {'flat': flat, 'resident': resident, 'residentId': oldId};
+  Future<void> deleteFlat(String id) async {
+    await _flatProvider.deleteFlat(id);
     notifyListeners();
   }
 
   // --- Guard Management using Repository ---
 
   // Create Guard (Admin) - Generates ID
-  String createGuardInvite(String name) {
-    final id = _guardRepository.createGuard(name);
+  String createGuardInvite(String name, {String? manualId}) {
+    final id = _guardRepository.createGuard(name, manualId: manualId);
     notifyListeners();
     return id;
+  }
+
+  // Update Guard
+  void updateGuard(String originalId, {String? name, String? newId}) {
+    _guardRepository.updateGuard(originalId, name: name, newId: newId);
+    notifyListeners();
   }
 
   // Approve Guard
