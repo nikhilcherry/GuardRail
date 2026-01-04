@@ -46,7 +46,7 @@ Future<void> main() async {
   ));
 }
 
-class GuardrailApp extends StatelessWidget {
+class GuardrailApp extends StatefulWidget {
   final AuthProvider authProvider;
   final SettingsRepository settingsRepository;
 
@@ -57,14 +57,38 @@ class GuardrailApp extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<GuardrailApp> createState() => _GuardrailAppState();
+}
+
+class _GuardrailAppState extends State<GuardrailApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      widget.authProvider.lockApp();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: widget.authProvider),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
-        ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(repository: widget.settingsRepository)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(repository: widget.settingsRepository)),
         ChangeNotifierProvider(create: (_) => FlatProvider()),
         ChangeNotifierProxyProvider<FlatProvider, AdminProvider>(
           create: (context) => AdminProvider(context.read<FlatProvider>()),
