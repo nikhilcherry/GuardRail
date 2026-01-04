@@ -36,7 +36,39 @@ class FlatRepository {
   // Singleton pattern
   static final FlatRepository _instance = FlatRepository._internal();
   factory FlatRepository() => _instance;
-  FlatRepository._internal();
+
+  FlatRepository._internal() {
+    // Seed data
+    // Seed for default phone user
+    _createSeedFlat('FLAT01', 'Sunny Apartment', '+919876543210', 'Robert');
+
+    // Seed for 'user' fallback
+    _createSeedFlat('FLAT02', 'Cozy Villa', 'user', 'Robert');
+
+    // Seed for email user
+    _createSeedFlat('FLAT03', 'Green House', 'robert@example.com', 'Robert');
+  }
+
+  void _createSeedFlat(String id, String name, String ownerId, String ownerName) {
+    if (_allFlats.any((f) => f.id == id)) return;
+
+    final flat = Flat(
+      id: id,
+      name: name,
+      ownerId: ownerId,
+      status: FlatStatus.active,
+    );
+
+    final owner = FlatMember(
+      userId: ownerId,
+      name: ownerName,
+      status: MemberStatus.accepted,
+      role: MemberRole.owner,
+    );
+
+    _allFlats.add(flat);
+    _flatMembers[id] = [owner];
+  }
 
   // Mock database
   final List<Flat> _allFlats = [];
