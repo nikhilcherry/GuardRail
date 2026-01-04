@@ -4,6 +4,7 @@ class SettingsRepository {
   static const String _keyBiometrics = 'biometricsEnabled';
   static const String _keyNotifications = 'notificationsEnabled';
   static const String _keyIsDarkMode = 'isDarkMode';
+  static const String _keyLocale = 'locale';
 
   Future<bool> getBiometricsEnabled() async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,5 +34,15 @@ class SettingsRepository {
   Future<void> setIsDarkMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyIsDarkMode, value);
+  }
+
+  Future<String?> getLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLocale);
+  }
+
+  Future<void> setLocale(String languageCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLocale, languageCode);
   }
 }

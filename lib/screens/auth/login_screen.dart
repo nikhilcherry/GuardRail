@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
@@ -33,9 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleEmailLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text(l10n.fillAllFields)),
       );
       return;
     }
@@ -49,9 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
           );
       // Navigation handled by AppRouter listening to AuthProvider
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login failed. Please check your credentials.'),
+        SnackBar(
+          content: Text(l10n.loginFailed),
         ),
       );
     } finally {
@@ -64,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -109,14 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         children: [
                           Text(
-                            'Login',
+                            l10n.login,
                             style: theme.textTheme.displayMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Please enter your credentials to continue',
+                            l10n.enterCredentials,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
@@ -130,14 +134,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Email', style: theme.textTheme.labelLarge),
+                          Text(l10n.email, style: theme.textTheme.labelLarge),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.email_outlined),
-                              hintText: 'your@email.com',
+                              hintText: 'your@email.com', // Typically not translated as it's an example
                             ),
                           ),
                         ],
@@ -149,14 +153,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Password', style: theme.textTheme.labelLarge),
+                          Text(l10n.password, style: theme.textTheme.labelLarge),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _passwordController,
                             obscureText: true,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.lock_outlined),
-                              hintText: 'Enter password',
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                              hintText: l10n.enterPassword,
                             ),
                           ),
                         ],
@@ -191,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Log In',
+                                      l10n.login,
                                       style: theme.textTheme.titleLarge?.copyWith(
                                         color: theme.colorScheme.onPrimary,
                                       ),
@@ -218,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: theme.iconTheme.color,
                             ),
                             label: Text(
-                              'Forgot Password?',
+                              l10n.forgotPassword,
                               style: theme.textTheme.bodySmall,
                             ),
                           ),
@@ -230,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: theme.iconTheme.color,
                             ),
                             label: Text(
-                              'Contact Support',
+                              l10n.contactSupport,
                               style: theme.textTheme.bodySmall,
                             ),
                           ),
@@ -239,13 +243,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Don't have an account? ",
+                                l10n.dontHaveAccount + ' ',
                                 style: theme.textTheme.bodySmall,
                               ),
                               TextButton(
                                 onPressed: () => context.push('/sign_up'),
                                 child: Text(
-                                  'Sign Up',
+                                  l10n.signUp,
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: theme.colorScheme.primary,
                                   ),
