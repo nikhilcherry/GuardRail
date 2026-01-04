@@ -9,6 +9,7 @@ class SharedVisitor {
   final String purpose;
   VisitorStatus status;
   final DateTime time;
+  DateTime? exitTime;
 
   SharedVisitor({
     required this.id,
@@ -17,6 +18,7 @@ class SharedVisitor {
     required this.purpose,
     this.status = VisitorStatus.pending,
     required this.time,
+    this.exitTime,
   });
 }
 
@@ -41,6 +43,14 @@ class VisitorRepository {
     final index = _visitors.indexWhere((v) => v.id == id);
     if (index != -1) {
       _visitors[index].status = status;
+      _controller.add(List.from(_visitors));
+    }
+  }
+
+  void markExit(String id) {
+    final index = _visitors.indexWhere((v) => v.id == id);
+    if (index != -1) {
+      _visitors[index].exitTime = DateTime.now();
       _controller.add(List.from(_visitors));
     }
   }
