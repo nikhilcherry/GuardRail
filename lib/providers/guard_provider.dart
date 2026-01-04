@@ -10,6 +10,7 @@ class VisitorEntry {
   final DateTime time;
   final DateTime? exitTime;
   final String? guardName;
+  final String? photoPath;
   final String? vehicleNumber;
 
   VisitorEntry({
@@ -21,6 +22,7 @@ class VisitorEntry {
     required this.time,
     this.exitTime,
     this.guardName,
+    this.photoPath,
     this.vehicleNumber,
   });
 }
@@ -97,6 +99,7 @@ class GuardProvider extends ChangeNotifier {
           status: v.status.name,
           time: v.time,
           exitTime: v.exitTime,
+          photoPath: v.photoPath,
         ));
       }
       notifyListeners();
@@ -119,6 +122,7 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
     String? vehicleNumber,
   }) async {
     try {
@@ -132,6 +136,7 @@ class GuardProvider extends ChangeNotifier {
         purpose: purpose,
         status: VisitorStatus.pending,
         time: time,
+        photoPath: photoPath,
       );
       
       VisitorRepository().addVisitor(newShared);
@@ -144,6 +149,7 @@ class GuardProvider extends ChangeNotifier {
         status: 'pending',
         time: time,
         guardName: 'Guard',
+        photoPath: photoPath,
         vehicleNumber: vehicleNumber,
       );
       
@@ -186,11 +192,22 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
     String? vehicleNumber,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
 
+      // Update repository
+      VisitorRepository().updateVisitor(
+        id,
+        name: name,
+        flatNumber: flatNumber,
+        purpose: purpose,
+        photoPath: photoPath,
+      );
+
+      // Also update local state for immediate UI feedback
       final index = _entries.indexWhere((entry) => entry.id == id);
       if (index != -1) {
         final oldEntry = _entries[index];
@@ -203,6 +220,7 @@ class GuardProvider extends ChangeNotifier {
           time: oldEntry.time,
           exitTime: oldEntry.exitTime,
           guardName: oldEntry.guardName,
+          photoPath: photoPath ?? oldEntry.photoPath,
           vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
         );
         notifyListeners();
