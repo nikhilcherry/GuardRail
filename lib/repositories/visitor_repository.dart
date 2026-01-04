@@ -7,6 +7,8 @@ class SharedVisitor {
   final String purpose;
   VisitorStatus status;
   final DateTime time;
+  final String? vehicleNumber;
+  final String? vehicleType;
   final String? photoPath;
   DateTime? exitTime;
   SharedVisitor({
@@ -16,6 +18,8 @@ class SharedVisitor {
     required this.purpose,
     this.status = VisitorStatus.pending,
     required this.time,
+    this.vehicleNumber,
+    this.vehicleType,
     this.photoPath,
     this.exitTime,
   });
@@ -39,7 +43,15 @@ class VisitorRepository {
       _controller.add(List.from(_visitors));
     }
   }
-  void updateVisitor(String id, {String? name, String? flatNumber, String? purpose, String? photoPath}) {
+  void updateVisitor(
+    String id, {
+    String? name,
+    String? flatNumber,
+    String? purpose,
+    String? photoPath,
+    String? vehicleNumber,
+    String? vehicleType,
+  }) {
     final index = _visitors.indexWhere((v) => v.id == id);
     if (index != -1) {
       final old = _visitors[index];
@@ -52,6 +64,8 @@ class VisitorRepository {
         time: old.time,
         photoPath: photoPath ?? old.photoPath,
         exitTime: old.exitTime,
+        vehicleNumber: vehicleNumber ?? old.vehicleNumber,
+        vehicleType: vehicleType ?? old.vehicleType,
       );
       _controller.add(List.from(_visitors));
     }

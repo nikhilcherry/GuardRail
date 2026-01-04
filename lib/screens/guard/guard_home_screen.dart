@@ -320,7 +320,9 @@ class _VisitorDialog extends StatefulWidget {
 class _VisitorDialogState extends State<_VisitorDialog> {
   late TextEditingController nameCtrl;
   late TextEditingController flatCtrl;
+  late TextEditingController vehicleNumberCtrl;
   String purpose = 'guest';
+  String vehicleType = 'None';
   bool loading = false;
   XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
@@ -333,7 +335,9 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     super.initState();
     nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
     flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
+    vehicleNumberCtrl = TextEditingController(text: widget.entry?.vehicleNumber ?? '');
     purpose = widget.entry?.purpose ?? 'guest';
+    vehicleType = widget.entry?.vehicleType ?? 'None';
     if (widget.entry?.photoPath != null) {
       _imageFile = XFile(widget.entry!.photoPath!);
     }
@@ -343,6 +347,7 @@ class _VisitorDialogState extends State<_VisitorDialog> {
   void dispose() {
     nameCtrl.dispose();
     flatCtrl.dispose();
+    vehicleNumberCtrl.dispose();
     super.dispose();
   }
 
@@ -426,7 +431,7 @@ class _VisitorDialogState extends State<_VisitorDialog> {
 
               TextField(
                 controller: nameCtrl,
-                textInputAction: TextInputAction.done,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(labelText: 'Visitor Name'),
               ),
               const SizedBox(height: 12),
@@ -440,6 +445,28 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                 ],
                 onChanged: (v) => setState(() => purpose = v!),
               ),
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                value: vehicleType,
+                decoration: const InputDecoration(labelText: 'Vehicle Type'),
+                items: const [
+                  DropdownMenuItem(value: 'None', child: Text('None')),
+                  DropdownMenuItem(value: 'Car', child: Text('Car')),
+                  DropdownMenuItem(value: 'Bike', child: Text('Bike')),
+                  DropdownMenuItem(value: 'Auto', child: Text('Auto')),
+                  DropdownMenuItem(value: 'Cab', child: Text('Cab')),
+                ],
+                onChanged: (v) => setState(() => vehicleType = v!),
+              ),
+
+              if (vehicleType != 'None') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: vehicleNumberCtrl,
+                  decoration: const InputDecoration(labelText: 'Vehicle Number'),
+                ),
+              ],
 
               const SizedBox(height: 20),
               ElevatedButton(
@@ -476,6 +503,8 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                               flatNumber: flatCtrl.text,
                               purpose: purpose,
                               photoPath: savedPhotoPath,
+                              vehicleNumber: vehicleType != 'None' ? vehicleNumberCtrl.text : null,
+                              vehicleType: vehicleType != 'None' ? vehicleType : null,
                             );
                             entry = widget.entry;
                           } else {
@@ -484,6 +513,8 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                               flatNumber: flatCtrl.text,
                               purpose: purpose,
                               photoPath: savedPhotoPath,
+                              vehicleNumber: vehicleType != 'None' ? vehicleNumberCtrl.text : null,
+                              vehicleType: vehicleType != 'None' ? vehicleType : null,
                             );
                           }
 
@@ -626,6 +657,21 @@ class _EntryCard extends StatelessWidget {
                 ),
                 Text('Flat ${entry.flatNumber}',
                     style: theme.textTheme.labelSmall),
+                if (entry.vehicleType != null && entry.vehicleType != 'None') ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.directions_car, size: 12, color: theme.disabledColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${entry.vehicleType} ${entry.vehicleNumber ?? ''}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.disabledColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (duration != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
