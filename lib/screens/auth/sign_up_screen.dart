@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/validators.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -126,17 +127,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nameController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   decoration: const InputDecoration(
                     hintText: 'John Doe',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
+                  validator: Validators.validateName,
                 ),
                 const SizedBox(height: 16),
 
@@ -145,21 +142,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _contactController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     hintText: 'john@example.com',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   style: theme.textTheme.bodyLarge,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
+                  validator: Validators.validateEmail,
                 ),
                 const SizedBox(height: 16),
 
@@ -168,18 +158,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _phoneController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    hintText: '+1234567890',
+                    hintText: '9876543210',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   style: theme.textTheme.bodyLarge,
-                  validator: (value) {
-                     if (value == null || value.isEmpty) {
-                       return 'Please enter your phone number';
-                     }
-                     return null;
-                  },
+                  validator: Validators.validatePhone,
                 ),
                 const SizedBox(height: 16),
 
@@ -207,21 +193,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   obscureText: true,
                   decoration: const InputDecoration(
                     hintText: 'Create a password',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
+                  validator: Validators.validatePassword,
                 ),
                 const SizedBox(height: 16),
 
