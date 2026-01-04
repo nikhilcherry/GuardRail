@@ -9,6 +9,8 @@ class SharedVisitor {
   final String purpose;
   VisitorStatus status;
   final DateTime time;
+  final String? vehicleNumber;
+  final String? vehicleType;
 
   SharedVisitor({
     required this.id,
@@ -17,6 +19,8 @@ class SharedVisitor {
     required this.purpose,
     this.status = VisitorStatus.pending,
     required this.time,
+    this.vehicleNumber,
+    this.vehicleType,
   });
 }
 
