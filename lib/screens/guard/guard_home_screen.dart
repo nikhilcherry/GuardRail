@@ -419,12 +419,14 @@ class _VisitorDialogState extends State<_VisitorDialog> {
 
               TextField(
                 controller: flatCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(labelText: 'Flat Number'),
               ),
               const SizedBox(height: 12),
 
               TextField(
                 controller: nameCtrl,
+                textInputAction: TextInputAction.done,
                 decoration: const InputDecoration(labelText: 'Visitor Name'),
               ),
               const SizedBox(height: 12),

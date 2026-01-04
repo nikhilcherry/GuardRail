@@ -452,6 +452,7 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: nameController,
+                    textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: 'Guard Name',
                       border: OutlineInputBorder(),

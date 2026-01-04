@@ -17,6 +17,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late FocusNode _emailFocusNode;
+  late FocusNode _passwordFocusNode;
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -25,12 +27,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -76,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Center(
@@ -137,7 +144,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _emailController,
+                                  focusNode: _emailFocusNode,
                                   keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onFieldSubmitted: (_) {
+                                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                  },
                                   autovalidateMode: AutovalidateMode.onUserInteraction,
                                   validator: Validators.validateEmail,
                                   decoration: const InputDecoration(
@@ -158,9 +170,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _passwordController,
+                                  focusNode: _passwordFocusNode,
                                   obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _handleEmailLogin(),
                                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  // We apply the same strict password policy here as per request ("All form screens")
                                   validator: Validators.validatePassword,
                                   decoration: const InputDecoration(
                                     prefixIcon: Icon(Icons.lock_outlined),
