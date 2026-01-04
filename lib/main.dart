@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
@@ -103,8 +105,8 @@ class _GuardrailAppState extends State<GuardrailApp> with WidgetsBindingObserver
           final authProvider = context.read<AuthProvider>();
           final appRouter = AppRouter(authProvider);
 
-          return Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
+          return Consumer2<ThemeProvider, SettingsProvider>(
+            builder: (context, themeProvider, settingsProvider, _) {
               return MaterialApp.router(
                 title: 'Guardrail',
                 theme: AppTheme.lightTheme,
@@ -112,6 +114,18 @@ class _GuardrailAppState extends State<GuardrailApp> with WidgetsBindingObserver
                 themeMode: themeProvider.themeMode,
                 debugShowCheckedModeBanner: false,
                 routerConfig: appRouter.router,
+                locale: settingsProvider.locale,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('hi'), // Hindi
+                  Locale('te'), // Telugu
+                ],
               );
             },
           );

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/theme_provider.dart';
+import '../../widgets/contact_support_dialog.dart';
 import 'resident_profile_screen.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
@@ -13,8 +17,8 @@ class ResidentSettingsScreen extends StatefulWidget {
 }
 
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
+  // Local state for biometrics toggle
   bool _biometricsEnabled = false;
-  bool _notificationsEnabled = true;
 
   @override
   void initState() {
@@ -29,39 +33,127 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   }
 
   Future<void> _handleLogout() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Log Out', style: AppTheme.headlineSmall),
+        title: Text(l10n.logout, style: AppTheme.headlineSmall),
         content: Text(
-          'Are you sure you want to log out?',
+          l10n.areYouSureLogout,
           style: AppTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: AppTheme.bodyMedium),
+            child: Text(l10n.cancel, style: AppTheme.bodyMedium),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.errorRed,
             ),
-            child: const Text('Log Out'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
     );
 
     if (confirmed == true) {
+      if (!mounted) return;
       context.read<AuthProvider>().logout();
     }
   }
 
+  void _showLanguageSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.backgroundDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Consumer<SettingsProvider>(
+          builder: (context, settings, _) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    l10n.selectLanguage,
+                    style: AppTheme.headlineSmall,
+                  ),
+                ),
+                ListTile(
+                  title: Text(l10n.english, style: AppTheme.bodyLarge),
+                  leading: Radio<String>(
+                    value: 'en',
+                    groupValue: settings.locale.languageCode,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settings.setLocale(Locale(value));
+                        Navigator.pop(context);
+                      }
+                    },
+                    activeColor: AppTheme.primary,
+                  ),
+                  onTap: () {
+                    settings.setLocale(const Locale('en'));
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(l10n.hindi, style: AppTheme.bodyLarge),
+                  leading: Radio<String>(
+                    value: 'hi',
+                    groupValue: settings.locale.languageCode,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settings.setLocale(Locale(value));
+                        Navigator.pop(context);
+                      }
+                    },
+                    activeColor: AppTheme.primary,
+                  ),
+                  onTap: () {
+                    settings.setLocale(const Locale('hi'));
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  title: Text(l10n.telugu, style: AppTheme.bodyLarge),
+                  leading: Radio<String>(
+                    value: 'te',
+                    groupValue: settings.locale.languageCode,
+                    onChanged: (value) {
+                      if (value != null) {
+                        settings.setLocale(Locale(value));
+                        Navigator.pop(context);
+                      }
+                    },
+                    activeColor: AppTheme.primary,
+                  ),
+                  onTap: () {
+                    settings.setLocale(const Locale('te'));
+                    Navigator.pop(context);
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
       appBar: AppBar(
@@ -72,24 +164,24 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Resident Settings',
+          l10n.settings,
           style: AppTheme.headlineMedium.copyWith(fontSize: 26),
         ),
         centerTitle: true,
       ),
-      body: Consumer<ResidentProvider>(
-        builder: (context, residentProvider, _) {
+      body: Consumer3<ResidentProvider, SettingsProvider, ThemeProvider>(
+        builder: (context, residentProvider, settingsProvider, themeProvider, _) {
           return SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 16),
                 // Account Section
                 _SettingsSection(
-                  title: 'Account',
+                  title: l10n.account,
                   children: [
                     _SettingsItem(
                       icon: Icons.person,
-                      title: 'My Profile',
+                      title: l10n.myProfile,
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
                       onTap: () {
                         Navigator.push(
@@ -102,7 +194,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
-                      title: 'Change Password',
+                      title: l10n.changePassword,
                       onTap: () {},
                     ),
                   ],
@@ -110,28 +202,32 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 const SizedBox(height: 24),
                 // Access & Security Section
                 _SettingsSection(
-                  title: 'Access & Security',
+                  title: l10n.accessAndSecurity,
                   children: [
                     _SettingsItem(
                       icon: Icons.assignment_ind,
-                      title: 'Visitor Management',
-                      subtitle: 'Pre-approvals & Guests',
+                      title: l10n.visitorManagement,
+                      subtitle: l10n.preApprovalsAndGuests,
                       onTap: () {},
                     ),
                     _SettingsToggleItem(
                       icon: Icons.face,
-                      title: 'Face ID Login',
+                      title: l10n.biometrics,
                       value: _biometricsEnabled,
                       onChanged: (value) async {
                         final success = await context.read<AuthProvider>().toggleBiometrics(value);
                         if (success) {
-                           setState(() => _biometricsEnabled = value);
+                          if (mounted) {
+                            setState(() => _biometricsEnabled = value);
+                          }
                         } else {
-                           // Show error or revert
-                           setState(() => _biometricsEnabled = !value);
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             const SnackBar(content: Text('Failed to update biometric settings')),
-                           );
+                          // Show error and revert
+                          if (mounted) {
+                            setState(() => _biometricsEnabled = !value);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.biometricsUpdateFailed)),
+                            );
+                          }
                         }
                       },
                     ),
@@ -140,26 +236,52 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 const SizedBox(height: 24),
                 // Preferences Section
                 _SettingsSection(
-                  title: 'Preferences',
+                  title: l10n.preferences,
                   children: [
-                    _SettingsToggleItem(
-                      icon: Icons.notifications,
-                      title: 'Entry Notifications',
-                      subtitle: 'Alerts for gate requests',
-                      value: _notificationsEnabled,
-                      onChanged: (value) {
-                        setState(() => _notificationsEnabled = value);
-                      },
-                    ),
                     _SettingsItem(
-                      icon: Icons.dark_mode,
-                      title: 'Dark Mode',
+                      icon: Icons.language,
+                      title: l10n.language,
                       trailing: Text(
-                        'System',
+                        _getLanguageName(settingsProvider.locale.languageCode, l10n),
                         style: AppTheme.bodySmall.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
+                      onTap: () => _showLanguageSelector(context),
+                    ),
+                    _SettingsToggleItem(
+                      icon: Icons.notifications,
+                      title: l10n.notifications,
+                      subtitle: l10n.alertsForGateRequests,
+                      value: settingsProvider.notificationsEnabled,
+                      onChanged: (value) {
+                        settingsProvider.setNotificationsEnabled(value);
+                      },
+                    ),
+                    _SettingsToggleItem(
+                      icon: Icons.dark_mode,
+                      title: l10n.darkMode,
+                      value: themeProvider.isDarkMode,
+                      onChanged: (value) {
+                        themeProvider.toggleTheme(value);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Support
+                _SettingsSection(
+                  title: l10n.support,
+                  children: [
+                    _SettingsItem(
+                      icon: Icons.support_agent,
+                      title: l10n.contactSupport,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const ContactSupportDialog(),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -173,7 +295,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       onPressed: _handleLogout,
                       icon: const Icon(Icons.logout, color: AppTheme.primary),
                       label: Text(
-                        'Log Out',
+                        l10n.logout,
                         style: AppTheme.titleLarge.copyWith(
                           color: AppTheme.primary,
                         ),
@@ -202,6 +324,18 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         },
       ),
     );
+  }
+
+  String _getLanguageName(String code, AppLocalizations l10n) {
+    switch (code) {
+      case 'hi':
+        return l10n.hindi;
+      case 'te':
+        return l10n.telugu;
+      case 'en':
+      default:
+        return l10n.english;
+    }
   }
 }
 
@@ -391,4 +525,3 @@ class _SettingsToggleItem extends StatelessWidget {
     );
   }
 }
-
