@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class ComingSoonDialog extends StatelessWidget {
   final String title;
   final String message;
+  final String? featureName;
 
   const ComingSoonDialog({
     Key? key,
     this.title = 'Coming Soon',
     this.message = 'We are working hard to bring you this feature. Stay tuned!',
+    this.featureName,
   }) : super(key: key);
 
   @override
@@ -38,7 +40,7 @@ class ComingSoonDialog extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              title,
+              featureName ?? title,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

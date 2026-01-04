@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -14,16 +13,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.backgroundDark,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
-          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
@@ -34,18 +31,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               Text(
                 'Reset Password',
-                style: theme.textTheme.displayMedium,
+                style: AppTheme.displayMedium,
               ),
               const SizedBox(height: 8),
               Text(
                 'Enter your email to receive reset instructions',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                ),
+                style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 32),
 
-              Text('Email Address', style: theme.textTheme.labelLarge),
+              Text('Email Address', style: AppTheme.labelLarge),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
@@ -57,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: theme.textTheme.bodyLarge,
+                style: AppTheme.bodyLarge,
               ),
               const SizedBox(height: 32),
 
@@ -70,17 +65,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Reset link sent (placeholder)')),
                     );
-                    context.pop();
+                    Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
+                    backgroundColor: AppTheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: Text(
                     'Send Reset Link',
-                    style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
+                    style: AppTheme.titleLarge.copyWith(color: Colors.black),
                   ),
                 ),
               ),

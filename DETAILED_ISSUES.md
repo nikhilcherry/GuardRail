@@ -271,11 +271,3 @@ Suggested fix
 - `lib/screens/guard/*` — guard flow pages (view all, check-ins, recent entries).
 - `lib/screens/admin/*` — admin dashboard and settings.
 
-If you want, I can:
-- produce a prioritized PR that implements P0 fixes (logout, back navigation, persistence), or
-- implement smaller isolated fixes (e.g., make the back arrow work and connect the logout button), or
-- create a test plan and unit/widget tests for the flows above.
-
----
-
-End of report.
