@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/resident_provider.dart';
 
-class ResidentVisitorsScreen extends StatelessWidget {
+class ResidentVisitorsScreen extends StatefulWidget {
   const ResidentVisitorsScreen({super.key});
+
+  @override
+  State<ResidentVisitorsScreen> createState() => _ResidentVisitorsScreenState();
+}
+
+class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focusedDay;
+  }
+
+  List<Visitor> _getVisitorsForDay(List<Visitor> allVisitors, DateTime day) {
+    return allVisitors.where((visitor) {
+      return isSameDay(visitor.date, day);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,85 +44,153 @@ class ResidentVisitorsScreen extends StatelessWidget {
       body: SafeArea(
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
-            final visitors = residentProvider.allVisitors;
+            final allVisitors = residentProvider.allVisitors;
+            final selectedVisitors = _getVisitorsForDay(allVisitors, _selectedDay!);
 
-            if (visitors.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    'No visitors yet.\nYou’ll see your full visitor history here.',
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondary,
+            return Column(
+              children: [
+                TableCalendar<Visitor>(
+                  firstDay: DateTime.utc(2023, 1, 1),
+                  lastDay: DateTime.utc(2026, 12, 31),
+                  focusedDay: _focusedDay,
+                  calendarFormat: _calendarFormat,
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDay, day);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    if (!isSameDay(_selectedDay, selectedDay)) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    }
+                  },
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedDay = focusedDay;
+                  },
+                  eventLoader: (day) {
+                    return _getVisitorsForDay(allVisitors, day);
+                  },
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: const TextStyle(color: AppTheme.textSecondary),
+                    weekendTextStyle: const TextStyle(color: AppTheme.textSecondary),
+                    selectedDecoration: const BoxDecoration(
+                      color: AppTheme.primary,
+                      shape: BoxShape.circle,
                     ),
-                    textAlign: TextAlign.center,
+                    todayDecoration: BoxDecoration(
+                      color: AppTheme.primary.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    selectedTextStyle: const TextStyle(color: Colors.black),
+                    markerDecoration: const BoxDecoration(
+                      color: AppTheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  headerStyle: HeaderStyle(
+                    formatButtonTextStyle: const TextStyle(color: AppTheme.primary),
+                    formatButtonDecoration: BoxDecoration(
+                      border: Border.all(color: AppTheme.primary),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    leftChevronIcon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
+                    rightChevronIcon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
+                    titleCentered: true,
+                    titleTextStyle: AppTheme.titleMedium,
+                  ),
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(color: AppTheme.textSecondary),
+                    weekendStyle: TextStyle(color: AppTheme.textSecondary),
                   ),
                 ),
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: visitors.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final visitor = visitors[index];
-
-                final typeLabel = visitor.type[0].toUpperCase() +
-                    visitor.type.substring(1);
-                final statusLabel = visitor.status[0].toUpperCase() +
-                    visitor.status.substring(1);
-                final timeLabel =
-                    DateFormat('MMM d, h:mm a').format(visitor.date);
-
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppTheme.borderDark.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceDark,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppTheme.borderDark.withOpacity(0.3),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: selectedVisitors.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Text(
+                              'No visitors on this day.',
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: AppTheme.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          itemCount: selectedVisitors.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final visitor = selectedVisitors[index];
+
+                            final typeLabel = visitor.type[0].toUpperCase() +
+                                visitor.type.substring(1);
+                            final statusLabel = visitor.status[0].toUpperCase() +
+                                visitor.status.substring(1);
+                            final timeLabel =
+                                DateFormat('h:mm a').format(visitor.date);
+
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceDark.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppTheme.borderDark.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.surfaceDark,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppTheme.borderDark.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_outline,
+                                      color: AppTheme.textSecondary,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          visitor.name,
+                                          style: AppTheme.titleSmall,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '$typeLabel • $statusLabel • $timeLabel',
+                                          style: AppTheme.labelSmall,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        child: const Icon(
-                          Icons.person_outline,
-                          color: AppTheme.textSecondary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              visitor.name,
-                              style: AppTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '$typeLabel • $statusLabel • $timeLabel',
-                              style: AppTheme.labelSmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ),
+              ],
             );
           },
         ),
@@ -154,4 +244,3 @@ class _ResidentBottomNav extends StatelessWidget {
     );
   }
 }
-
