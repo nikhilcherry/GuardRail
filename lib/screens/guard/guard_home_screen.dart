@@ -69,6 +69,8 @@ class _GateControlView extends StatefulWidget {
 }
 
 class _GateControlViewState extends State<_GateControlView> {
+  bool _showOnlyInside = false;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -125,9 +127,27 @@ class _GateControlViewState extends State<_GateControlView> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
-                      children: const [
-                        _QuickActions(),
-                        SizedBox(height: 32),
+                      children: [
+                        const _QuickActions(),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recent Activity',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            FilterChip(
+                              label: const Text('Currently Inside'),
+                              selected: _showOnlyInside,
+                              onSelected: (val) => setState(() => _showOnlyInside = val),
+                              checkmarkColor: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -144,12 +164,34 @@ class _GateControlViewState extends State<_GateControlView> {
                       );
                     }
 
+                    final entries = _showOnlyInside
+                        ? guardProvider.entries
+                            .where((e) => e.status == 'approved' && e.exitTime == null)
+                            .toList()
+                        : guardProvider.entries;
+
+                    if (entries.isEmpty) {
+                       return SliverToBoxAdapter(
+                         child: Padding(
+                           padding: const EdgeInsets.all(40),
+                           child: Center(
+                             child: Text(
+                               'No visitors found',
+                               style: theme.textTheme.bodyLarge?.copyWith(
+                                 color: theme.disabledColor,
+                               ),
+                             ),
+                           ),
+                         ),
+                       );
+                    }
+
                     return SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final entry = guardProvider.entries[index];
+                            final entry = entries[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                                 child: InkWell(
@@ -161,7 +203,7 @@ class _GateControlViewState extends State<_GateControlView> {
                                 ),
                             );
                           },
-                          childCount: guardProvider.entries.length,
+                          childCount: entries.length,
                         ),
                       ),
                     );
@@ -410,9 +452,21 @@ class _EntryCard extends StatelessWidget {
   final VisitorEntry entry;
   const _EntryCard({required this.entry});
 
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60);
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    }
+    return '${minutes}m';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isApproved = entry.status == 'approved';
+    final isInside = isApproved && entry.exitTime == null;
+    final duration = entry.exitTime != null ? entry.exitTime!.difference(entry.time) : null;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -429,14 +483,98 @@ class _EntryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.name, style: theme.textTheme.titleSmall),
+                Row(
+                  children: [
+                    Text(entry.name, style: theme.textTheme.titleSmall),
+                    if (isInside) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.green, width: 0.5),
+                        ),
+                        child: const Text(
+                          'INSIDE',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
                 Text('Flat ${entry.flatNumber}',
                     style: theme.textTheme.labelSmall),
+                if (duration != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      'Duration: ${_formatDuration(duration)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 10,
+                        color: theme.disabledColor,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          Text(DateFormat('HH:mm').format(entry.time),
-              style: theme.textTheme.labelSmall),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(DateFormat('HH:mm').format(entry.time),
+                  style: theme.textTheme.labelSmall),
+              if (entry.exitTime != null)
+                Text(
+                  'Exit: ${DateFormat('HH:mm').format(entry.exitTime!)}',
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.disabledColor),
+                ),
+              if (isInside)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () {
+                      // Prevent row tap
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Mark Exit?'),
+                          content: Text('Mark ${entry.name} as exited?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.read<GuardProvider>().markExit(entry.id);
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Text(
+                        'Mark Exit',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

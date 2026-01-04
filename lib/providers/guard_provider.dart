@@ -8,6 +8,7 @@ class VisitorEntry {
   final String purpose;
   final String status; // approved, pending, rejected
   final DateTime time;
+  final DateTime? exitTime;
   final String? guardName;
   final String? vehicleNumber;
 
@@ -18,6 +19,7 @@ class VisitorEntry {
     required this.purpose,
     required this.status,
     required this.time,
+    this.exitTime,
     this.guardName,
     this.vehicleNumber,
   });
@@ -94,6 +96,7 @@ class GuardProvider extends ChangeNotifier {
           purpose: v.purpose,
           status: v.status.name,
           time: v.time,
+          exitTime: v.exitTime,
         ));
       }
       notifyListeners();
@@ -168,6 +171,15 @@ class GuardProvider extends ChangeNotifier {
     }
   }
 
+  // Mark visitor exit
+  Future<void> markExit(String id) async {
+    try {
+      VisitorRepository().markExit(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Update visitor entry
   Future<void> updateVisitorEntry({
     required String id,
@@ -189,6 +201,7 @@ class GuardProvider extends ChangeNotifier {
           purpose: purpose,
           status: oldEntry.status,
           time: oldEntry.time,
+          exitTime: oldEntry.exitTime,
           guardName: oldEntry.guardName,
           vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
         );
