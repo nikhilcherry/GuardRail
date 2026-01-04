@@ -8,6 +8,7 @@ import '../../widgets/coming_soon.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
+import '../../widgets/visitor_dialog.dart';
 import 'guard_check_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'visitor_status_screen.dart';
@@ -148,9 +149,8 @@ class _GateControlViewState extends State<_GateControlView> {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                                 child: InkWell(
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => VisitorStatusScreen(entryId: entry.id)),
+                                  onTap: () => context.push(
+                                    '/visitor_details/${entry.id}?source=guard',
                                   ),
                                   child: _EntryCard(entry: entry),
                                 ),
@@ -173,7 +173,7 @@ class _GateControlViewState extends State<_GateControlView> {
   void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
     showDialog(
       context: context,
-      builder: (context) => _VisitorDialog(entry: entry),
+      builder: (context) => VisitorDialog(entry: entry),
     );
   }
 }
@@ -195,7 +195,7 @@ class _QuickActions extends StatelessWidget {
             label: 'Register\nVisitor',
             onTap: () => showDialog(
               context: context,
-              builder: (context) => const _VisitorDialog(),
+              builder: (context) => const VisitorDialog(),
             ),
           ),
         ),
@@ -250,121 +250,6 @@ class _QuickActions extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleSmall?.copyWith(height: 1.2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _VisitorDialog extends StatefulWidget {
-  final VisitorEntry? entry;
-  const _VisitorDialog({this.entry});
-
-  @override
-  State<_VisitorDialog> createState() => _VisitorDialogState();
-}
-
-class _VisitorDialogState extends State<_VisitorDialog> {
-  late TextEditingController nameCtrl;
-  late TextEditingController flatCtrl;
-  String purpose = 'guest';
-  bool loading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
-    flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
-    purpose = widget.entry?.purpose ?? 'guest';
-  }
-
-  @override
-  void dispose() {
-    nameCtrl.dispose();
-    flatCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final editing = widget.entry != null;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(editing ? 'Edit Visitor' : 'Register Visitor',
-                style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: flatCtrl,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Visitor Name'),
-            ),
-            const SizedBox(height: 12),
-
-            DropdownButtonFormField<String>(
-              value: purpose,
-              items: const [
-                DropdownMenuItem(value: 'guest', child: Text('Guest')),
-                DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
-                DropdownMenuItem(value: 'service', child: Text('Service')),
-              ],
-              onChanged: (v) => setState(() => purpose = v!),
-            ),
-
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: loading
-                  ? null
-                  : () async {
-                      setState(() => loading = true);
-
-                      final guard = context.read<GuardProvider>();
-                      VisitorEntry? entry;
-                      if (editing) {
-                        await guard.updateVisitorEntry(
-                          id: widget.entry!.id,
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                        entry = widget.entry;
-                      } else {
-                        entry = await guard.registerNewVisitor(
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                      }
-
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        if (entry != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VisitorStatusScreen(entryId: entry!.id),
-                            ),
-                          );
-                        }
-                      }
-                    },
-              child: loading
-                  ? const CircularProgressIndicator()
-                  : Text(editing ? 'Save' : 'Register'),
             ),
           ],
         ),

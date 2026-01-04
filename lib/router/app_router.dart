@@ -14,6 +14,7 @@ import '../screens/resident/resident_settings_screen.dart';
 import '../screens/resident/flat_management_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_additional_screens.dart';
+import '../screens/shared/visitor_details_screen.dart';
 
 class AppRouter {
   final AuthProvider authProvider;
@@ -43,6 +44,14 @@ class AppRouter {
       GoRoute(
         path: '/id_verification',
         builder: (context, state) => const IDVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/visitor_details/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final source = state.uri.queryParameters['source'] ?? 'resident';
+          return VisitorDetailsScreen(visitorId: id, source: source);
+        },
       ),
       GoRoute(
         path: '/guard_home',
