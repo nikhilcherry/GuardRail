@@ -10,6 +10,7 @@ import '../../providers/guard_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../main.dart';
+import '../../utils/validators.dart';
 
 class AdminFlatsScreen extends StatefulWidget {
   const AdminFlatsScreen({Key? key}) : super(key: key);
@@ -41,25 +42,29 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
         TextEditingController(text: flat?['flat'] ?? '');
     final residentController = TextEditingController(
         text: flat?['resident']?.replaceFirst('Owner ID: ', '') ?? '');
+    final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
-        content: SingleChildScrollView(
+        content: Form(
+          key: formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              TextFormField(
                 controller: flatController,
-                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(labelText: 'Flat Name'),
+                validator: Validators.validateFlatNumber,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
               const SizedBox(height: 16),
-              TextField(
+              TextFormField(
                 controller: residentController,
-                textInputAction: TextInputAction.done,
                 decoration: const InputDecoration(labelText: 'Owner Name'),
+                validator: Validators.validateName,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
             ],
           ),
@@ -71,6 +76,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
           ),
           ElevatedButton(
             onPressed: () {
+              if (!formKey.currentState!.validate()) return;
               if (isEditing) {
                 provider.updateFlat(
                   flat!['id']!,

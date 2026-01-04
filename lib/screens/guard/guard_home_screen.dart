@@ -1,16 +1,23 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
+import '../../widgets/visitor_dialog.dart';
+import '../../utils/validators.dart';
 import 'guard_check_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'visitor_status_screen.dart';
+import '../../widgets/sos_button.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -28,6 +35,9 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      floatingActionButton: SOSButton(
+        onAction: () => context.read<GuardProvider>().logEmergency(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: theme.cardColor,
         selectedItemColor: theme.colorScheme.primary,
@@ -64,6 +74,8 @@ class _GateControlView extends StatefulWidget {
 }
 
 class _GateControlViewState extends State<_GateControlView> {
+  bool _showOnlyInside = false;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -120,9 +132,27 @@ class _GateControlViewState extends State<_GateControlView> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
-                      children: const [
-                        _QuickActions(),
-                        SizedBox(height: 32),
+                      children: [
+                        const _QuickActions(),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recent Activity',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            FilterChip(
+                              label: const Text('Currently Inside'),
+                              selected: _showOnlyInside,
+                              onSelected: (val) => setState(() => _showOnlyInside = val),
+                              checkmarkColor: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -139,24 +169,45 @@ class _GateControlViewState extends State<_GateControlView> {
                       );
                     }
 
+                    final entries = _showOnlyInside
+                        ? guardProvider.entries
+                            .where((e) => e.status == 'approved' && e.exitTime == null)
+                            .toList()
+                        : guardProvider.entries;
+
+                    if (entries.isEmpty) {
+                       return SliverToBoxAdapter(
+                         child: Padding(
+                           padding: const EdgeInsets.all(40),
+                           child: Center(
+                             child: Text(
+                               'No visitors found',
+                               style: theme.textTheme.bodyLarge?.copyWith(
+                                 color: theme.disabledColor,
+                               ),
+                             ),
+                           ),
+                         ),
+                       );
+                    }
+
                     return SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final entry = guardProvider.entries[index];
+                            final entry = entries[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                                 child: InkWell(
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => VisitorStatusScreen(entryId: entry.id)),
+                                  onTap: () => context.push(
+                                    '/visitor_details/${entry.id}?source=guard',
                                   ),
                                   child: _EntryCard(entry: entry),
                                 ),
                             );
                           },
-                          childCount: guardProvider.entries.length,
+                          childCount: entries.length,
                         ),
                       ),
                     );
@@ -173,7 +224,7 @@ class _GateControlViewState extends State<_GateControlView> {
   void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
     showDialog(
       context: context,
-      builder: (context) => _VisitorDialog(entry: entry),
+      builder: (context) => VisitorDialog(entry: entry),
     );
   }
 }
@@ -271,6 +322,11 @@ class _VisitorDialogState extends State<_VisitorDialog> {
   late TextEditingController flatCtrl;
   String purpose = 'guest';
   bool loading = false;
+  XFile? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  // Track if the image has been modified during this session
+  bool _imageChanged = false;
 
   @override
   void initState() {
@@ -278,6 +334,9 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
     flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
     purpose = widget.entry?.purpose ?? 'guest';
+    if (widget.entry?.photoPath != null) {
+      _imageFile = XFile(widget.entry!.photoPath!);
+    }
   }
 
   @override
@@ -285,6 +344,27 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     nameCtrl.dispose();
     flatCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+      if (photo != null) {
+        setState(() {
+          _imageFile = photo;
+          _imageChanged = true;
+        });
+      }
+    } catch (e) {
+      // Handle camera error or permission denial gracefully
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open camera: $e')),
+      );
+    }
   }
 
   @override
@@ -302,6 +382,39 @@ class _VisitorDialogState extends State<_VisitorDialog> {
             children: [
               Text(editing ? 'Edit Visitor' : 'Register Visitor',
                   style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 16),
+
+              // Photo Capture Area
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: theme.dividerColor),
+                    image: _imageFile != null
+                        ? DecorationImage(
+                            image: FileImage(File(_imageFile!.path)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _imageFile == null
+                      ? Icon(Icons.camera_alt,
+                          size: 40, color: theme.disabledColor)
+                      : null,
+                ),
+              ),
+              if (_imageFile == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text('Tap to take photo',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.disabledColor)),
+                ),
+
               const SizedBox(height: 16),
 
               TextField(
@@ -335,34 +448,64 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                     : () async {
                         setState(() => loading = true);
 
-                        final guard = context.read<GuardProvider>();
-                        VisitorEntry? entry;
-                        if (editing) {
-                          await guard.updateVisitorEntry(
-                            id: widget.entry!.id,
-                            name: nameCtrl.text,
-                            flatNumber: flatCtrl.text,
-                            purpose: purpose,
-                          );
-                          entry = widget.entry;
-                        } else {
-                          entry = await guard.registerNewVisitor(
-                            name: nameCtrl.text,
-                            flatNumber: flatCtrl.text,
-                            purpose: purpose,
-                          );
-                        }
+                        try {
+                          String? savedPhotoPath;
 
-                        if (context.mounted) {
-                          Navigator.pop(context); // Close dialog
-                          if (entry != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => VisitorStatusScreen(entryId: entry!.id),
-                              ),
+                          if (_imageFile != null) {
+                             if (_imageChanged) {
+                               // Only save if changed (new photo)
+                               final directory = await getApplicationDocumentsDirectory();
+                               final fileName = 'visitor_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                               final savedImage = await File(_imageFile!.path).copy(path.join(directory.path, fileName));
+                               savedPhotoPath = savedImage.path;
+                             } else {
+                               // Keep existing path
+                               savedPhotoPath = widget.entry?.photoPath;
+                             }
+                          } else {
+                             // _imageFile is null, so photo might have been removed or never existed
+                             savedPhotoPath = null;
+                          }
+
+                          final guard = context.read<GuardProvider>();
+                          VisitorEntry? entry;
+                          if (editing) {
+                            await guard.updateVisitorEntry(
+                              id: widget.entry!.id,
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              photoPath: savedPhotoPath,
+                            );
+                            entry = widget.entry;
+                          } else {
+                            entry = await guard.registerNewVisitor(
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              photoPath: savedPhotoPath,
                             );
                           }
+
+                          if (context.mounted) {
+                            Navigator.pop(context); // Close dialog
+                            if (entry != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VisitorStatusScreen(entryId: entry!.id),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => loading = false);
                         }
                       },
                 child: loading
@@ -381,9 +524,21 @@ class _EntryCard extends StatelessWidget {
   final VisitorEntry entry;
   const _EntryCard({required this.entry});
 
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60);
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    }
+    return '${minutes}m';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isApproved = entry.status == 'approved';
+    final isInside = isApproved && entry.exitTime == null;
+    final duration = entry.exitTime != null ? entry.exitTime!.difference(entry.time) : null;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -394,20 +549,149 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.person_outline),
+          // Thumbnail
+          GestureDetector(
+            onTap: entry.photoPath != null
+                ? () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            InteractiveViewer(
+                              child: Image.file(File(entry.photoPath!)),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                : null,
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.dividerColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                image: entry.photoPath != null
+                    ? DecorationImage(
+                        image: FileImage(File(entry.photoPath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: entry.photoPath == null
+                  ? const Icon(Icons.person_outline)
+                  : null,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.name, style: theme.textTheme.titleSmall),
+                Row(
+                  children: [
+                    Text(entry.name, style: theme.textTheme.titleSmall),
+                    if (isInside) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.green, width: 0.5),
+                        ),
+                        child: const Text(
+                          'INSIDE',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
                 Text('Flat ${entry.flatNumber}',
                     style: theme.textTheme.labelSmall),
+                if (duration != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      'Duration: ${_formatDuration(duration)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 10,
+                        color: theme.disabledColor,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          Text(DateFormat('HH:mm').format(entry.time),
-              style: theme.textTheme.labelSmall),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(DateFormat('HH:mm').format(entry.time),
+                  style: theme.textTheme.labelSmall),
+              if (entry.exitTime != null)
+                Text(
+                  'Exit: ${DateFormat('HH:mm').format(entry.exitTime!)}',
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.disabledColor),
+                ),
+              if (isInside)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () {
+                      // Prevent row tap
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Mark Exit?'),
+                          content: Text('Mark ${entry.name} as exited?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.read<GuardProvider>().markExit(entry.id);
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Text(
+                        'Mark Exit',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

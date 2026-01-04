@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/flat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/validators.dart';
 
 class FlatManagementScreen extends StatefulWidget {
   const FlatManagementScreen({Key? key}) : super(key: key);
@@ -278,51 +279,56 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: theme.dividerColor),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Create New Flat',
-                style: theme.textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _flatNameController,
-                decoration: InputDecoration(
-                  labelText: 'Flat Name (e.g. "Flat 402")',
-                  filled: true,
-                  fillColor: theme.scaffoldBackgroundColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: theme.dividerColor),
-                  ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Create New Flat',
+                  style: theme.textTheme.titleLarge,
                 ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_flatNameController.text.isNotEmpty) {
-                       await flatProvider.createFlat(
-                        _flatNameController.text,
-                        authProvider.userPhone ?? authProvider.userEmail ?? 'user',
-                        authProvider.userName ?? 'User',
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _flatNameController,
+                  validator: Validators.validateFlatNumber,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  decoration: InputDecoration(
+                    labelText: 'Flat Name (e.g. "Flat 402")',
+                    filled: true,
+                    fillColor: theme.scaffoldBackgroundColor,
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: theme.dividerColor),
                     ),
                   ),
-                  child: const Text('Create Flat'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                         await flatProvider.createFlat(
+                          _flatNameController.text,
+                          authProvider.userPhone ?? authProvider.userEmail ?? 'user',
+                          authProvider.userName ?? 'User',
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Create Flat'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 

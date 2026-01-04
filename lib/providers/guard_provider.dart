@@ -8,7 +8,10 @@ class VisitorEntry {
   final String purpose;
   final String status; // approved, pending, rejected
   final DateTime time;
+  final DateTime? exitTime;
   final String? guardName;
+  final String? photoPath;
+  final String? vehicleNumber;
 
   VisitorEntry({
     required this.id,
@@ -17,7 +20,10 @@ class VisitorEntry {
     required this.purpose,
     required this.status,
     required this.time,
+    this.exitTime,
     this.guardName,
+    this.photoPath,
+    this.vehicleNumber,
   });
 }
 
@@ -92,6 +98,8 @@ class GuardProvider extends ChangeNotifier {
           purpose: v.purpose,
           status: v.status.name,
           time: v.time,
+          exitTime: v.exitTime,
+          photoPath: v.photoPath,
         ));
       }
       notifyListeners();
@@ -114,6 +122,8 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
+    String? vehicleNumber,
   }) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -126,6 +136,7 @@ class GuardProvider extends ChangeNotifier {
         purpose: purpose,
         status: VisitorStatus.pending,
         time: time,
+        photoPath: photoPath,
       );
       
       VisitorRepository().addVisitor(newShared);
@@ -138,6 +149,8 @@ class GuardProvider extends ChangeNotifier {
         status: 'pending',
         time: time,
         guardName: 'Guard',
+        photoPath: photoPath,
+        vehicleNumber: vehicleNumber,
       );
       
       return newEntry;
@@ -164,16 +177,37 @@ class GuardProvider extends ChangeNotifier {
     }
   }
 
+  // Mark visitor exit
+  Future<void> markExit(String id) async {
+    try {
+      VisitorRepository().markExit(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Update visitor entry
   Future<void> updateVisitorEntry({
     required String id,
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
+    String? vehicleNumber,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
 
+      // Update repository
+      VisitorRepository().updateVisitor(
+        id,
+        name: name,
+        flatNumber: flatNumber,
+        purpose: purpose,
+        photoPath: photoPath,
+      );
+
+      // Also update local state for immediate UI feedback
       final index = _entries.indexWhere((entry) => entry.id == id);
       if (index != -1) {
         final oldEntry = _entries[index];
@@ -184,7 +218,10 @@ class GuardProvider extends ChangeNotifier {
           purpose: purpose,
           status: oldEntry.status,
           time: oldEntry.time,
+          exitTime: oldEntry.exitTime,
           guardName: oldEntry.guardName,
+          photoPath: photoPath ?? oldEntry.photoPath,
+          vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
         );
         notifyListeners();
       }
@@ -257,5 +294,11 @@ class GuardProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void logEmergency() {
+    final timestamp = DateTime.now();
+    // In a real application, this would send an API request to the backend.
+    print('EMERGENCY: Guard triggered SOS at $timestamp');
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
+import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _passwordController;
   late FocusNode _emailFocusNode;
   late FocusNode _passwordFocusNode;
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
@@ -39,10 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleEmailLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -133,48 +132,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Email
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Email', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _emailController,
-                            focusNode: _emailFocusNode,
-                            textInputAction: TextInputAction.next,
-                            onSubmitted: (_) {
-                              FocusScope.of(context).requestFocus(_passwordFocusNode);
-                            },
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.email_outlined),
-                              hintText: 'your@email.com',
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Email
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Email', style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _emailController,
+                                  focusNode: _emailFocusNode,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onFieldSubmitted: (_) {
+                                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                  },
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validateEmail,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.email_outlined),
+                                    hintText: 'your@email.com',
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 16),
+                            const SizedBox(height: 16),
 
-                      // Password
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Password', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _passwordController,
-                            focusNode: _passwordFocusNode,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _handleEmailLogin(),
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.lock_outlined),
-                              hintText: 'Enter password',
+                            // Password
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Password', style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  focusNode: _passwordFocusNode,
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _handleEmailLogin(),
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validatePassword,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.lock_outlined),
+                                    hintText: 'Enter password',
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
 
                       const SizedBox(height: 32),

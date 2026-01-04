@@ -6,14 +6,17 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/id_verification_screen.dart';
+import '../screens/auth/lock_screen.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/guard/guard_home_screen.dart';
 import '../screens/resident/resident_home_screen.dart';
 import '../screens/resident/resident_visitors_screen.dart';
 import '../screens/resident/resident_settings_screen.dart';
 import '../screens/resident/flat_management_screen.dart';
+import '../screens/resident/generate_qr_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_additional_screens.dart';
+import '../screens/shared/visitor_details_screen.dart';
 
 class AppRouter {
   final AuthProvider authProvider;
@@ -45,6 +48,18 @@ class AppRouter {
         builder: (context, state) => const IDVerificationScreen(),
       ),
       GoRoute(
+        path: '/visitor_details/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final source = state.uri.queryParameters['source'] ?? 'resident';
+          return VisitorDetailsScreen(visitorId: id, source: source);
+        },
+      ),
+      GoRoute(
+        path: '/lock',
+        builder: (context, state) => const LockScreen(),
+      ),
+      GoRoute(
         path: '/guard_home',
         builder: (context, state) => const GuardHomeScreen(),
       ),
@@ -63,6 +78,10 @@ class AppRouter {
           GoRoute(
             path: 'flat',
             builder: (context, state) => const FlatManagementScreen(),
+          ),
+          GoRoute(
+            path: 'generate_qr',
+            builder: (context, state) => const GenerateQRScreen(),
           ),
         ],
       ),
@@ -90,8 +109,25 @@ class AppRouter {
       final isLoggedIn = authProvider.isLoggedIn;
       final isVerified = authProvider.isVerified;
       final selectedRole = authProvider.selectedRole;
+      final isAppLocked = authProvider.isAppLocked;
 
       final currentPath = state.uri.toString();
+
+      // Lock Logic
+      if (isAppLocked) {
+        if (currentPath != '/lock') {
+          return '/lock';
+        }
+        return null;
+      } else if (currentPath == '/lock') {
+        // If unlocked but still on lock screen, redirect to home
+         if (isLoggedIn) {
+            // Re-evaluate redirect logic below to find correct home
+         } else {
+            return '/';
+         }
+      }
+
       final isLoggingIn = currentPath == '/login';
       final isRoleSelection = currentPath == '/';
       final isSignUp = currentPath == '/sign_up';
@@ -111,7 +147,7 @@ class AppRouter {
         }
 
         // If verified (or not required), but trying to access auth/verification screens, redirect to home.
-        if (isLoggingIn || isRoleSelection || isSignUp || isVerification) {
+        if (isLoggingIn || isRoleSelection || isSignUp || isVerification || currentPath == '/lock') {
           switch (selectedRole) {
             case 'guard':
               return '/guard_home';
