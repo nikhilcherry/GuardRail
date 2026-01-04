@@ -65,11 +65,11 @@ class GuardrailApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
         ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => FlatProvider()),
         ChangeNotifierProxyProvider<FlatProvider, AdminProvider>(
           create: (context) => AdminProvider(context.read<FlatProvider>()),
           update: (context, flatProvider, previous) => AdminProvider(flatProvider),
         ),
-        ChangeNotifierProvider(create: (_) => FlatProvider()),
       ],
       child: Builder(
         builder: (context) {
