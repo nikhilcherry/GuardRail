@@ -49,13 +49,14 @@ class AdminProvider extends ChangeNotifier {
   // ============ FLATS MANAGEMENT ============
 
   // Get all flats
-  List<Map<String, dynamic>> get allFlats => _flatRepository.allFlats;
+  List<Flat> get allFlats => _flatRepository.allFlats;
 
   // Get pending flats
-  List<String> get pendingFlats => _flatRepository.getPendingFlats();
+  List<Flat> get pendingFlats => _flatRepository.getPendingFlats();
 
   // Get active flats
-  List<String> get activeFlats => _flatRepository.getActiveFlats();
+  List<Flat> get activeFlats => _flatRepository.getActiveFlats();
+
 
   // Get flats from FlatProvider with mapping
   List<Map<String, dynamic>> get flats {

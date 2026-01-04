@@ -78,7 +78,8 @@ class _GuardCheckScreenState extends State<GuardCheckScreen> {
 
        if (!mounted) return;
 
-       final guardId = context.read<AuthProvider>().user?.uid ?? 'unknown_guard';
+       final guardId = context.read<AuthProvider>().userId;
+
 
        await context.read<GuardProvider>().processScan(
          qrCode: code,

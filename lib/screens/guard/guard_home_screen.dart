@@ -9,6 +9,8 @@ import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
 import 'guard_check_screen.dart';
+import 'qr_scanner_screen.dart';
+import 'visitor_status_screen.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -119,7 +121,7 @@ class _GateControlViewState extends State<_GateControlView> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: const [
-                        _RegisterVisitorButton(),
+                        _QuickActions(),
                         SizedBox(height: 32),
                       ],
                     ),
@@ -145,10 +147,13 @@ class _GateControlViewState extends State<_GateControlView> {
                             final entry = guardProvider.entries[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: InkWell(
-                                onTap: () => _showVisitorDialog(context, entry: entry),
-                                child: _EntryCard(entry: entry),
-                              ),
+                                child: InkWell(
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => VisitorStatusScreen(entryId: entry.id)),
+                                  ),
+                                  child: _EntryCard(entry: entry),
+                                ),
                             );
                           },
                           childCount: guardProvider.entries.length,
@@ -173,30 +178,79 @@ class _GateControlViewState extends State<_GateControlView> {
   }
 }
 
-class _RegisterVisitorButton extends StatelessWidget {
-  const _RegisterVisitorButton({Key? key}) : super(key: key);
+class _QuickActions extends StatelessWidget {
+  const _QuickActions({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    return Row(
+      children: [
+        // Manual Registration
+        Expanded(
+          child: _actionCard(
+            context,
+            icon: Icons.person_add_outlined,
+            label: 'Register\nVisitor',
+            onTap: () => showDialog(
+              context: context,
+              builder: (context) => const _VisitorDialog(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        // QR Scanning
+        Expanded(
+          child: _actionCard(
+            context,
+            icon: Icons.qr_code_scanner,
+            label: 'Scan\nVisitor QR',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actionCard(BuildContext context,
+      {required IconData icon, required String label, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return InkWell(
-      onTap: () => showDialog(
-        context: context,
-        builder: (context) => const _VisitorDialog(),
-      ),
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: theme.dividerColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
-            Icon(Icons.add, size: 40, color: theme.colorScheme.primary),
-            const SizedBox(height: 8),
-            Text('Register New Visitor', style: theme.textTheme.titleMedium),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 28, color: theme.colorScheme.primary),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleSmall?.copyWith(height: 1.2),
+            ),
           ],
         ),
       ),
@@ -279,6 +333,7 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                       setState(() => loading = true);
 
                       final guard = context.read<GuardProvider>();
+                      VisitorEntry? entry;
                       if (editing) {
                         await guard.updateVisitorEntry(
                           id: widget.entry!.id,
@@ -286,15 +341,26 @@ class _VisitorDialogState extends State<_VisitorDialog> {
                           flatNumber: flatCtrl.text,
                           purpose: purpose,
                         );
+                        entry = widget.entry;
                       } else {
-                        await guard.registerNewVisitor(
+                        entry = await guard.registerNewVisitor(
                           name: nameCtrl.text,
                           flatNumber: flatCtrl.text,
                           purpose: purpose,
                         );
                       }
 
-                      if (context.mounted) Navigator.pop(context);
+                      if (context.mounted) {
+                        Navigator.pop(context); // Close dialog
+                        if (entry != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VisitorStatusScreen(entryId: entry!.id),
+                            ),
+                          );
+                        }
+                      }
                     },
               child: loading
                   ? const CircularProgressIndicator()

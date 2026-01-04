@@ -15,7 +15,14 @@ class GuardRepository {
   //   'linkedUserName': null, // Name from User Signup
   //   'createdAt': DateTime...
   // }
-  final List<Map<String, dynamic>> _guards = [];
+  final List<Map<String, dynamic>> _guards = [
+    {
+      'id': 'GUARD001',
+      'name': 'Default Guard',
+      'status': 'active',
+      'createdAt': DateTime(2025, 12, 1),
+    }
+  ];
 
   List<Map<String, dynamic>> getAllGuards() {
     return List.from(_guards);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../repositories/visitor_repository.dart';
 
 class VisitorEntry {
   final String id;
@@ -80,6 +81,21 @@ class GuardProvider extends ChangeNotifier {
 
   GuardProvider() {
     _loadData();
+    // Listen to shared repository updates
+    VisitorRepository().visitorStream.listen((updatedVisitors) {
+      _entries.clear();
+      for (var v in updatedVisitors) {
+        _entries.add(VisitorEntry(
+          id: v.id,
+          name: v.name,
+          flatNumber: v.flatNumber,
+          purpose: v.purpose,
+          status: v.status.name,
+          time: v.time,
+        ));
+      }
+      notifyListeners();
+    });
   }
 
   Future<void> _loadData() async {
@@ -100,20 +116,30 @@ class GuardProvider extends ChangeNotifier {
     required String purpose,
   }) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      final id = DateTime.now().millisecondsSinceEpoch.toString();
+      final time = DateTime.now();
       
+      final newShared = SharedVisitor(
+        id: id,
+        name: name,
+        flatNumber: flatNumber,
+        purpose: purpose,
+        status: VisitorStatus.pending,
+        time: time,
+      );
+      
+      VisitorRepository().addVisitor(newShared);
+
       final newEntry = VisitorEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: id,
         name: name,
         flatNumber: flatNumber,
         purpose: purpose,
         status: 'pending',
-        time: DateTime.now(),
+        time: time,
         guardName: 'Guard',
       );
       
-      _entries.insert(0, newEntry);
-      notifyListeners();
       return newEntry;
     } catch (e) {
       rethrow;
@@ -123,21 +149,7 @@ class GuardProvider extends ChangeNotifier {
   // Approve visitor
   Future<void> approveVisitor(String id) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final index = _entries.indexWhere((entry) => entry.id == id);
-      if (index != -1) {
-        _entries[index] = VisitorEntry(
-          id: _entries[index].id,
-          name: _entries[index].name,
-          flatNumber: _entries[index].flatNumber,
-          purpose: _entries[index].purpose,
-          status: 'approved',
-          time: _entries[index].time,
-          guardName: _entries[index].guardName,
-        );
-        notifyListeners();
-      }
+      VisitorRepository().updateStatus(id, VisitorStatus.approved);
     } catch (e) {
       rethrow;
     }
@@ -146,21 +158,7 @@ class GuardProvider extends ChangeNotifier {
   // Reject visitor
   Future<void> rejectVisitor(String id) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final index = _entries.indexWhere((entry) => entry.id == id);
-      if (index != -1) {
-        _entries[index] = VisitorEntry(
-          id: _entries[index].id,
-          name: _entries[index].name,
-          flatNumber: _entries[index].flatNumber,
-          purpose: _entries[index].purpose,
-          status: 'rejected',
-          time: _entries[index].time,
-          guardName: _entries[index].guardName,
-        );
-        notifyListeners();
-      }
+      VisitorRepository().updateStatus(id, VisitorStatus.rejected);
     } catch (e) {
       rethrow;
     }

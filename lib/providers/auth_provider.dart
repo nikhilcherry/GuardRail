@@ -5,6 +5,8 @@ import '../repositories/guard_repository.dart';
 import '../services/auth_service.dart';
 import '../services/logger_service.dart';
 import '../services/mock/mock_auth_service.dart';
+import '../repositories/flat_repository.dart';
+
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
@@ -29,6 +31,8 @@ class AuthProvider extends ChangeNotifier {
   String? get userEmail => _userEmail;
   bool get biometricsEnabled => _biometricsEnabled;
   bool get isVerified => _isVerified;
+  String get userId => _userEmail ?? _userPhone ?? 'unknown_user';
+
 
   AuthProvider({AuthRepository? repository})
       : _repository = repository ?? AuthRepository();

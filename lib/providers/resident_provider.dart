@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../repositories/visitor_repository.dart';
 
 class Visitor {
   final String id;
@@ -104,6 +105,23 @@ class ResidentProvider extends ChangeNotifier {
 
   ResidentProvider() {
     _loadData();
+    // Listen to shared repository updates
+    VisitorRepository().visitorStream.listen((updatedVisitors) {
+      _todaysVisitors.clear();
+      for (var v in updatedVisitors) {
+        _todaysVisitors.add(Visitor(
+          id: v.id,
+          name: v.name,
+          type: v.purpose,
+          status: v.status.name,
+          date: v.time,
+        ));
+      }
+      _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
+      _cachedPendingApprovals = null;
+      _cachedAllVisitors = null;
+       notifyListeners();
+    });
   }
 
   Future<void> _loadData() async {
@@ -120,24 +138,7 @@ class ResidentProvider extends ChangeNotifier {
   // Approve visitor request
   Future<void> approveVisitor(String visitorId) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final index = _todaysVisitors.indexWhere((v) => v.id == visitorId);
-      if (index != -1) {
-        final visitor = _todaysVisitors[index];
-        _todaysVisitors[index] = Visitor(
-          id: visitor.id,
-          name: visitor.name,
-          type: visitor.type,
-          status: 'approved',
-          date: visitor.date,
-          profileImage: visitor.profileImage,
-        );
-        _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
-        _cachedPendingApprovals = null; // Invalidate cache
-        _cachedAllVisitors = null; // Invalidate all visitors cache
-        notifyListeners();
-      }
+      VisitorRepository().updateStatus(visitorId, VisitorStatus.approved);
     } catch (e) {
       rethrow;
     }
@@ -146,24 +147,7 @@ class ResidentProvider extends ChangeNotifier {
   // Reject visitor request
   Future<void> rejectVisitor(String visitorId) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final index = _todaysVisitors.indexWhere((v) => v.id == visitorId);
-      if (index != -1) {
-        final visitor = _todaysVisitors[index];
-        _todaysVisitors[index] = Visitor(
-          id: visitor.id,
-          name: visitor.name,
-          type: visitor.type,
-          status: 'rejected',
-          date: visitor.date,
-          profileImage: visitor.profileImage,
-        );
-        _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
-        _cachedPendingApprovals = null; // Invalidate cache
-        _cachedAllVisitors = null; // Invalidate all visitors cache
-        notifyListeners();
-      }
+      VisitorRepository().updateStatus(visitorId, VisitorStatus.rejected);
     } catch (e) {
       rethrow;
     }

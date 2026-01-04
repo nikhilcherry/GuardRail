@@ -84,6 +84,21 @@ class _IDVerificationScreenState extends State<IDVerificationScreen> {
             ),
           ),
 
+          // Back Button
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => context.read<AuthProvider>().logout(),
+                  tooltip: 'Back to Role Selection',
+                ),
+              ),
+            ),
+          ),
+
           // Content
           SafeArea(
             child: Padding(
