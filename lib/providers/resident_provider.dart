@@ -89,6 +89,7 @@ class ResidentProvider extends ChangeNotifier {
   List<Visitor> get todaysVisitors => _todaysVisitors;
   List<Visitor> get pastVisitors => _pastVisitors;
   List<PreApprovedVisitor> get preApprovedVisitors => _preApprovedVisitors;
+  List<Visitor> get pendingVisitors => getPendingApprovals();
   List<Visitor> get allVisitors {
     if (_cachedAllVisitors != null) {
       return _cachedAllVisitors!;

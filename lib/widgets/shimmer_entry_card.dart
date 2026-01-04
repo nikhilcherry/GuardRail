@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerEntryCard extends StatelessWidget {
-  const ShimmerEntryCard({Key? key}) : super(key: key);
+  const ShimmerEntryCard({super.key});
 
   @override
   Widget build(BuildContext context) {
