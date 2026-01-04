@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
+import 'resident_profile_screen.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
   const ResidentSettingsScreen({super.key});
@@ -78,7 +79,14 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.person,
                       title: 'My Profile',
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ResidentProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
