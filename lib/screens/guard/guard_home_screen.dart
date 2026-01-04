@@ -8,6 +8,7 @@ import '../../widgets/coming_soon.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
+import '../../utils/validators.dart';
 import 'guard_check_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'visitor_status_screen.dart';
@@ -269,6 +270,8 @@ class _VisitorDialog extends StatefulWidget {
 class _VisitorDialogState extends State<_VisitorDialog> {
   late TextEditingController nameCtrl;
   late TextEditingController flatCtrl;
+  late TextEditingController vehicleCtrl;
+  final _formKey = GlobalKey<FormState>();
   String purpose = 'guest';
   bool loading = false;
 
@@ -277,6 +280,7 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     super.initState();
     nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
     flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
+    vehicleCtrl = TextEditingController(text: widget.entry?.vehicleNumber ?? '');
     purpose = widget.entry?.purpose ?? 'guest';
   }
 
@@ -284,6 +288,7 @@ class _VisitorDialogState extends State<_VisitorDialog> {
   void dispose() {
     nameCtrl.dispose();
     flatCtrl.dispose();
+    vehicleCtrl.dispose();
     super.dispose();
   }
 
@@ -296,77 +301,101 @@ class _VisitorDialogState extends State<_VisitorDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(editing ? 'Edit Visitor' : 'Register Visitor',
-                style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 16),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(editing ? 'Edit Visitor' : 'Register Visitor',
+                    style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
 
-            TextField(
-              controller: flatCtrl,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
-            ),
-            const SizedBox(height: 12),
+                TextFormField(
+                  controller: flatCtrl,
+                  decoration: const InputDecoration(labelText: 'Flat Number'),
+                  validator: Validators.validateFlatNumber,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                ),
+                const SizedBox(height: 12),
 
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Visitor Name'),
-            ),
-            const SizedBox(height: 12),
+                TextFormField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Visitor Name'),
+                  validator: Validators.validateName,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                ),
+                const SizedBox(height: 12),
 
-            DropdownButtonFormField<String>(
-              value: purpose,
-              items: const [
-                DropdownMenuItem(value: 'guest', child: Text('Guest')),
-                DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
-                DropdownMenuItem(value: 'service', child: Text('Service')),
+                TextFormField(
+                  controller: vehicleCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Vehicle Number (Optional)',
+                    helperText: 'Format: KA05AB1234'
+                  ),
+                  validator: Validators.validateVehicleNumber,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  textCapitalization: TextCapitalization.characters,
+                ),
+                const SizedBox(height: 12),
+
+                DropdownButtonFormField<String>(
+                  value: purpose,
+                  items: const [
+                    DropdownMenuItem(value: 'guest', child: Text('Guest')),
+                    DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                    DropdownMenuItem(value: 'service', child: Text('Service')),
+                  ],
+                  onChanged: (v) => setState(() => purpose = v!),
+                ),
+
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: loading
+                      ? null
+                      : () async {
+                          if (!_formKey.currentState!.validate()) return;
+                          setState(() => loading = true);
+
+                          final guard = context.read<GuardProvider>();
+                          VisitorEntry? entry;
+                          if (editing) {
+                            await guard.updateVisitorEntry(
+                              id: widget.entry!.id,
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              vehicleNumber: vehicleCtrl.text.isNotEmpty ? vehicleCtrl.text : null,
+                            );
+                            entry = widget.entry;
+                          } else {
+                            entry = await guard.registerNewVisitor(
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              vehicleNumber: vehicleCtrl.text.isNotEmpty ? vehicleCtrl.text : null,
+                            );
+                          }
+
+                          if (context.mounted) {
+                            Navigator.pop(context); // Close dialog
+                            if (entry != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VisitorStatusScreen(entryId: entry!.id),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: loading
+                      ? const CircularProgressIndicator()
+                      : Text(editing ? 'Save' : 'Register'),
+                ),
               ],
-              onChanged: (v) => setState(() => purpose = v!),
             ),
-
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: loading
-                  ? null
-                  : () async {
-                      setState(() => loading = true);
-
-                      final guard = context.read<GuardProvider>();
-                      VisitorEntry? entry;
-                      if (editing) {
-                        await guard.updateVisitorEntry(
-                          id: widget.entry!.id,
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                        entry = widget.entry;
-                      } else {
-                        entry = await guard.registerNewVisitor(
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                      }
-
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        if (entry != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VisitorStatusScreen(entryId: entry!.id),
-                            ),
-                          );
-                        }
-                      }
-                    },
-              child: loading
-                  ? const CircularProgressIndicator()
-                  : Text(editing ? 'Save' : 'Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );

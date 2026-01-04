@@ -9,6 +9,7 @@ class VisitorEntry {
   final String status; // approved, pending, rejected
   final DateTime time;
   final String? guardName;
+  final String? vehicleNumber;
 
   VisitorEntry({
     required this.id,
@@ -18,6 +19,7 @@ class VisitorEntry {
     required this.status,
     required this.time,
     this.guardName,
+    this.vehicleNumber,
   });
 }
 
@@ -114,6 +116,7 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? vehicleNumber,
   }) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -138,6 +141,7 @@ class GuardProvider extends ChangeNotifier {
         status: 'pending',
         time: time,
         guardName: 'Guard',
+        vehicleNumber: vehicleNumber,
       );
       
       return newEntry;
@@ -170,6 +174,7 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? vehicleNumber,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -185,6 +190,7 @@ class GuardProvider extends ChangeNotifier {
           status: oldEntry.status,
           time: oldEntry.time,
           guardName: oldEntry.guardName,
+          vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
         );
         notifyListeners();
       }
