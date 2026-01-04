@@ -7,6 +7,7 @@ import '../../providers/resident_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
+import 'resident_profile_screen.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
   const ResidentSettingsScreen({super.key});
@@ -16,9 +17,23 @@ class ResidentSettingsScreen extends StatefulWidget {
 }
 
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
-  // Local state for toggles is now driven by SettingsProvider
+  // Local state for biometrics toggle
+  bool _biometricsEnabled = false;
 
-  Future<void> _handleLogout(AppLocalizations l10n) async {
+  @override
+  void initState() {
+    super.initState();
+    // Sync with provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      setState(() {
+        _biometricsEnabled = authProvider.biometricsEnabled;
+      });
+    });
+  }
+
+  Future<void> _handleLogout() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -137,7 +152,6 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Assuming AppLocalizations is available now
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -169,7 +183,14 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.person,
                       title: l10n.myProfile,
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ResidentProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
@@ -192,9 +213,22 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                     _SettingsToggleItem(
                       icon: Icons.face,
                       title: l10n.biometrics,
-                      value: settingsProvider.biometricsEnabled,
-                      onChanged: (value) {
-                        settingsProvider.setBiometricsEnabled(value);
+                      value: _biometricsEnabled,
+                      onChanged: (value) async {
+                        final success = await context.read<AuthProvider>().toggleBiometrics(value);
+                        if (success) {
+                          if (mounted) {
+                            setState(() => _biometricsEnabled = value);
+                          }
+                        } else {
+                          // Show error and revert
+                          if (mounted) {
+                            setState(() => _biometricsEnabled = !value);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.biometricsUpdateFailed)),
+                            );
+                          }
+                        }
                       },
                     ),
                   ],
@@ -229,7 +263,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       title: l10n.darkMode,
                       value: themeProvider.isDarkMode,
                       onChanged: (value) {
-                         themeProvider.toggleTheme(value);
+                        themeProvider.toggleTheme(value);
                       },
                     ),
                   ],
@@ -237,19 +271,19 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 const SizedBox(height: 24),
                 // Support
                 _SettingsSection(
-                   title: l10n.support,
-                   children: [
-                     _SettingsItem(
-                       icon: Icons.support_agent,
-                       title: l10n.contactSupport,
-                       onTap: () {
-                         showDialog(
-                           context: context,
-                           builder: (_) => const ContactSupportDialog(),
-                         );
-                       },
-                     ),
-                   ],
+                  title: l10n.support,
+                  children: [
+                    _SettingsItem(
+                      icon: Icons.support_agent,
+                      title: l10n.contactSupport,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const ContactSupportDialog(),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 40),
                 // Logout Button
@@ -258,7 +292,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => _handleLogout(l10n),
+                      onPressed: _handleLogout,
                       icon: const Icon(Icons.logout, color: AppTheme.primary),
                       label: Text(
                         l10n.logout,
@@ -278,7 +312,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Version 2.4.1 (Build 890)', // Version string remains as is
+                  'Version 2.4.1 (Build 890)',
                   style: AppTheme.labelSmall.copyWith(
                     color: AppTheme.textTertiary,
                   ),

@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
+import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -17,6 +18,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late FocusNode _emailFocusNode;
+  late FocusNode _passwordFocusNode;
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
@@ -24,21 +28,22 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _handleEmailLogin() async {
     final l10n = AppLocalizations.of(context)!;
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.fillAllFields)),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -81,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Center(
@@ -130,40 +136,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Email
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(l10n.email, style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.email_outlined),
-                              hintText: 'your@email.com', // Typically not translated as it's an example
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Email
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.email, style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _emailController,
+                                  focusNode: _emailFocusNode,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onFieldSubmitted: (_) {
+                                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                  },
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validateEmail,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.email_outlined),
+                                    hintText: 'your@email.com',
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 16),
+                            const SizedBox(height: 16),
 
-                      // Password
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(l10n.password, style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outlined),
-                              hintText: l10n.enterPassword,
+                            // Password
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.password, style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  focusNode: _passwordFocusNode,
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _handleEmailLogin(),
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validatePassword,
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    hintText: l10n.enterPassword,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
 
                       const SizedBox(height: 32),
