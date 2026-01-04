@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resident_provider.dart';
+import 'resident_profile_screen.dart';
 
 class ResidentSettingsScreen extends StatefulWidget {
   const ResidentSettingsScreen({super.key});
@@ -14,6 +15,18 @@ class ResidentSettingsScreen extends StatefulWidget {
 class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   bool _biometricsEnabled = false;
   bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync with provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      setState(() {
+        _biometricsEnabled = authProvider.biometricsEnabled;
+      });
+    });
+  }
 
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
@@ -78,7 +91,14 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.person,
                       title: 'My Profile',
                       subtitle: '${residentProvider.residentName}, Flat ${residentProvider.flatNumber}',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ResidentProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _SettingsItem(
                       icon: Icons.lock,
@@ -102,8 +122,17 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.face,
                       title: 'Face ID Login',
                       value: _biometricsEnabled,
-                      onChanged: (value) {
-                        setState(() => _biometricsEnabled = value);
+                      onChanged: (value) async {
+                        final success = await context.read<AuthProvider>().toggleBiometrics(value);
+                        if (success) {
+                           setState(() => _biometricsEnabled = value);
+                        } else {
+                           // Show error or revert
+                           setState(() => _biometricsEnabled = !value);
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             const SnackBar(content: Text('Failed to update biometric settings')),
+                           );
+                        }
                       },
                     ),
                   ],
