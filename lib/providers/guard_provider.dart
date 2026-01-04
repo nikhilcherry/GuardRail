@@ -8,7 +8,9 @@ class VisitorEntry {
   final String purpose;
   final String status; // approved, pending, rejected
   final DateTime time;
+  final DateTime? exitTime;
   final String? guardName;
+  final String? vehicleNumber;
 
   VisitorEntry({
     required this.id,
@@ -17,7 +19,9 @@ class VisitorEntry {
     required this.purpose,
     required this.status,
     required this.time,
+    this.exitTime,
     this.guardName,
+    this.vehicleNumber,
   });
 }
 
@@ -92,6 +96,7 @@ class GuardProvider extends ChangeNotifier {
           purpose: v.purpose,
           status: v.status.name,
           time: v.time,
+          exitTime: v.exitTime,
         ));
       }
       notifyListeners();
@@ -114,6 +119,7 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? vehicleNumber,
   }) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -138,6 +144,7 @@ class GuardProvider extends ChangeNotifier {
         status: 'pending',
         time: time,
         guardName: 'Guard',
+        vehicleNumber: vehicleNumber,
       );
       
       return newEntry;
@@ -164,12 +171,22 @@ class GuardProvider extends ChangeNotifier {
     }
   }
 
+  // Mark visitor exit
+  Future<void> markExit(String id) async {
+    try {
+      VisitorRepository().markExit(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Update visitor entry
   Future<void> updateVisitorEntry({
     required String id,
     required String name,
     required String flatNumber,
     required String purpose,
+    String? vehicleNumber,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -184,7 +201,9 @@ class GuardProvider extends ChangeNotifier {
           purpose: purpose,
           status: oldEntry.status,
           time: oldEntry.time,
+          exitTime: oldEntry.exitTime,
           guardName: oldEntry.guardName,
+          vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
         );
         notifyListeners();
       }
@@ -257,5 +276,11 @@ class GuardProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void logEmergency() {
+    final timestamp = DateTime.now();
+    // In a real application, this would send an API request to the backend.
+    print('EMERGENCY: Guard triggered SOS at $timestamp');
   }
 }

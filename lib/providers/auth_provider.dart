@@ -22,6 +22,7 @@ class AuthProvider extends ChangeNotifier {
   String? _userEmail;
   bool _biometricsEnabled = false;
   bool _isVerified = false;
+  bool _isAppLocked = false;
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitializing => _isInitializing;
@@ -31,6 +32,7 @@ class AuthProvider extends ChangeNotifier {
   String? get userEmail => _userEmail;
   bool get biometricsEnabled => _biometricsEnabled;
   bool get isVerified => _isVerified;
+  bool get isAppLocked => _isAppLocked;
   String get userId => _userEmail ?? _userPhone ?? 'unknown_user';
 
 
@@ -85,11 +87,9 @@ class AuthProvider extends ChangeNotifier {
           _isLoggedIn = false;
           await _repository.clearAuth();
         } else if (_biometricsEnabled) {
-          // Enforce biometrics if enabled
-          final authenticated = await _authService.authenticate();
-          if (!authenticated) {
-             _isLoggedIn = false;
-          }
+          // Enforce biometrics if enabled (Lock app instead of auto-authenticating which might fail silently or block UI)
+          // We set locked state, Router will redirect to Lock Screen which handles the prompt.
+          _isAppLocked = true;
         }
       }
 
@@ -399,6 +399,22 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setBool('biometricsEnabled', false);
       notifyListeners();
       return true;
+    }
+  }
+
+  void lockApp() {
+    if (_biometricsEnabled && !_isAppLocked && _isLoggedIn) {
+       _isAppLocked = true;
+       notifyListeners();
+       _logger.info('App locked due to background state');
+    }
+  }
+
+  Future<void> unlockApp() async {
+    final authenticated = await _authService.authenticate();
+    if (authenticated) {
+      _isAppLocked = false;
+      notifyListeners();
     }
   }
 

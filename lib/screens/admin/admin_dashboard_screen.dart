@@ -8,6 +8,7 @@ import '../../main.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/guard_provider.dart';
+import 'admin_analytics_widgets.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -148,6 +149,42 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   context.go('/admin_dashboard/flats'),
                             ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Divider(),
+
+                // Analytics Section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Analytics (Mock Data)',
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      const ChartContainer(
+                        title: 'Weekly Visitor Count',
+                        child: VisitorCountChart(),
+                      ),
+                      const SizedBox(height: 16),
+                      const ChartContainer(
+                        title: 'Peak Hours',
+                        child: PeakHoursChart(),
+                      ),
+                      const SizedBox(height: 16),
+                      const ChartContainer(
+                        title: 'Guard Status',
+                        child: GuardStatusChart(),
+                      ),
+                      const SizedBox(height: 16),
+                      const ChartContainer(
+                        title: 'Approval Rates',
+                        child: ApprovalRateChart(),
                       ),
                     ],
                   ),
