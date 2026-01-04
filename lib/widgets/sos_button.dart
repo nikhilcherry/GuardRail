@@ -3,8 +3,9 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 class SOSButton extends StatelessWidget {
   final VoidCallback onAction;
+  final FlutterRingtonePlayer _ringtonePlayer = FlutterRingtonePlayer();
 
-  const SOSButton({Key? key, required this.onAction}) : super(key: key);
+  SOSButton({Key? key, required this.onAction}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class SOSButton extends StatelessWidget {
 
   void _triggerSOS(BuildContext context) {
     // Play sound (looping alarm)
-    FlutterRingtonePlayer.playAlarm();
+    _ringtonePlayer.playAlarm();
 
     // Log action
     onAction();
@@ -66,7 +67,7 @@ class SOSButton extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              FlutterRingtonePlayer.stop();
+              _ringtonePlayer.stop();
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(

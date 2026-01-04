@@ -12,6 +12,7 @@ class VisitorEntry {
   final String? guardName;
   final String? photoPath;
   final String? vehicleNumber;
+  final String? vehicleType;
 
   VisitorEntry({
     required this.id,
@@ -24,6 +25,7 @@ class VisitorEntry {
     this.guardName,
     this.photoPath,
     this.vehicleNumber,
+    this.vehicleType,
   });
 }
 
@@ -100,6 +102,8 @@ class GuardProvider extends ChangeNotifier {
           time: v.time,
           exitTime: v.exitTime,
           photoPath: v.photoPath,
+          vehicleNumber: v.vehicleNumber,
+          vehicleType: v.vehicleType,
         ));
       }
       notifyListeners();
@@ -124,6 +128,7 @@ class GuardProvider extends ChangeNotifier {
     required String purpose,
     String? photoPath,
     String? vehicleNumber,
+    String? vehicleType,
   }) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -137,6 +142,8 @@ class GuardProvider extends ChangeNotifier {
         status: VisitorStatus.pending,
         time: time,
         photoPath: photoPath,
+        vehicleNumber: vehicleNumber,
+        vehicleType: vehicleType,
       );
       
       VisitorRepository().addVisitor(newShared);
@@ -151,6 +158,7 @@ class GuardProvider extends ChangeNotifier {
         guardName: 'Guard',
         photoPath: photoPath,
         vehicleNumber: vehicleNumber,
+        vehicleType: vehicleType,
       );
       
       return newEntry;
@@ -194,6 +202,7 @@ class GuardProvider extends ChangeNotifier {
     required String purpose,
     String? photoPath,
     String? vehicleNumber,
+    String? vehicleType,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -205,6 +214,8 @@ class GuardProvider extends ChangeNotifier {
         flatNumber: flatNumber,
         purpose: purpose,
         photoPath: photoPath,
+        vehicleNumber: vehicleNumber,
+        vehicleType: vehicleType,
       );
 
       // Also update local state for immediate UI feedback
@@ -222,6 +233,7 @@ class GuardProvider extends ChangeNotifier {
           guardName: oldEntry.guardName,
           photoPath: photoPath ?? oldEntry.photoPath,
           vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
+          vehicleType: vehicleType ?? oldEntry.vehicleType,
         );
         notifyListeners();
       }
