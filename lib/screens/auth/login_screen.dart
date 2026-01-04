@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 
+import '../../services/logger_service.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
@@ -55,7 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
             password: _passwordController.text,
           );
       // Navigation handled by AppRouter listening to AuthProvider
-    } catch (_) {
+    } catch (e, stack) {
+      LoggerService().error('Login failed', e, stack);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -151,6 +153,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   focusNode: _emailFocusNode,
                                   keyboardType: TextInputType.emailAddress,
                                   textInputAction: TextInputAction.next,
+                                  maxLength: 254, // SECURITY: RFC 5321 limit
+                                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                                   onFieldSubmitted: (_) {
                                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                                   },
@@ -177,6 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   focusNode: _passwordFocusNode,
                                   obscureText: true,
                                   textInputAction: TextInputAction.done,
+                                  maxLength: 128, // SECURITY: Prevent large input DoS
+                                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                                   onFieldSubmitted: (_) => _handleEmailLogin(),
                                   autovalidateMode: AutovalidateMode.onUserInteraction,
                                   validator: Validators.validatePassword,
