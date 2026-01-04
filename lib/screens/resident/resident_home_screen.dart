@@ -147,7 +147,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                hasFlat ? flatName : 'Create/Join Flat',
+                                hasFlat ? 'Manage Family' : 'Manage Flat',
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   color: theme.textTheme.bodySmall?.color,
                                 ),
@@ -232,25 +232,51 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               const SizedBox(height: 16),
                               _PendingVisitorCard(
                                 visitor: pendingVisitors.first,
-                                onApprove: () {
-                                  residentProvider.approveVisitor(
-                                    pendingVisitors.first.id,
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Visitor approved'),
-                                    ),
-                                  );
+                                onApprove: () async {
+                                  try {
+                                    await residentProvider.approveVisitor(
+                                      pendingVisitors.first.id,
+                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Visitor approved'),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor: AppTheme.errorRed,
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
-                                onReject: () {
-                                  residentProvider.rejectVisitor(
-                                    pendingVisitors.first.id,
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Visitor rejected'),
-                                    ),
-                                  );
+                                onReject: () async {
+                                  try {
+                                    await residentProvider.rejectVisitor(
+                                      pendingVisitors.first.id,
+                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Visitor rejected'),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor: AppTheme.errorRed,
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
                               ),
                               const SizedBox(height: 32),
@@ -326,8 +352,8 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
 
 class _PendingVisitorCard extends StatefulWidget {
   final Visitor visitor;
-  final VoidCallback onApprove;
-  final VoidCallback onReject;
+  final Future<void> Function() onApprove;
+  final Future<void> Function() onReject;
 
   const _PendingVisitorCard({
     required this.visitor,
@@ -342,6 +368,7 @@ class _PendingVisitorCard extends StatefulWidget {
 class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -361,6 +388,19 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleAction(Future<void> Function() action) async {
+    if (_isProcessing) return;
+    setState(() {
+      _isProcessing = true;
+    });
+    await action();
+    if (mounted) {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
   }
 
   @override
@@ -474,9 +514,11 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: widget.onReject,
-                    icon: const Icon(Icons.close),
-                    label: const Text('Reject'),
+                    onPressed: _isProcessing ? null : () => _handleAction(widget.onReject),
+                    icon: _isProcessing
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.close),
+                    label: Text(_isProcessing ? 'Wait...' : 'Reject'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.errorRed,
                       foregroundColor: Colors.white,
@@ -491,9 +533,11 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: widget.onApprove,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Approve'),
+                    onPressed: _isProcessing ? null : () => _handleAction(widget.onApprove),
+                    icon: _isProcessing
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                      : const Icon(Icons.check),
+                    label: Text(_isProcessing ? 'Wait...' : 'Approve'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.black,
