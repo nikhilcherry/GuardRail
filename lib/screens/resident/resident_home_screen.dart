@@ -9,6 +9,7 @@ import '../../providers/flat_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'resident_notifications_screen.dart';
 import '../../widgets/shimmer_list_item.dart';
+import '../../widgets/sos_button.dart';
 
 class ResidentHomeScreen extends StatefulWidget {
   const ResidentHomeScreen({Key? key}) : super(key: key);
@@ -24,6 +25,9 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      floatingActionButton: SOSButton(
+        onAction: () => context.read<ResidentProvider>().logEmergency(),
+      ),
       body: SafeArea(
         child: Consumer2<ResidentProvider, FlatProvider>(
           builder: (context, residentProvider, flatProvider, _) {

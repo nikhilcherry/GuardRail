@@ -211,4 +211,10 @@ class ResidentProvider extends ChangeNotifier {
     if (email != null) _email = email;
     notifyListeners();
   }
+
+  void logEmergency() {
+    final timestamp = DateTime.now();
+    // In a real application, this would send an API request to the backend.
+    print('EMERGENCY: Resident triggered SOS at $timestamp');
+  }
 }

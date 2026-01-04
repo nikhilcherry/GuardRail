@@ -11,6 +11,7 @@ import '../../widgets/shimmer_entry_card.dart';
 import 'guard_check_screen.dart';
 import 'qr_scanner_screen.dart';
 import 'visitor_status_screen.dart';
+import '../../widgets/sos_button.dart';
 
 class GuardHomeScreen extends StatefulWidget {
   const GuardHomeScreen({Key? key}) : super(key: key);
@@ -28,6 +29,9 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      floatingActionButton: SOSButton(
+        onAction: () => context.read<GuardProvider>().logEmergency(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: theme.cardColor,
         selectedItemColor: theme.colorScheme.primary,

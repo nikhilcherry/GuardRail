@@ -258,4 +258,10 @@ class GuardProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void logEmergency() {
+    final timestamp = DateTime.now();
+    // In a real application, this would send an API request to the backend.
+    print('EMERGENCY: Guard triggered SOS at $timestamp');
+  }
 }
