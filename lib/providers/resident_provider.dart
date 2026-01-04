@@ -81,6 +81,8 @@ class ResidentProvider extends ChangeNotifier {
   String _flatNumber = '402';
   String _phoneNumber = '+91 98765 43210';
   String _email = 'robert@example.com';
+  String? _profileImage;
+  DateTime? _lastLogin;
   int _pendingRequests = 1;
   bool _isLoading = false;
 
@@ -100,6 +102,8 @@ class ResidentProvider extends ChangeNotifier {
   String get flatNumber => _flatNumber;
   String get phoneNumber => _phoneNumber;
   String get email => _email;
+  String? get profileImage => _profileImage;
+  DateTime? get lastLogin => _lastLogin;
   int get pendingRequests => _pendingRequests;
   bool get isLoading => _isLoading;
 
@@ -130,6 +134,9 @@ class ResidentProvider extends ChangeNotifier {
 
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 2));
+
+    // Simulate getting last login
+    _lastLogin = DateTime.now().subtract(const Duration(hours: 4));
 
     _isLoading = false;
     notifyListeners();
@@ -204,11 +211,13 @@ class ResidentProvider extends ChangeNotifier {
     String? flatNumber,
     String? phoneNumber,
     String? email,
+    String? profileImage,
   }) {
     if (name != null) _residentName = name;
     if (flatNumber != null) _flatNumber = flatNumber;
     if (phoneNumber != null) _phoneNumber = phoneNumber;
     if (email != null) _email = email;
+    if (profileImage != null) _profileImage = profileImage;
     notifyListeners();
   }
 
