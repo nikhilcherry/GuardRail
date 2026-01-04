@@ -126,57 +126,96 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () => context.go('/resident_home/flat'),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => context.go('/resident_home/flat'),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: theme.dividerColor,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                hasFlat ? Icons.home : Icons.add_home_outlined,
-                                size: 20,
-                                color: theme.colorScheme.primary,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                hasFlat ? 'Manage Family' : 'Manage Flat',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  color: theme.textTheme.bodySmall?.color,
+                              decoration: BoxDecoration(
+                                color: theme.cardColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: theme.dividerColor,
                                 ),
                               ),
-                              if (isOwner && pendingMembersCount > 0) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.errorRed,
-                                    shape: BoxShape.circle,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    hasFlat ? Icons.home : Icons.add_home_outlined,
+                                    size: 20,
+                                    color: theme.colorScheme.primary,
                                   ),
-                                  child: Text(
-                                    pendingMembersCount.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    hasFlat ? 'Manage Family' : 'Manage Flat',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      color: theme.textTheme.bodySmall?.color,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ],
+                                  if (isOwner && pendingMembersCount > 0) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.errorRed,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        pendingMembersCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          InkWell(
+                            onTap: () => context.go('/resident_home/generate_qr'),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.cardColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: theme.dividerColor,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.qr_code,
+                                    size: 20,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'New Invite',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      color: theme.textTheme.bodySmall?.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

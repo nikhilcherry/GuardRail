@@ -13,6 +13,7 @@ import '../screens/resident/resident_home_screen.dart';
 import '../screens/resident/resident_visitors_screen.dart';
 import '../screens/resident/resident_settings_screen.dart';
 import '../screens/resident/flat_management_screen.dart';
+import '../screens/resident/generate_qr_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_additional_screens.dart';
 
@@ -68,6 +69,10 @@ class AppRouter {
           GoRoute(
             path: 'flat',
             builder: (context, state) => const FlatManagementScreen(),
+          ),
+          GoRoute(
+            path: 'generate_qr',
+            builder: (context, state) => const GenerateQRScreen(),
           ),
         ],
       ),
