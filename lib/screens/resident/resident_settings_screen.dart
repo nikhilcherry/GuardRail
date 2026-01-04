@@ -15,6 +15,18 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   bool _biometricsEnabled = false;
   bool _notificationsEnabled = true;
 
+  @override
+  void initState() {
+    super.initState();
+    // Sync with provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      setState(() {
+        _biometricsEnabled = authProvider.biometricsEnabled;
+      });
+    });
+  }
+
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -102,8 +114,17 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       icon: Icons.face,
                       title: 'Face ID Login',
                       value: _biometricsEnabled,
-                      onChanged: (value) {
-                        setState(() => _biometricsEnabled = value);
+                      onChanged: (value) async {
+                        final success = await context.read<AuthProvider>().toggleBiometrics(value);
+                        if (success) {
+                           setState(() => _biometricsEnabled = value);
+                        } else {
+                           // Show error or revert
+                           setState(() => _biometricsEnabled = !value);
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             const SnackBar(content: Text('Failed to update biometric settings')),
+                           );
+                        }
                       },
                     ),
                   ],
