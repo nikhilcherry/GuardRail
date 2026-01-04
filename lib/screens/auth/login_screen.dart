@@ -16,6 +16,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late FocusNode _emailFocusNode;
+  late FocusNode _passwordFocusNode;
   bool _isLoading = false;
 
   @override
@@ -23,12 +25,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -77,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Center(
@@ -134,6 +141,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _emailController,
+                            focusNode: _emailFocusNode,
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              FocusScope.of(context).requestFocus(_passwordFocusNode);
+                            },
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.email_outlined),
@@ -153,6 +165,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _passwordController,
+                            focusNode: _passwordFocusNode,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _handleEmailLogin(),
                             obscureText: true,
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.lock_outlined),

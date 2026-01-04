@@ -19,6 +19,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  // Focus Nodes
+  final _nameFocusNode = FocusNode();
+  final _contactFocusNode = FocusNode();
+  final _phoneFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
+  final _residenceIdFocusNode = FocusNode();
+
   // New: Role Selection
   String? _selectedRole;
   final _residenceIdController = TextEditingController();
@@ -34,6 +42,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _residenceIdController.dispose();
+    _nameFocusNode.dispose();
+    _contactFocusNode.dispose();
+    _phoneFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
+    _residenceIdFocusNode.dispose();
     super.dispose();
   }
 
@@ -102,6 +116,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
@@ -126,6 +141,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nameController,
+                  focusNode: _nameFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_contactFocusNode),
                   decoration: const InputDecoration(
                     hintText: 'John Doe',
                     prefixIcon: Icon(Icons.person_outline),
@@ -145,6 +163,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _contactController,
+                  focusNode: _contactFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_phoneFocusNode),
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     hintText: 'john@example.com',
@@ -168,6 +189,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _phoneController,
+                  focusNode: _phoneFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     hintText: '+1234567890',
@@ -207,6 +231,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                   obscureText: true,
                   decoration: const InputDecoration(
                     hintText: 'Create a password',
@@ -230,6 +257,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _confirmPasswordController,
+                  focusNode: _confirmPasswordFocusNode,
+                  textInputAction: _selectedRole == 'resident' ? TextInputAction.next : TextInputAction.done,
+                  onFieldSubmitted: (_) {
+                    if (_selectedRole == 'resident') {
+                      FocusScope.of(context).requestFocus(_residenceIdFocusNode);
+                    } else {
+                      _handleSignUp();
+                    }
+                  },
                   obscureText: true,
                   decoration: const InputDecoration(
                     hintText: 'Confirm your password',
@@ -272,6 +308,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _residenceIdController,
+                    focusNode: _residenceIdFocusNode,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleSignUp(),
                     decoration: const InputDecoration(
                       hintText: 'Enter Residence ID to join',
                       prefixIcon: Icon(Icons.apartment),

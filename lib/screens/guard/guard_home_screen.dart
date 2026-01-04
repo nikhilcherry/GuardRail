@@ -294,79 +294,83 @@ class _VisitorDialogState extends State<_VisitorDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(editing ? 'Edit Visitor' : 'Register Visitor',
-                style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 16),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(editing ? 'Edit Visitor' : 'Register Visitor',
+                  style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 16),
 
-            TextField(
-              controller: flatCtrl,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
-            ),
-            const SizedBox(height: 12),
+              TextField(
+                controller: flatCtrl,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(labelText: 'Flat Number'),
+              ),
+              const SizedBox(height: 12),
 
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Visitor Name'),
-            ),
-            const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(labelText: 'Visitor Name'),
+              ),
+              const SizedBox(height: 12),
 
-            DropdownButtonFormField<String>(
-              value: purpose,
-              items: const [
-                DropdownMenuItem(value: 'guest', child: Text('Guest')),
-                DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
-                DropdownMenuItem(value: 'service', child: Text('Service')),
-              ],
-              onChanged: (v) => setState(() => purpose = v!),
-            ),
+              DropdownButtonFormField<String>(
+                value: purpose,
+                items: const [
+                  DropdownMenuItem(value: 'guest', child: Text('Guest')),
+                  DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                  DropdownMenuItem(value: 'service', child: Text('Service')),
+                ],
+                onChanged: (v) => setState(() => purpose = v!),
+              ),
 
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: loading
-                  ? null
-                  : () async {
-                      setState(() => loading = true);
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: loading
+                    ? null
+                    : () async {
+                        setState(() => loading = true);
 
-                      final guard = context.read<GuardProvider>();
-                      VisitorEntry? entry;
-                      if (editing) {
-                        await guard.updateVisitorEntry(
-                          id: widget.entry!.id,
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                        entry = widget.entry;
-                      } else {
-                        entry = await guard.registerNewVisitor(
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                      }
-
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        if (entry != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VisitorStatusScreen(entryId: entry!.id),
-                            ),
+                        final guard = context.read<GuardProvider>();
+                        VisitorEntry? entry;
+                        if (editing) {
+                          await guard.updateVisitorEntry(
+                            id: widget.entry!.id,
+                            name: nameCtrl.text,
+                            flatNumber: flatCtrl.text,
+                            purpose: purpose,
+                          );
+                          entry = widget.entry;
+                        } else {
+                          entry = await guard.registerNewVisitor(
+                            name: nameCtrl.text,
+                            flatNumber: flatCtrl.text,
+                            purpose: purpose,
                           );
                         }
-                      }
-                    },
-              child: loading
-                  ? const CircularProgressIndicator()
-                  : Text(editing ? 'Save' : 'Register'),
-            ),
-          ],
+
+                        if (context.mounted) {
+                          Navigator.pop(context); // Close dialog
+                          if (entry != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VisitorStatusScreen(entryId: entry!.id),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : Text(editing ? 'Save' : 'Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );

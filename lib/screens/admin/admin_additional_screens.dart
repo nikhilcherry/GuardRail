@@ -46,19 +46,23 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: flatController,
-              decoration: const InputDecoration(labelText: 'Flat Name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: residentController,
-              decoration: const InputDecoration(labelText: 'Owner Name'),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: flatController,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(labelText: 'Flat Name'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: residentController,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(labelText: 'Owner Name'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -442,6 +446,7 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: nameController,
+                    textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
                       labelText: 'Guard Name',
                       border: OutlineInputBorder(),
