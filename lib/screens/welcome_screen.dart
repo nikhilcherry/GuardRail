@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -52,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Welcome to Guardrail',
+                      l10n.welcomeMessage,
                       style: theme.textTheme.displayLarge?.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
@@ -67,7 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 340),
                       child: Text(
-                        'Seamless, secure access for your community.',
+                        l10n.seamlessSecureAccess,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 15,
                           color: AppTheme.textSecondary,
@@ -106,7 +108,7 @@ class WelcomeScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      child: const Text('Login'),
+                      child: Text(l10n.login),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -129,13 +131,13 @@ class WelcomeScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const Text('Sign Up'),
+                      child: Text(l10n.signUp),
                     ),
                   ),
                   const SizedBox(height: 32),
                   // Footer
                   Text(
-                    'By proceeding, you agree to our Terms & Privacy Policy.',
+                    l10n.agreeTerms,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       color: AppTheme.textSecondary,

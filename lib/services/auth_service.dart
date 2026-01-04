@@ -109,7 +109,11 @@ class AuthService {
   Future<bool> authenticate() async {
     try {
       return await _localAuth.authenticate(
-        localizedReason: 'Please authenticate to access Guardrail',
+        localizedReason: 'Verify your identity to access GuardRail',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: false,
+        ),
       );
     } catch (e) {
       return false;

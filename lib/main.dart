@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/guard_provider.dart';
@@ -46,7 +48,7 @@ Future<void> main() async {
   ));
 }
 
-class GuardrailApp extends StatelessWidget {
+class GuardrailApp extends StatefulWidget {
   final AuthProvider authProvider;
   final SettingsRepository settingsRepository;
 
@@ -57,14 +59,38 @@ class GuardrailApp extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<GuardrailApp> createState() => _GuardrailAppState();
+}
+
+class _GuardrailAppState extends State<GuardrailApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      widget.authProvider.lockApp();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: widget.authProvider),
         ChangeNotifierProvider(create: (_) => GuardProvider()),
         ChangeNotifierProvider(create: (_) => ResidentProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider(repository: settingsRepository)),
-        ChangeNotifierProvider(create: (_) => SettingsProvider(repository: settingsRepository)),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(repository: widget.settingsRepository)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(repository: widget.settingsRepository)),
         ChangeNotifierProvider(create: (_) => FlatProvider()),
         ChangeNotifierProxyProvider<FlatProvider, AdminProvider>(
           create: (context) => AdminProvider(context.read<FlatProvider>()),
@@ -79,8 +105,8 @@ class GuardrailApp extends StatelessWidget {
           final authProvider = context.read<AuthProvider>();
           final appRouter = AppRouter(authProvider);
 
-          return Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
+          return Consumer2<ThemeProvider, SettingsProvider>(
+            builder: (context, themeProvider, settingsProvider, _) {
               return MaterialApp.router(
                 title: 'Guardrail',
                 theme: AppTheme.lightTheme,
@@ -88,6 +114,18 @@ class GuardrailApp extends StatelessWidget {
                 themeMode: themeProvider.themeMode,
                 debugShowCheckedModeBanner: false,
                 routerConfig: appRouter.router,
+                locale: settingsProvider.locale,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('hi'), // Hindi
+                  Locale('te'), // Telugu
+                ],
               );
             },
           );

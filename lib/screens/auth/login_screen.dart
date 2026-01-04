@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/contact_support_dialog.dart';
+import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,6 +18,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late FocusNode _emailFocusNode;
+  late FocusNode _passwordFocusNode;
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
@@ -23,20 +28,22 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _handleEmailLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+    final l10n = AppLocalizations.of(context)!;
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -49,9 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
           );
       // Navigation handled by AppRouter listening to AuthProvider
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login failed. Please check your credentials.'),
+        SnackBar(
+          content: Text(l10n.loginFailed),
         ),
       );
     } finally {
@@ -64,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -77,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Center(
@@ -109,14 +119,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         children: [
                           Text(
-                            'Login',
+                            l10n.login,
                             style: theme.textTheme.displayMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Please enter your credentials to continue',
+                            l10n.enterCredentials,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
@@ -126,40 +136,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Email
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Email', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.email_outlined),
-                              hintText: 'your@email.com',
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Email
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.email, style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _emailController,
+                                  focusNode: _emailFocusNode,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  onFieldSubmitted: (_) {
+                                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                                  },
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validateEmail,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.email_outlined),
+                                    hintText: 'your@email.com',
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 16),
+                            const SizedBox(height: 16),
 
-                      // Password
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Password', style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.lock_outlined),
-                              hintText: 'Enter password',
+                            // Password
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.password, style: theme.textTheme.labelLarge),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  focusNode: _passwordFocusNode,
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _handleEmailLogin(),
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  validator: Validators.validatePassword,
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    hintText: l10n.enterPassword,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
 
                       const SizedBox(height: 32),
@@ -191,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Log In',
+                                      l10n.login,
                                       style: theme.textTheme.titleLarge?.copyWith(
                                         color: theme.colorScheme.onPrimary,
                                       ),
@@ -218,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: theme.iconTheme.color,
                             ),
                             label: Text(
-                              'Forgot Password?',
+                              l10n.forgotPassword,
                               style: theme.textTheme.bodySmall,
                             ),
                           ),
@@ -230,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: theme.iconTheme.color,
                             ),
                             label: Text(
-                              'Contact Support',
+                              l10n.contactSupport,
                               style: theme.textTheme.bodySmall,
                             ),
                           ),
@@ -239,13 +268,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Don't have an account? ",
+                                l10n.dontHaveAccount + ' ',
                                 style: theme.textTheme.bodySmall,
                               ),
                               TextButton(
                                 onPressed: () => context.push('/sign_up'),
                                 child: Text(
-                                  'Sign Up',
+                                  l10n.signUp,
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: theme.colorScheme.primary,
                                   ),
