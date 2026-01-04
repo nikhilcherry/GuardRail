@@ -29,22 +29,19 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
         onAction: () => context.read<ResidentProvider>().logEmergency(),
       ),
       body: SafeArea(
-        child: Consumer2<ResidentProvider, FlatProvider>(
-          builder: (context, residentProvider, flatProvider, _) {
-            final pendingVisitors = residentProvider.getPendingApprovals();
-            final hasPendingRequest = pendingVisitors.isNotEmpty;
+        child: Column(
+          children: [
+            // Header
+            // PERF: Scoped Consumer to prevent header rebuilds when visitor list changes
+            Consumer2<ResidentProvider, FlatProvider>(
+              builder: (context, residentProvider, flatProvider, _) {
+                // Check flat status
+                final currentFlat = flatProvider.currentFlat;
+                final hasFlat = currentFlat != null;
+                final pendingMembersCount = flatProvider.pendingMembers.length;
+                final isOwner = hasFlat && flatProvider.members.any((m) => m.role == MemberRole.owner && m.userId == (context.read<AuthProvider>().userPhone ?? context.read<AuthProvider>().userEmail ?? 'user'));
 
-            // Check flat status
-            final currentFlat = flatProvider.currentFlat;
-            final hasFlat = currentFlat != null;
-            final flatName = hasFlat ? currentFlat.name : 'No Flat';
-            final pendingMembersCount = flatProvider.pendingMembers.length;
-            final isOwner = hasFlat && flatProvider.members.any((m) => m.role == MemberRole.owner && m.userId == (context.read<AuthProvider>().userPhone ?? context.read<AuthProvider>().userEmail ?? 'user'));
-
-            return Column(
-              children: [
-                // Header
-                Padding(
+                return Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,10 +216,18 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                       ),
                     ],
                   ),
-                ),
-                // Main Content
-                Expanded(
-                  child: CustomScrollView(
+                );
+              },
+            ),
+            // Main Content
+            // PERF: Scoped Consumer prevents list rebuilds when flat settings change
+            Expanded(
+              child: Consumer<ResidentProvider>(
+                builder: (context, residentProvider, _) {
+                  final pendingVisitors = residentProvider.getPendingApprovals();
+                  final hasPendingRequest = pendingVisitors.isNotEmpty;
+
+                  return CustomScrollView(
                     slivers: [
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -391,11 +396,11 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                           ),
                         ),
                     ],
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const _ResidentBottomNav(currentIndex: 0),
