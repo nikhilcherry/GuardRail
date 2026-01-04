@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
@@ -271,6 +275,11 @@ class _VisitorDialogState extends State<_VisitorDialog> {
   late TextEditingController flatCtrl;
   String purpose = 'guest';
   bool loading = false;
+  XFile? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  // Track if the image has been modified during this session
+  bool _imageChanged = false;
 
   @override
   void initState() {
@@ -278,6 +287,9 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     nameCtrl = TextEditingController(text: widget.entry?.name ?? '');
     flatCtrl = TextEditingController(text: widget.entry?.flatNumber ?? '');
     purpose = widget.entry?.purpose ?? 'guest';
+    if (widget.entry?.photoPath != null) {
+      _imageFile = XFile(widget.entry!.photoPath!);
+    }
   }
 
   @override
@@ -287,6 +299,27 @@ class _VisitorDialogState extends State<_VisitorDialog> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+      if (photo != null) {
+        setState(() {
+          _imageFile = photo;
+          _imageChanged = true;
+        });
+      }
+    } catch (e) {
+      // Handle camera error or permission denial gracefully
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open camera: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -294,79 +327,151 @@ class _VisitorDialogState extends State<_VisitorDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(editing ? 'Edit Visitor' : 'Register Visitor',
-                style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 16),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(editing ? 'Edit Visitor' : 'Register Visitor',
+                  style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 16),
 
-            TextField(
-              controller: flatCtrl,
-              decoration: const InputDecoration(labelText: 'Flat Number'),
-            ),
-            const SizedBox(height: 12),
+              // Photo Capture Area
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: theme.dividerColor),
+                    image: _imageFile != null
+                        ? DecorationImage(
+                            image: FileImage(File(_imageFile!.path)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _imageFile == null
+                      ? Icon(Icons.camera_alt,
+                          size: 40, color: theme.disabledColor)
+                      : null,
+                ),
+              ),
+              if (_imageFile == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text('Tap to take photo',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.disabledColor)),
+                ),
 
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Visitor Name'),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
-            DropdownButtonFormField<String>(
-              value: purpose,
-              items: const [
-                DropdownMenuItem(value: 'guest', child: Text('Guest')),
-                DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
-                DropdownMenuItem(value: 'service', child: Text('Service')),
-              ],
-              onChanged: (v) => setState(() => purpose = v!),
-            ),
+              TextField(
+                controller: flatCtrl,
+                decoration: const InputDecoration(labelText: 'Flat Number'),
+              ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: loading
-                  ? null
-                  : () async {
-                      setState(() => loading = true);
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Visitor Name'),
+              ),
+              const SizedBox(height: 12),
 
-                      final guard = context.read<GuardProvider>();
-                      VisitorEntry? entry;
-                      if (editing) {
-                        await guard.updateVisitorEntry(
-                          id: widget.entry!.id,
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                        entry = widget.entry;
-                      } else {
-                        entry = await guard.registerNewVisitor(
-                          name: nameCtrl.text,
-                          flatNumber: flatCtrl.text,
-                          purpose: purpose,
-                        );
-                      }
+              DropdownButtonFormField<String>(
+                value: purpose,
+                items: const [
+                  DropdownMenuItem(value: 'guest', child: Text('Guest')),
+                  DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                  DropdownMenuItem(value: 'service', child: Text('Service')),
+                ],
+                onChanged: (v) => setState(() => purpose = v!),
+              ),
 
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        if (entry != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VisitorStatusScreen(entryId: entry!.id),
-                            ),
-                          );
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: loading
+                    ? null
+                    : () async {
+                        setState(() => loading = true);
+
+                        try {
+                          String? savedPhotoPath;
+
+                          if (_imageFile != null) {
+                             if (_imageChanged) {
+                               // Only save if changed (new photo)
+                               final directory = await getApplicationDocumentsDirectory();
+                               final fileName = 'visitor_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                               final savedImage = await File(_imageFile!.path).copy(path.join(directory.path, fileName));
+                               savedPhotoPath = savedImage.path;
+                             } else {
+                               // Keep existing path
+                               savedPhotoPath = widget.entry?.photoPath;
+                             }
+                          } else {
+                             // _imageFile is null, so photo might have been removed or never existed
+                             savedPhotoPath = null;
+                          }
+
+                          final guard = context.read<GuardProvider>();
+                          VisitorEntry? entry;
+                          if (editing) {
+                            await guard.updateVisitorEntry(
+                              id: widget.entry!.id,
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              photoPath: savedPhotoPath,
+                            );
+                            entry = widget.entry; // This is actually the old entry object, provider will update list
+                          } else {
+                            entry = await guard.registerNewVisitor(
+                              name: nameCtrl.text,
+                              flatNumber: flatCtrl.text,
+                              purpose: purpose,
+                              photoPath: savedPhotoPath,
+                            );
+                          }
+
+                          if (context.mounted) {
+                            Navigator.pop(context); // Close dialog
+                            if (entry != null && !editing) {
+                              // Only navigate for new entries, or maybe both?
+                              // Original code navigated for new/edit. Let's keep it consistent.
+                              // But wait, updateVisitorEntry returns void.
+                              // So we can't easily get the updated entry object without fetching it again.
+                              // The previous logic for edit: entry = widget.entry
+                              // But widget.entry is stale.
+                              // However, for navigation to StatusScreen, ID is enough.
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VisitorStatusScreen(entryId: editing ? widget.entry!.id : entry!.id),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => loading = false);
                         }
-                      }
-                    },
-              child: loading
-                  ? const CircularProgressIndicator()
-                  : Text(editing ? 'Save' : 'Register'),
-            ),
-          ],
+                      },
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : Text(editing ? 'Save' : 'Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -390,7 +495,52 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.person_outline),
+          // Thumbnail
+          GestureDetector(
+            onTap: entry.photoPath != null
+                ? () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            InteractiveViewer(
+                              child: Image.file(File(entry.photoPath!)),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                : null,
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.dividerColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                image: entry.photoPath != null
+                    ? DecorationImage(
+                        image: FileImage(File(entry.photoPath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: entry.photoPath == null
+                  ? const Icon(Icons.person_outline)
+                  : null,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

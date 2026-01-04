@@ -9,6 +9,7 @@ class VisitorEntry {
   final String status; // approved, pending, rejected
   final DateTime time;
   final String? guardName;
+  final String? photoPath;
 
   VisitorEntry({
     required this.id,
@@ -18,6 +19,7 @@ class VisitorEntry {
     required this.status,
     required this.time,
     this.guardName,
+    this.photoPath,
   });
 }
 
@@ -92,6 +94,7 @@ class GuardProvider extends ChangeNotifier {
           purpose: v.purpose,
           status: v.status.name,
           time: v.time,
+          photoPath: v.photoPath,
         ));
       }
       notifyListeners();
@@ -114,6 +117,7 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
   }) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -126,6 +130,7 @@ class GuardProvider extends ChangeNotifier {
         purpose: purpose,
         status: VisitorStatus.pending,
         time: time,
+        photoPath: photoPath,
       );
       
       VisitorRepository().addVisitor(newShared);
@@ -138,6 +143,7 @@ class GuardProvider extends ChangeNotifier {
         status: 'pending',
         time: time,
         guardName: 'Guard',
+        photoPath: photoPath,
       );
       
       return newEntry;
@@ -170,24 +176,19 @@ class GuardProvider extends ChangeNotifier {
     required String name,
     required String flatNumber,
     required String purpose,
+    String? photoPath,
   }) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
 
-      final index = _entries.indexWhere((entry) => entry.id == id);
-      if (index != -1) {
-        final oldEntry = _entries[index];
-        _entries[index] = VisitorEntry(
-          id: oldEntry.id,
-          name: name,
-          flatNumber: flatNumber,
-          purpose: purpose,
-          status: oldEntry.status,
-          time: oldEntry.time,
-          guardName: oldEntry.guardName,
-        );
-        notifyListeners();
-      }
+      // Update local state is handled by the listener, but we should update the repository
+      VisitorRepository().updateVisitor(
+        id,
+        name: name,
+        flatNumber: flatNumber,
+        purpose: purpose,
+        photoPath: photoPath,
+      );
     } catch (e) {
       rethrow;
     }
