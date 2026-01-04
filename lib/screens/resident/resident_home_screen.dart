@@ -273,54 +273,59 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              _PendingVisitorCard(
-                                visitor: pendingVisitors.first,
-                                onApprove: () async {
-                                  try {
-                                    await residentProvider.approveVisitor(
-                                      pendingVisitors.first.id,
-                                    );
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Visitor approved'),
-                                        ),
+                              InkWell(
+                                onTap: () => context.push(
+                                  '/visitor_details/${pendingVisitors.first.id}?source=resident',
+                                ),
+                                child: _PendingVisitorCard(
+                                  visitor: pendingVisitors.first,
+                                  onApprove: () async {
+                                    try {
+                                      await residentProvider.approveVisitor(
+                                        pendingVisitors.first.id,
                                       );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Visitor approved'),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Error: $e'),
+                                            backgroundColor: AppTheme.errorRed,
+                                          ),
+                                        );
+                                      }
                                     }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Error: $e'),
-                                          backgroundColor: AppTheme.errorRed,
-                                        ),
+                                  },
+                                  onReject: () async {
+                                    try {
+                                      await residentProvider.rejectVisitor(
+                                        pendingVisitors.first.id,
                                       );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Visitor rejected'),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Error: $e'),
+                                            backgroundColor: AppTheme.errorRed,
+                                          ),
+                                        );
+                                      }
                                     }
-                                  }
-                                },
-                                onReject: () async {
-                                  try {
-                                    await residentProvider.rejectVisitor(
-                                      pendingVisitors.first.id,
-                                    );
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Visitor rejected'),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Error: $e'),
-                                          backgroundColor: AppTheme.errorRed,
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
+                                  },
+                                ),
                               ),
                               const SizedBox(height: 32),
                             ],
@@ -373,7 +378,12 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                     residentProvider.todaysVisitors[index];
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
-                                  child: _HistoryCard(visitor: visitor),
+                                  child: InkWell(
+                                    onTap: () => context.push(
+                                      '/visitor_details/${visitor.id}?source=resident',
+                                    ),
+                                    child: _HistoryCard(visitor: visitor),
+                                  ),
                                 );
                               },
                               childCount: residentProvider.todaysVisitors.length,
