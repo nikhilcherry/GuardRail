@@ -216,12 +216,6 @@ class _GateControlViewState extends State<_GateControlView> {
     );
   }
 
-  void _showVisitorDialog(BuildContext context, {VisitorEntry? entry}) {
-    showDialog(
-      context: context,
-      builder: (context) => VisitorDialog(entry: entry),
-    );
-  }
 }
 
 class _QuickActions extends StatelessWidget {
@@ -241,7 +235,7 @@ class _QuickActions extends StatelessWidget {
             label: 'Register\nVisitor',
             onTap: () => showDialog(
               context: context,
-              builder: (context) => const _VisitorDialog(),
+              builder: (context) => const VisitorDialog(),
             ),
           ),
         ),

@@ -11,10 +11,10 @@ class ThemeProvider with ChangeNotifier {
 
   ThemeProvider({SettingsRepository? repository})
       : _repository = repository ?? SettingsRepository() {
-    _loadTheme();
+    loadTheme();
   }
 
-  void _loadTheme() async {
+  void loadTheme() async {
     final isDark = await _repository.getIsDarkMode();
     if (isDark != null) {
       _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
