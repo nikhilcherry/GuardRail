@@ -32,15 +32,11 @@ class LoggerService {
   }
 
   void _log(String level, String message, dynamic error, StackTrace? stackTrace) {
+    // SECURITY: Ensure logs are only printed in debug mode to prevent data leakage in release builds
     if (kDebugMode) {
-      // In debug mode, print to console
       debugPrint('[$level] $message');
-      if (error != null) {
-        debugPrint('Error: $error');
-      }
-      if (stackTrace != null) {
-        debugPrint('StackTrace: $stackTrace');
-      }
+      if (error != null) debugPrint('Error: $error');
+      if (stackTrace != null) debugPrint('StackTrace: $stackTrace');
     }
   }
 }
