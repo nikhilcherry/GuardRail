@@ -18,3 +18,13 @@
 **Learning:** `DateFormat` from `package:intl` uses an internal factory cache. Extracting it to a `static final` variable provides negligible performance benefits while breaking localization support (static variables don't update on locale change).
 
 **Action:** Prefer using `DateFormat` directly (or via a localized helper) to ensure correct locale handling, unless profiling proves strict object allocation is a bottleneck despite the factory cache.
+
+## 2025-02-27 - Large Consumers Cause Unnecessary Header Rebuilds
+
+**Learning:** Wrapping an entire screen in a `Consumer` (or `Consumer2`) causes the entire widget tree to rebuild whenever *any* part of the state changes. This is particularly wasteful when the screen has a static or semi-static header (e.g., "Good Evening, [Name]") that rebuilds every time a list below it updates (e.g., visitor log changes).
+
+**Action:**
+1. Extract the header into a separate widget.
+2. Use `Selector` or scoped `Consumer` within the header to listen only to the specific properties it needs (e.g., user name, notification count).
+3. Ensure the parent screen uses `const` for the header widget, so it is not rebuilt when the parent rebuilds.
+4. Limit the main `Consumer` to wrap only the dynamic list content (e.g., `SliverList` or `Expanded`).
