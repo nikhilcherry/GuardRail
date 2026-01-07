@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../services/logger_service.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
@@ -89,10 +90,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           residenceId: _residenceIdController.text.isNotEmpty ? _residenceIdController.text : null,
         );
         // AppRouter handles redirection
-      } catch (e) {
+      } catch (e, stack) {
+        LoggerService().error('Registration failed', e, stack);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed: $e')),
+            const SnackBar(content: Text('Registration failed. Please try again.')),
           );
         }
       } finally {
@@ -144,6 +146,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _nameController,
                   focusNode: _nameFocusNode,
                   textInputAction: TextInputAction.next,
+                  maxLength: 100, // SECURITY: Prevent large input DoS
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_contactFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   decoration: const InputDecoration(
@@ -162,6 +166,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _contactController,
                   focusNode: _contactFocusNode,
                   textInputAction: TextInputAction.next,
+                  maxLength: 254, // SECURITY: RFC 5321 limit
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_phoneFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.emailAddress,
@@ -181,6 +187,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
                   textInputAction: TextInputAction.next,
+                  maxLength: 20, // SECURITY: Prevent large input DoS (allow for formatting)
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.phone,
@@ -219,6 +227,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
                   textInputAction: TextInputAction.next,
+                  maxLength: 128, // SECURITY: Prevent large input DoS
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   obscureText: true,
@@ -238,6 +248,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _confirmPasswordController,
                   focusNode: _confirmPasswordFocusNode,
                   textInputAction: _selectedRole == 'resident' ? TextInputAction.next : TextInputAction.done,
+                  maxLength: 128, // SECURITY: Prevent large input DoS
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) {
                     if (_selectedRole == 'resident') {
                       FocusScope.of(context).requestFocus(_residenceIdFocusNode);
@@ -290,6 +302,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _residenceIdController,
                     focusNode: _residenceIdFocusNode,
                     textInputAction: TextInputAction.done,
+                    maxLength: 50, // SECURITY: Prevent large input DoS
+                    buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                     onFieldSubmitted: (_) => _handleSignUp(),
                     decoration: const InputDecoration(
                       hintText: 'Enter Residence ID to join',
