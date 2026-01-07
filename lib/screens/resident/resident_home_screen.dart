@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
@@ -22,6 +23,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -53,7 +55,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Resident Portal',
+                                l10n.residentPortal,
                                 style: theme.textTheme.labelMedium?.copyWith(
                                   color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.bold,
@@ -61,7 +63,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Good Evening,',
+                                l10n.goodEvening,
                                 style: theme.textTheme.headlineMedium,
                               ),
                               Text(
@@ -76,8 +78,8 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                             onTap: () {
                               showComingSoonDialog(
                                 context,
-                                title: 'Notifications',
-                                message: 'We are adding a notification center to keep you updated on all activities.',
+                                title: l10n.notifications,
+                                message: l10n.notificationCenterMessage,
                               );
                             },
                             borderRadius: BorderRadius.circular(12),
@@ -150,7 +152,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    hasFlat ? 'Manage Family' : 'Manage Flat',
+                                    hasFlat ? l10n.manageFamily : l10n.manageFlat,
                                     style: theme.textTheme.titleSmall?.copyWith(
                                       color: theme.textTheme.bodySmall?.color,
                                     ),
@@ -203,7 +205,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'New Invite',
+                                    l10n.newInvite,
                                     style: theme.textTheme.titleSmall?.copyWith(
                                       color: theme.textTheme.bodySmall?.color,
                                     ),
@@ -239,7 +241,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Pending Request',
+                                    l10n.pendingRequest,
                                     style: theme.textTheme.titleLarge,
                                   ),
                                   Container(
@@ -266,7 +268,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          'Live',
+                                          l10n.live,
                                           style: theme.textTheme.labelSmall?.copyWith(
                                             color: AppTheme.errorRed,
                                             fontSize: 9,
@@ -291,8 +293,8 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       );
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Visitor approved'),
+                                          SnackBar(
+                                            content: Text(l10n.visitorApproved),
                                           ),
                                         );
                                       }
@@ -300,7 +302,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text('Error: $e'),
+                                            content: Text('${l10n.error}: $e'),
                                             backgroundColor: AppTheme.errorRed,
                                           ),
                                         );
@@ -314,8 +316,8 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       );
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Visitor rejected'),
+                                          SnackBar(
+                                            content: Text(l10n.visitorRejected),
                                           ),
                                         );
                                       }
@@ -323,7 +325,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text('Error: $e'),
+                                            content: Text('${l10n.error}: $e'),
                                             backgroundColor: AppTheme.errorRed,
                                           ),
                                         );
@@ -339,7 +341,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Recent History',
+                                  l10n.recentHistory,
                                   style: theme.textTheme.titleLarge,
                                 ),
                               ],
@@ -352,7 +354,7 @@ class _ResidentHomeScreenState extends State<ResidentHomeScreen> {
                                     vertical: 32,
                                   ),
                                   child: Text(
-                                    'No recent visitors',
+                                    l10n.noRecentVisitors,
                                     style: theme.textTheme.labelMedium,
                                   ),
                                 ),
@@ -464,6 +466,7 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Container(
@@ -543,7 +546,7 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Guard: Ramesh', // Ideally this should be dynamic too
+                  '${l10n.guard}: Ramesh', // Ideally this should be dynamic too
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.textTheme.bodySmall?.color,
                   ),
@@ -560,7 +563,7 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Arrived 1 min ago', // Ideally dynamic
+                  '${l10n.arrived} 1 ${l10n.min} ${l10n.ago}', // Ideally dynamic
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.textTheme.bodySmall?.color,
                   ),
@@ -576,7 +579,7 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                     icon: _isProcessing
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.close),
-                    label: Text(_isProcessing ? 'Wait...' : 'Reject'),
+                    label: Text(_isProcessing ? l10n.wait : l10n.reject),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.errorRed,
                       foregroundColor: Colors.white,
@@ -595,7 +598,7 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                     icon: _isProcessing
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
                       : const Icon(Icons.check),
-                    label: Text(_isProcessing ? 'Wait...' : 'Approve'),
+                    label: Text(_isProcessing ? l10n.wait : l10n.approve),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.black,
@@ -728,25 +731,26 @@ class _ResidentBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return BottomNavigationBar(
       backgroundColor: theme.cardColor,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_filled),
-          label: 'Home',
-          activeIcon: Icon(Icons.home_filled),
+          icon: const Icon(Icons.home_filled),
+          label: l10n.home,
+          activeIcon: const Icon(Icons.home_filled),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.groups_outlined),
-          label: 'Visitors',
-          activeIcon: Icon(Icons.groups),
+          icon: const Icon(Icons.groups_outlined),
+          label: l10n.visitors,
+          activeIcon: const Icon(Icons.groups),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          label: 'Settings',
-          activeIcon: Icon(Icons.settings),
+          icon: const Icon(Icons.settings_outlined),
+          label: l10n.settings,
+          activeIcon: const Icon(Icons.settings),
         ),
       ],
       currentIndex: currentIndex,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/logger_service.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
@@ -68,10 +69,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _handleSignUp() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       if (_selectedRole == null) {
          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a role to continue')),
+            SnackBar(content: Text(l10n.pleaseSelectRole)),
          );
          return;
       }
@@ -94,7 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         LoggerService().error('Registration failed', e, stack);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration failed. Please try again.')),
+            SnackBar(content: Text(l10n.registrationFailed)),
           );
         }
       } finally {
@@ -106,6 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -127,12 +130,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Create Account',
+                  l10n.createAccount,
                   style: theme.textTheme.displayMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign up to get started',
+                  l10n.signUpToGetStarted,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
@@ -140,7 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 32),
 
                 // Name
-                Text('Full Name', style: theme.textTheme.labelLarge),
+                Text(l10n.fullName, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nameController,
@@ -150,9 +153,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_contactFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: const InputDecoration(
-                    hintText: 'John Doe',
-                    prefixIcon: Icon(Icons.person_outline),
+                  decoration: InputDecoration(
+                    hintText: l10n.nameHint,
+                    prefixIcon: const Icon(Icons.person_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: Validators.validateName,
@@ -160,7 +163,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
 
                 // Email
-                Text('Email Address', style: theme.textTheme.labelLarge),
+                Text(l10n.emailAddress, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _contactController,
@@ -171,9 +174,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_phoneFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    hintText: 'john@example.com',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    hintText: l10n.emailHint,
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: Validators.validateEmail,
@@ -181,7 +184,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
 
                 // Phone
-                Text('Phone Number', style: theme.textTheme.labelLarge),
+                Text(l10n.phoneNumber, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _phoneController,
@@ -192,9 +195,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    hintText: '9876543210',
-                    prefixIcon: Icon(Icons.phone_outlined),
+                  decoration: InputDecoration(
+                    hintText: l10n.phoneHint,
+                    prefixIcon: const Icon(Icons.phone_outlined),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: Validators.validatePhone,
@@ -202,7 +205,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
 
                 // Date of Birth
-                Text('Date of Birth', style: theme.textTheme.labelLarge),
+                Text(l10n.dateOfBirth, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: () => _selectDate(context),
@@ -212,7 +215,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     child: Text(
                       _selectedDate == null
-                          ? 'Select Date'
+                          ? l10n.selectDate
                           : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                       style: theme.textTheme.bodyLarge,
                     ),
@@ -221,7 +224,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
 
                 // Password
-                Text('Password', style: theme.textTheme.labelLarge),
+                Text(l10n.password, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordController,
@@ -232,9 +235,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Create a password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                  decoration: InputDecoration(
+                    hintText: l10n.createPassword,
+                    prefixIcon: const Icon(Icons.lock_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: Validators.validatePassword,
@@ -242,7 +245,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
 
                 // Confirm Password
-                Text('Confirm Password', style: theme.textTheme.labelLarge),
+                Text(l10n.confirmPassword, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _confirmPasswordController,
@@ -259,17 +262,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   },
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Confirm your password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                  decoration: InputDecoration(
+                    hintText: l10n.confirmYourPassword,
+                    prefixIcon: const Icon(Icons.lock_outline),
                   ),
                   style: theme.textTheme.bodyLarge,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return l10n.pleaseConfirmPassword;
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return l10n.passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -277,26 +280,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 24),
 
                 // Role Selection
-                Text('Continue as', style: theme.textTheme.labelLarge),
+                Text(l10n.continueAs, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 12),
                 Row(
                    children: [
-                     _buildRoleCard('resident', 'Resident', Icons.home_outlined, theme),
+                     _buildRoleCard('resident', l10n.resident, Icons.home_outlined, theme),
                      const SizedBox(width: 12),
-                     _buildRoleCard('guard', 'Guard', Icons.security_outlined, theme),
+                     _buildRoleCard('guard', l10n.guard, Icons.security_outlined, theme),
                    ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                    children: [
-                     _buildRoleCard('admin', 'Admin', Icons.admin_panel_settings_outlined, theme),
+                     _buildRoleCard('admin', l10n.admin, Icons.admin_panel_settings_outlined, theme),
                    ],
                 ),
 
                 // Residence ID (Optional)
                 if (_selectedRole == 'resident') ...[
                   const SizedBox(height: 24),
-                  Text('Residence ID (Optional)', style: theme.textTheme.labelLarge),
+                  Text(l10n.residenceIdOptional, style: theme.textTheme.labelLarge),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _residenceIdController,
@@ -305,10 +308,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     maxLength: 50, // SECURITY: Prevent large input DoS
                     buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                     onFieldSubmitted: (_) => _handleSignUp(),
-                    decoration: const InputDecoration(
-                      hintText: 'Enter Residence ID to join',
-                      prefixIcon: Icon(Icons.apartment),
-                      helperText: 'Leave empty if you want to create a new flat',
+                    decoration: InputDecoration(
+                      hintText: l10n.enterResidenceIdToJoin,
+                      prefixIcon: const Icon(Icons.apartment),
+                      helperText: l10n.leaveEmptyToCreateFlat,
                     ),
                     style: theme.textTheme.bodyLarge,
                   ),
@@ -335,7 +338,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: CircularProgressIndicator(color: theme.colorScheme.onPrimary, strokeWidth: 2)
                         )
                       : Text(
-                        'Sign Up',
+                        l10n.signUp,
                         style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary),
                       ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../theme/app_theme.dart';
 import '../../providers/guard_provider.dart';
@@ -27,6 +28,7 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -39,14 +41,14 @@ class _GuardHomeScreenState extends State<GuardHomeScreen> {
         unselectedItemColor: theme.disabledColor,
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.security),
-            label: 'Gate Control',
+            icon: const Icon(Icons.security),
+            label: l10n.gateControl,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner),
-            label: 'Guard Checks',
+            icon: const Icon(Icons.qr_code_scanner),
+            label: l10n.guardChecks,
           ),
         ],
       ),
@@ -74,6 +76,7 @@ class _GateControlViewState extends State<_GateControlView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return SafeArea(
       child: Column(
@@ -97,7 +100,7 @@ class _GateControlViewState extends State<_GateControlView> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                Text('Gate Control', style: theme.textTheme.headlineMedium),
+                Text(l10n.gateControl, style: theme.textTheme.headlineMedium),
                 InkWell(
                   onTap: () async {
                     await context.read<AuthProvider>().logout();
@@ -108,7 +111,7 @@ class _GateControlViewState extends State<_GateControlView> {
                       Icon(Icons.logout, color: theme.colorScheme.error, size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        'Logout',
+                        l10n.logout,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.error,
                         ),
@@ -134,13 +137,13 @@ class _GateControlViewState extends State<_GateControlView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Recent Activity',
+                              l10n.recentActivity,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             FilterChip(
-                              label: const Text('Currently Inside'),
+                              label: Text(l10n.currentlyInside),
                               selected: _showOnlyInside,
                               onSelected: (val) => setState(() => _showOnlyInside = val),
                               checkmarkColor: theme.colorScheme.onPrimaryContainer,
@@ -176,7 +179,7 @@ class _GateControlViewState extends State<_GateControlView> {
                            padding: const EdgeInsets.all(40),
                            child: Center(
                              child: Text(
-                               'No visitors found',
+                               l10n.noVisitorsFound,
                                style: theme.textTheme.bodyLarge?.copyWith(
                                  color: theme.disabledColor,
                                ),
@@ -224,6 +227,7 @@ class _QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Row(
       children: [
@@ -232,7 +236,7 @@ class _QuickActions extends StatelessWidget {
           child: _actionCard(
             context,
             icon: Icons.person_add_outlined,
-            label: 'Register\nVisitor',
+            label: l10n.registerVisitorMultiline,
             onTap: () => showDialog(
               context: context,
               builder: (context) => const VisitorDialog(),
@@ -245,7 +249,7 @@ class _QuickActions extends StatelessWidget {
           child: _actionCard(
             context,
             icon: Icons.qr_code_scanner,
-            label: 'Scan\nVisitor QR',
+            label: l10n.scanVisitorQRMultiline,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const QRScannerScreen()),
@@ -315,6 +319,7 @@ class _EntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isApproved = entry.status == 'approved';
     final isInside = isApproved && entry.exitTime == null;
     final duration = entry.exitTime != null ? entry.exitTime!.difference(entry.time) : null;
@@ -391,9 +396,9 @@ class _EntryCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.green, width: 0.5),
                         ),
-                        child: const Text(
-                          'INSIDE',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.inside,
+                          style: const TextStyle(
                             color: Colors.green,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -403,7 +408,7 @@ class _EntryCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                Text('Flat ${entry.flatNumber}',
+                Text('${l10n.flat} ${entry.flatNumber}',
                     style: theme.textTheme.labelSmall),
                 if (entry.vehicleType != null && entry.vehicleType != 'None') ...[
                   const SizedBox(height: 4),
@@ -424,7 +429,7 @@ class _EntryCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      'Duration: ${_formatDuration(duration)}',
+                      '${l10n.duration}: ${_formatDuration(duration)}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 10,
                         color: theme.disabledColor,
@@ -441,7 +446,7 @@ class _EntryCard extends StatelessWidget {
                   style: theme.textTheme.labelSmall),
               if (entry.exitTime != null)
                 Text(
-                  'Exit: ${DateFormat('HH:mm').format(entry.exitTime!)}',
+                  '${l10n.exit}: ${DateFormat('HH:mm').format(entry.exitTime!)}',
                   style: theme.textTheme.labelSmall?.copyWith(color: theme.disabledColor),
                 ),
               if (isInside)
@@ -454,19 +459,19 @@ class _EntryCard extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Mark Exit?'),
-                          content: Text('Mark ${entry.name} as exited?'),
+                          title: Text(l10n.markExitTitle),
+                          content: Text(l10n.markExitMessage(entry.name)),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
+                              child: Text(l10n.cancel),
                             ),
                             TextButton(
                               onPressed: () {
                                 context.read<GuardProvider>().markExit(entry.id);
                                 Navigator.pop(context);
                               },
-                              child: const Text('Confirm'),
+                              child: Text(l10n.confirm),
                             ),
                           ],
                         ),
@@ -475,7 +480,7 @@ class _EntryCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Text(
-                        'Mark Exit',
+                        l10n.markExitAction,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
