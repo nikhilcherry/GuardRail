@@ -81,7 +81,21 @@ class GuardProvider extends ChangeNotifier {
   DateTime _lastPatrolCheck = DateTime.now().subtract(const Duration(minutes: 45));
   final List<DateTime> _patrolLogs = [];
   
+  // Cache for inside visitors to avoid O(N) filtering on every build
+  List<VisitorEntry>? _cachedInsideEntries;
+
   List<VisitorEntry> get entries => _entries;
+
+  List<VisitorEntry> get insideEntries {
+    if (_cachedInsideEntries != null) {
+      return _cachedInsideEntries!;
+    }
+    _cachedInsideEntries = _entries
+        .where((e) => e.status == 'approved' && e.exitTime == null)
+        .toList();
+    return _cachedInsideEntries!;
+  }
+
   List<GuardCheck> get checks => _checks;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
@@ -107,6 +121,7 @@ class GuardProvider extends ChangeNotifier {
           vehicleType: v.vehicleType,
         ));
       }
+      _cachedInsideEntries = null;
       notifyListeners();
     });
   }
@@ -236,6 +251,7 @@ class GuardProvider extends ChangeNotifier {
           vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
           vehicleType: vehicleType ?? oldEntry.vehicleType,
         );
+        _cachedInsideEntries = null;
         notifyListeners();
       }
     } catch (e) {
