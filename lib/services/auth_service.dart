@@ -110,10 +110,8 @@ class AuthService {
     try {
       return await _localAuth.authenticate(
         localizedReason: 'Verify your identity to access GuardRail',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: false,
-        ),
+        // options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
+        // Fallback for older local_auth versions or mock environments
       );
     } catch (e) {
       return false;

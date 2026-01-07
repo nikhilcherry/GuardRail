@@ -63,5 +63,6 @@
   "enterPassword": "Enter password",
   "support": "Support",
   "seamlessSecureAccess": "Seamless, secure access for your community.",
-  "agreeTerms": "By proceeding, you agree to our Terms & Privacy Policy."
+  "agreeTerms": "By proceeding, you agree to our Terms & Privacy Policy.",
+  "biometricsUpdateFailed": "Failed to update biometrics settings"
 }
