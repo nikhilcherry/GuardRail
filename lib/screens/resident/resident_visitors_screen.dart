@@ -132,61 +132,7 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final visitor = selectedVisitors[index];
-
-                            final typeLabel = visitor.type[0].toUpperCase() +
-                                visitor.type.substring(1);
-                            final statusLabel = visitor.status[0].toUpperCase() +
-                                visitor.status.substring(1);
-                            final timeLabel =
-                                DateFormat('h:mm a').format(visitor.date);
-
-                            return Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppTheme.surfaceDark.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppTheme.borderDark.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.surfaceDark,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: AppTheme.borderDark.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.person_outline,
-                                      color: AppTheme.textSecondary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          visitor.name,
-                                          style: AppTheme.titleSmall,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '$typeLabel • $statusLabel • $timeLabel',
-                                          style: AppTheme.labelSmall,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
+                            return _VisitorListItem(visitor: visitor);
                           },
                         ),
                 ),
@@ -196,6 +142,70 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
         ),
       ),
       bottomNavigationBar: const _ResidentBottomNav(currentIndex: 1),
+    );
+  }
+}
+
+class _VisitorListItem extends StatelessWidget {
+  final Visitor visitor;
+  // PERF: Cache DateFormat to avoid repeated parsing overhead in list items.
+  static final _timeFormatter = DateFormat('h:mm a');
+
+  const _VisitorListItem({required this.visitor});
+
+  @override
+  Widget build(BuildContext context) {
+    final typeLabel = visitor.type[0].toUpperCase() + visitor.type.substring(1);
+    final statusLabel =
+        visitor.status[0].toUpperCase() + visitor.status.substring(1);
+    final timeLabel = _timeFormatter.format(visitor.date);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceDark.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.borderDark.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceDark,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.borderDark.withOpacity(0.3),
+              ),
+            ),
+            child: const Icon(
+              Icons.person_outline,
+              color: AppTheme.textSecondary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  visitor.name,
+                  style: AppTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$typeLabel • $statusLabel • $timeLabel',
+                  style: AppTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
