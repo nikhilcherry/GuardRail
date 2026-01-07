@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../repositories/visitor_repository.dart';
+import '../services/logger_service.dart';
 
 class VisitorEntry {
   final String id;
@@ -311,6 +312,7 @@ class GuardProvider extends ChangeNotifier {
   void logEmergency() {
     final timestamp = DateTime.now();
     // In a real application, this would send an API request to the backend.
-    print('EMERGENCY: Guard triggered SOS at $timestamp');
+    // SECURITY: Use LoggerService instead of print to prevent sensitive data leakage in release builds.
+    LoggerService().info('EMERGENCY: Guard triggered SOS at $timestamp');
   }
 }

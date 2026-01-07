@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../repositories/visitor_repository.dart';
+import '../services/logger_service.dart';
 
 class Visitor {
   final String id;
@@ -225,6 +226,7 @@ class ResidentProvider extends ChangeNotifier {
   void logEmergency() {
     final timestamp = DateTime.now();
     // In a real application, this would send an API request to the backend.
-    print('EMERGENCY: Resident triggered SOS at $timestamp');
+    // SECURITY: Use LoggerService instead of print to prevent sensitive data leakage in release builds.
+    LoggerService().info('EMERGENCY: Resident triggered SOS at $timestamp');
   }
 }
