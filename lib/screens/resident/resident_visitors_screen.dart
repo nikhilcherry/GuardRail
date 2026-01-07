@@ -32,13 +32,13 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
           'Visitors',
-          style: AppTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ),
       body: SafeArea(
@@ -79,36 +79,36 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
                     return _getVisitorsForDay(allVisitors, day);
                   },
                   calendarStyle: CalendarStyle(
-                    defaultTextStyle: const TextStyle(color: AppTheme.textSecondary),
-                    weekendTextStyle: const TextStyle(color: AppTheme.textSecondary),
-                    selectedDecoration: const BoxDecoration(
-                      color: AppTheme.primary,
+                    defaultTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    weekendTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    selectedDecoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
                       shape: BoxShape.circle,
                     ),
                     todayDecoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.5),
+                      color: Theme.of(context).primaryColor.withOpacity(0.5),
                       shape: BoxShape.circle,
                     ),
                     selectedTextStyle: const TextStyle(color: Colors.black),
-                    markerDecoration: const BoxDecoration(
-                      color: AppTheme.primary,
+                    markerDecoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
                       shape: BoxShape.circle,
                     ),
                   ),
                   headerStyle: HeaderStyle(
-                    formatButtonTextStyle: const TextStyle(color: AppTheme.primary),
+                    formatButtonTextStyle: TextStyle(color: Theme.of(context).primaryColor),
                     formatButtonDecoration: BoxDecoration(
-                      border: Border.all(color: AppTheme.primary),
+                      border: Border.all(color: Theme.of(context).primaryColor),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    leftChevronIcon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
-                    rightChevronIcon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
+                    leftChevronIcon: Icon(Icons.chevron_left, color: Theme.of(context).iconTheme.color),
+                    rightChevronIcon: Icon(Icons.chevron_right, color: Theme.of(context).iconTheme.color),
                     titleCentered: true,
-                    titleTextStyle: AppTheme.titleMedium,
+                    titleTextStyle: Theme.of(context).textTheme.titleMedium!,
                   ),
-                  daysOfWeekStyle: const DaysOfWeekStyle(
-                    weekdayStyle: TextStyle(color: AppTheme.textSecondary),
-                    weekendStyle: TextStyle(color: AppTheme.textSecondary),
+                  daysOfWeekStyle: DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    weekendStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -119,8 +119,8 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
                             padding: const EdgeInsets.all(24),
                             child: Text(
                               'No visitors on this day.',
-                              style: AppTheme.bodyMedium.copyWith(
-                                color: AppTheme.textSecondary,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -163,10 +163,10 @@ class _VisitorListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceDark.withOpacity(0.5),
+        color: Theme.of(context).cardColor.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.borderDark.withOpacity(0.3),
+          color: Theme.of(context).dividerColor.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -175,15 +175,15 @@ class _VisitorListItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppTheme.borderDark.withOpacity(0.3),
+                color: Theme.of(context).dividerColor.withOpacity(0.3),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person_outline,
-              color: AppTheme.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: 20,
             ),
           ),
@@ -194,12 +194,12 @@ class _VisitorListItem extends StatelessWidget {
               children: [
                 Text(
                   visitor.name,
-                  style: AppTheme.titleSmall,
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '$typeLabel • $statusLabel • $timeLabel',
-                  style: AppTheme.labelSmall,
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
             ),
@@ -218,7 +218,7 @@ class _ResidentBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: AppTheme.surfaceDark,
+      backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor ?? Theme.of(context).cardColor,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       items: const [
@@ -239,8 +239,8 @@ class _ResidentBottomNav extends StatelessWidget {
         ),
       ],
       currentIndex: currentIndex,
-      selectedItemColor: AppTheme.primary,
-      unselectedItemColor: AppTheme.textSecondary,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
       onTap: (index) {
         if (index == currentIndex) return;
         if (index == 0) {
