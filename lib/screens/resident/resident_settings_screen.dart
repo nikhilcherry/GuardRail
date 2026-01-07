@@ -37,17 +37,17 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surfaceDark,
+      backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(l10n.logout, style: AppTheme.headlineSmall),
+      title: Text(l10n.logout, style: Theme.of(context).textTheme.headlineSmall),
         content: Text(
           l10n.areYouSureLogout,
-          style: AppTheme.bodyMedium,
+        style: Theme.of(context).textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel, style: AppTheme.bodyMedium),
+          child: Text(l10n.cancel, style: Theme.of(context).textTheme.bodyMedium),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -69,7 +69,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
   void _showLanguageSelector(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -84,11 +84,11 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     l10n.selectLanguage,
-                    style: AppTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
                 ListTile(
-                  title: Text(l10n.english, style: AppTheme.bodyLarge),
+                  title: Text(l10n.english, style: Theme.of(context).textTheme.bodyLarge),
                   leading: Radio<String>(
                     value: 'en',
                     groupValue: settings.locale.languageCode,
@@ -98,7 +98,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                         Navigator.pop(context);
                       }
                     },
-                    activeColor: AppTheme.primary,
+                    activeColor: Theme.of(context).primaryColor,
                   ),
                   onTap: () {
                     settings.setLocale(const Locale('en'));
@@ -106,7 +106,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                   },
                 ),
                 ListTile(
-                  title: Text(l10n.hindi, style: AppTheme.bodyLarge),
+                  title: Text(l10n.hindi, style: Theme.of(context).textTheme.bodyLarge),
                   leading: Radio<String>(
                     value: 'hi',
                     groupValue: settings.locale.languageCode,
@@ -116,7 +116,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                         Navigator.pop(context);
                       }
                     },
-                    activeColor: AppTheme.primary,
+                    activeColor: Theme.of(context).primaryColor,
                   ),
                   onTap: () {
                     settings.setLocale(const Locale('hi'));
@@ -124,7 +124,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                   },
                 ),
                 ListTile(
-                  title: Text(l10n.telugu, style: AppTheme.bodyLarge),
+                  title: Text(l10n.telugu, style: Theme.of(context).textTheme.bodyLarge),
                   leading: Radio<String>(
                     value: 'te',
                     groupValue: settings.locale.languageCode,
@@ -134,7 +134,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                         Navigator.pop(context);
                       }
                     },
-                    activeColor: AppTheme.primary,
+                    activeColor: Theme.of(context).primaryColor,
                   ),
                   onTap: () {
                     settings.setLocale(const Locale('te'));
@@ -155,9 +155,9 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
@@ -165,7 +165,7 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
         ),
         title: Text(
           l10n.settings,
-          style: AppTheme.headlineMedium.copyWith(fontSize: 26),
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 26),
         ),
         centerTitle: true,
       ),
@@ -243,8 +243,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                       title: l10n.language,
                       trailing: Text(
                         _getLanguageName(settingsProvider.locale.languageCode, l10n),
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppTheme.textSecondary,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       onTap: () => _showLanguageSelector(context),
@@ -293,15 +293,15 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: _handleLogout,
-                      icon: const Icon(Icons.logout, color: AppTheme.primary),
+                      icon: Icon(Icons.logout, color: Theme.of(context).primaryColor),
                       label: Text(
                         l10n.logout,
-                        style: AppTheme.titleLarge.copyWith(
-                          color: AppTheme.primary,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppTheme.borderDark),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -313,8 +313,8 @@ class _ResidentSettingsScreenState extends State<ResidentSettingsScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Version 2.4.1 (Build 890)',
-                  style: AppTheme.labelSmall.copyWith(
-                    color: AppTheme.textTertiary,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -357,8 +357,8 @@ class _SettingsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Text(
             title,
-            style: AppTheme.labelSmall.copyWith(
-              color: AppTheme.textSecondary,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 13,
               letterSpacing: 1.2,
             ),
@@ -367,9 +367,9 @@ class _SettingsSection extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceDark,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.borderDark),
+            border: Border.all(color: Theme.of(context).dividerColor),
           ),
           child: Column(
             children: children,
@@ -409,7 +409,7 @@ class _SettingsItem extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: AppTheme.borderDark,
+                color: Theme.of(context).dividerColor,
                 width: hasSubtitle && !hasTrailing ? 1 : 0,
               ),
             ),
@@ -420,10 +420,10 @@ class _SettingsItem extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.borderDark,
+                  color: Theme.of(context).dividerColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: AppTheme.textPrimary, size: 20),
+                child: Icon(icon, color: Theme.of(context).iconTheme.color, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -431,25 +431,25 @@ class _SettingsItem extends StatelessWidget {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: AppTheme.titleMedium),
+                          Text(title, style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 2),
                           Text(
                             subtitle!,
-                            style: AppTheme.bodySmall.copyWith(
-                              color: AppTheme.textSecondary,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       )
-                    : Text(title, style: AppTheme.bodyLarge),
+                    : Text(title, style: Theme.of(context).textTheme.bodyLarge),
               ),
               if (hasTrailing)
                 trailing!
               else if (onTap != null)
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: AppTheme.textTertiary,
+                  color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
                 ),
             ],
           ),
@@ -481,7 +481,7 @@ class _SettingsToggleItem extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: subtitle != null ? AppTheme.borderDark : Colors.transparent,
+            color: subtitle != null ? Theme.of(context).dividerColor : Colors.transparent,
             width: subtitle != null ? 1 : 0,
           ),
         ),
@@ -492,10 +492,10 @@ class _SettingsToggleItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppTheme.borderDark,
+              color: Theme.of(context).dividerColor.withOpacity(0.5),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppTheme.textPrimary, size: 20),
+            child: Icon(icon, color: Theme.of(context).iconTheme.color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -503,22 +503,22 @@ class _SettingsToggleItem extends StatelessWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: AppTheme.titleMedium),
+                      Text(title, style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppTheme.textSecondary,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   )
-                : Text(title, style: AppTheme.bodyLarge),
+                : Text(title, style: Theme.of(context).textTheme.bodyLarge),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppTheme.primary,
+            activeColor: Theme.of(context).primaryColor,
           ),
         ],
       ),

@@ -72,9 +72,9 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundDark,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
@@ -82,13 +82,13 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
         ),
         title: Text(
           'My Profile',
-          style: AppTheme.headlineMedium.copyWith(fontSize: 20),
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 20),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            color: AppTheme.primary,
+            color: Theme.of(context).primaryColor,
             onPressed: () {
               if (_isEditing) {
                 _saveProfile();
@@ -115,9 +115,9 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: AppTheme.surfaceDark,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.primary, width: 2),
+                          border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                           image: _imageFile != null
                               ? DecorationImage(
                                   image: FileImage(_imageFile!),
@@ -133,7 +133,7 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                                   : null,
                         ),
                         child: (_imageFile == null && residentProvider.profileImage == null)
-                            ? const Icon(Icons.person, size: 60, color: AppTheme.textSecondary)
+                            ? Icon(Icons.person, size: 60, color: Theme.of(context).colorScheme.onSurfaceVariant)
                             : null,
                       ),
                       if (_isEditing)
@@ -144,8 +144,8 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                             onTap: _pickImage,
                             child: Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: AppTheme.primary,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.photo_library, size: 20, color: Colors.black),
@@ -162,12 +162,12 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                    Container(
                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                      decoration: BoxDecoration(
-                       color: AppTheme.surfaceDark.withOpacity(0.5),
+                       color: Theme.of(context).cardColor.withOpacity(0.5),
                        borderRadius: BorderRadius.circular(20),
                      ),
                      child: Text(
                        'Last Login: ${DateFormat('MMM d, yyyy h:mm a').format(residentProvider.lastLogin!)}',
-                       style: AppTheme.labelSmall.copyWith(color: AppTheme.textSecondary),
+                       style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                      ),
                    ),
 
@@ -200,12 +200,12 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                 const SizedBox(height: 32),
 
                 // Flat Information (Read-only)
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'RESIDENCE INFORMATION',
                     style: TextStyle(
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -216,25 +216,25 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.borderDark),
+                    border: Border.all(color: Theme.of(context).dividerColor),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.home, color: AppTheme.primary),
+                      Icon(Icons.home, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Flat ${residentProvider.flatNumber}',
-                            style: AppTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Tower A, Sunrise Apartments', // Mock data, ideally from Provider
-                            style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -272,29 +272,29 @@ class _ProfileField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTheme.labelSmall.copyWith(color: AppTheme.textSecondary),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           enabled: enabled,
           keyboardType: keyboardType,
-          style: AppTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: enabled ? AppTheme.primary : AppTheme.textSecondary),
+            prefixIcon: Icon(icon, color: enabled ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant),
             filled: true,
-            fillColor: enabled ? AppTheme.surfaceDark : Colors.black.withOpacity(0.2),
+            fillColor: enabled ? Theme.of(context).inputDecorationTheme.fillColor : Theme.of(context).colorScheme.surfaceContainerHighest,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: enabled ? AppTheme.borderDark : Colors.transparent),
+              borderSide: BorderSide(color: enabled ? (Theme.of(context).inputDecorationTheme.enabledBorder?.borderSide.color ?? Theme.of(context).dividerColor) : Colors.transparent),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.borderDark),
+              borderSide: BorderSide(color: Theme.of(context).dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primary),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor),
             ),
           ),
         ),
