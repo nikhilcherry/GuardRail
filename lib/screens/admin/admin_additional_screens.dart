@@ -35,69 +35,6 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
     super.dispose();
   }
 
-  void _showAddEditFlatDialog(AdminProvider provider,
-      {Map<String, dynamic>? flat}) {
-    final isEditing = flat != null;
-    final flatController =
-        TextEditingController(text: flat?['flat'] ?? '');
-    final residentController = TextEditingController(
-        text: flat?['resident']?.replaceFirst('Owner ID: ', '') ?? '');
-    final formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: flatController,
-                decoration: const InputDecoration(labelText: 'Flat Name'),
-                validator: Validators.validateFlatNumber,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: residentController,
-                decoration: const InputDecoration(labelText: 'Owner Name'),
-                validator: Validators.validateName,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (!formKey.currentState!.validate()) return;
-              if (isEditing) {
-                provider.updateFlat(
-                  flat!['id']!,
-                  flatController.text,
-                  residentController.text,
-                );
-              } else {
-                provider.addFlat(
-                  flatController.text,
-                  residentController.text,
-                );
-              }
-              Navigator.pop(context);
-            },
-            child: Text(isEditing ? 'Save' : 'Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
@@ -110,7 +47,13 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
           title: 'Flats',
           currentIndex: 1,
           floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddEditFlatDialog(adminProvider),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    _AdminFlatDialog(provider: adminProvider),
+              );
+            },
             child: const Icon(Icons.add),
           ),
           body: Column(
@@ -179,7 +122,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
                                                   BorderRadius
                                                       .circular(4),
                                             ),
-                                            child: Text(
+                                            child: const Text(
                                               'PENDING',
                                               style: TextStyle(
                                                 color: Colors.orange,
@@ -201,48 +144,16 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
                                                 Icons.edit),
                                             tooltip: 'Edit Request',
                                             onPressed: () {
-                                              // Edit Pending Flat Name Dialog
-                                              final controller =
-                                                  TextEditingController(
-                                                      text:
-                                                          flat.name);
                                               showDialog(
                                                 context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                  title: const Text(
-                                                      'Edit Request Details'),
-                                                  content:
-                                                      TextField(
-                                                    controller:
-                                                        controller,
-                                                    decoration:
-                                                        const InputDecoration(
-                                                            labelText:
-                                                                'Flat Name'),
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context),
-                                                      child: const Text(
-                                                          'Cancel'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        adminProvider
-                                                            .updateFlatName(
-                                                                flat.id,
-                                                                controller
-                                                                    .text);
-                                                        Navigator.pop(
-                                                            context);
-                                                      },
-                                                      child: const Text(
-                                                          'Save'),
-                                                    ),
-                                                  ],
+                                                builder: (context) => _EditNameDialog(
+                                                  title: 'Edit Request Details',
+                                                  label: 'Flat Name',
+                                                  initialValue: flat.name,
+                                                  onSave: (val) {
+                                                    adminProvider.updateFlatName(flat.id, val);
+                                                    Navigator.pop(context);
+                                                  },
                                                 ),
                                               );
                                             },
@@ -318,45 +229,16 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
                                     IconButton(
                                       icon: const Icon(Icons.edit),
                                       onPressed: () {
-                                        // Edit Flat Name Dialog
-                                        final controller =
-                                            TextEditingController(
-                                                text: flat.name);
                                         showDialog(
                                           context: context,
-                                          builder: (context) =>
-                                              AlertDialog(
-                                            title: const Text(
-                                                'Edit Flat Name'),
-                                            content: TextField(
-                                              controller: controller,
-                                              decoration:
-                                                  const InputDecoration(
-                                                      labelText:
-                                                          'Flat Name'),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(
-                                                        context),
-                                                child: const Text(
-                                                    'Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  adminProvider
-                                                      .updateFlatName(
-                                                          flat.id,
-                                                          controller
-                                                              .text);
-                                                  Navigator.pop(
-                                                      context);
-                                                },
-                                                child: const Text(
-                                                    'Save'),
-                                              ),
-                                            ],
+                                          builder: (context) => _EditNameDialog(
+                                            title: 'Edit Flat Name',
+                                            label: 'Flat Name',
+                                            initialValue: flat.name,
+                                            onSave: (val) {
+                                              adminProvider.updateFlatName(flat.id, val);
+                                              Navigator.pop(context);
+                                            },
                                           ),
                                         );
                                       },
@@ -424,123 +306,6 @@ class AdminGuardsScreen extends StatefulWidget {
 }
 
 class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
-  void _showAddEditGuardDialog(AdminProvider provider,
-      {Map<String, dynamic>? guard}) {
-    final isEditing = guard != null;
-    final nameController =
-        TextEditingController(text: guard?['name'] ?? '');
-    final idController = TextEditingController(text: guard?['id'] ?? '');
-
-    // For manual ID vs Random
-    bool isManualId = isEditing; // Default to manual if editing
-
-    // State for the dialog
-    String? error;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(isEditing ? 'Edit Guard' : 'Create Guard Invite'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Guard Details'),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    textInputAction: TextInputAction.done,
-                    decoration: const InputDecoration(
-                      labelText: 'Guard Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (!isEditing) ...[
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isManualId,
-                          onChanged: (val) {
-                            setState(() {
-                              isManualId = val ?? false;
-                              if (!isManualId) idController.clear();
-                            });
-                          },
-                        ),
-                        const Text('Enter Manual ID'),
-                      ],
-                    ),
-                  ],
-                  if (isManualId || isEditing)
-                    TextField(
-                      controller: idController,
-                      enabled: isEditing || isManualId,
-                      decoration: const InputDecoration(
-                        labelText: 'Guard ID',
-                        border: OutlineInputBorder(),
-                        helperText: 'Leave empty to auto-generate (if creating)',
-                      ),
-                    ),
-                  if (error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(error!,
-                          style: const TextStyle(color: Colors.red)),
-                    ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.trim().isEmpty) {
-                    setState(() => error = 'Name is required');
-                    return;
-                  }
-
-                  try {
-                    if (isEditing) {
-                      provider.updateGuard(
-                        guard!['id'],
-                        name: nameController.text.trim(),
-                        newId: idController.text.trim().isNotEmpty
-                            ? idController.text.trim()
-                            : null,
-                      );
-                    } else {
-                      final id = provider.createGuardInvite(
-                          nameController.text.trim(),
-                          manualId: isManualId &&
-                                  idController.text.trim().isNotEmpty
-                              ? idController.text.trim()
-                              : null);
-
-                      // Show Generated ID if it was auto-generated or just confirm
-                      // We'll close this dialog first
-                    }
-                    Navigator.pop(context);
-                  } catch (e) {
-                    setState(() =>
-                        error = e.toString().replaceAll('Exception: ', ''));
-                  }
-                },
-                child: Text(isEditing ? 'Save' : 'Create'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
@@ -551,7 +316,12 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
           title: 'Guards',
           currentIndex: 2,
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showAddEditGuardDialog(adminProvider),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => _AdminGuardDialog(provider: adminProvider),
+              );
+            },
             icon: const Icon(Icons.add),
             label: const Text('Create Guard'),
           ),
@@ -648,10 +418,15 @@ class _AdminGuardsScreenState extends State<AdminGuardsScreen> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () =>
-                                      _showAddEditGuardDialog(
-                                          adminProvider,
-                                          guard: guard),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => _AdminGuardDialog(
+                                        provider: adminProvider,
+                                        guard: guard,
+                                      ),
+                                    );
+                                  },
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete),
@@ -1045,6 +820,277 @@ class _SettingsTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AdminFlatDialog extends StatefulWidget {
+  final AdminProvider provider;
+  final Map<String, dynamic>? flat;
+
+  const _AdminFlatDialog({required this.provider, this.flat});
+
+  @override
+  State<_AdminFlatDialog> createState() => _AdminFlatDialogState();
+}
+
+class _AdminFlatDialogState extends State<_AdminFlatDialog> {
+  late TextEditingController _flatController;
+  late TextEditingController _residentController;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _flatController = TextEditingController(text: widget.flat?['flat'] ?? '');
+    _residentController = TextEditingController(
+        text: widget.flat?['resident']?.replaceFirst('Owner ID: ', '') ?? '');
+  }
+
+  @override
+  void dispose() {
+    _flatController.dispose();
+    _residentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = widget.flat != null;
+
+    return AlertDialog(
+      title: Text(isEditing ? 'Edit Flat' : 'Add Flat'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _flatController,
+              decoration: const InputDecoration(labelText: 'Flat Name'),
+              validator: Validators.validateFlatNumber,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _residentController,
+              decoration: const InputDecoration(labelText: 'Owner Name'),
+              validator: Validators.validateName,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (!_formKey.currentState!.validate()) return;
+            if (isEditing) {
+              widget.provider.updateFlat(
+                widget.flat!['id']!,
+                _flatController.text,
+                _residentController.text,
+              );
+            } else {
+              widget.provider.addFlat(
+                _flatController.text,
+                _residentController.text,
+              );
+            }
+            Navigator.pop(context);
+          },
+          child: Text(isEditing ? 'Save' : 'Add'),
+        ),
+      ],
+    );
+  }
+}
+
+class _AdminGuardDialog extends StatefulWidget {
+  final AdminProvider provider;
+  final Map<String, dynamic>? guard;
+
+  const _AdminGuardDialog({required this.provider, this.guard});
+
+  @override
+  State<_AdminGuardDialog> createState() => _AdminGuardDialogState();
+}
+
+class _AdminGuardDialogState extends State<_AdminGuardDialog> {
+  late TextEditingController _nameController;
+  late TextEditingController _idController;
+  bool _isManualId = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final isEditing = widget.guard != null;
+    _nameController = TextEditingController(text: widget.guard?['name'] ?? '');
+    _idController = TextEditingController(text: widget.guard?['id'] ?? '');
+    _isManualId = isEditing;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _idController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = widget.guard != null;
+
+    return AlertDialog(
+      title: Text(isEditing ? 'Edit Guard' : 'Create Guard Invite'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Guard Details'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _nameController,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                labelText: 'Guard Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (!isEditing) ...[
+              Row(
+                children: [
+                  Checkbox(
+                    value: _isManualId,
+                    onChanged: (val) {
+                      setState(() {
+                        _isManualId = val ?? false;
+                        if (!_isManualId) _idController.clear();
+                      });
+                    },
+                  ),
+                  const Text('Enter Manual ID'),
+                ],
+              ),
+            ],
+            if (_isManualId || isEditing)
+              TextField(
+                controller: _idController,
+                enabled: isEditing || _isManualId,
+                decoration: const InputDecoration(
+                  labelText: 'Guard ID',
+                  border: OutlineInputBorder(),
+                  helperText: 'Leave empty to auto-generate (if creating)',
+                ),
+              ),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(_error!,
+                    style: const TextStyle(color: Colors.red)),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_nameController.text.trim().isEmpty) {
+              setState(() => _error = 'Name is required');
+              return;
+            }
+
+            try {
+              if (isEditing) {
+                widget.provider.updateGuard(
+                  widget.guard!['id'],
+                  name: _nameController.text.trim(),
+                  newId: _idController.text.trim().isNotEmpty
+                      ? _idController.text.trim()
+                      : null,
+                );
+              } else {
+                widget.provider.createGuardInvite(
+                    _nameController.text.trim(),
+                    manualId: _isManualId &&
+                            _idController.text.trim().isNotEmpty
+                        ? _idController.text.trim()
+                        : null);
+              }
+              Navigator.pop(context);
+            } catch (e) {
+              setState(() =>
+                  _error = e.toString().replaceAll('Exception: ', ''));
+            }
+          },
+          child: Text(isEditing ? 'Save' : 'Create'),
+        ),
+      ],
+    );
+  }
+}
+
+class _EditNameDialog extends StatefulWidget {
+  final String title;
+  final String label;
+  final String initialValue;
+  final Function(String) onSave;
+
+  const _EditNameDialog({
+    required this.title,
+    required this.label,
+    required this.initialValue,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditNameDialog> createState() => _EditNameDialogState();
+}
+
+class _EditNameDialogState extends State<_EditNameDialog> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        decoration: InputDecoration(labelText: widget.label),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => widget.onSave(_controller.text),
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }
