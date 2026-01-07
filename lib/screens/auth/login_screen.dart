@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../services/logger_service.dart';
 import '../../theme/app_theme.dart';
@@ -160,9 +160,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                   autovalidateMode: AutovalidateMode.onUserInteraction,
                                   validator: Validators.validateEmail,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.email_outlined),
-                                    hintText: 'your@email.com',
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(Icons.email_outlined),
+                                    hintText: l10n.emailHint,
                                   ),
                                 ),
                               ],

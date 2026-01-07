@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/coming_soon.dart';
 import '../../main.dart';
@@ -21,6 +22,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -44,7 +46,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Admin Panel',
+              l10n.adminPanel,
               style: theme.textTheme.headlineSmall,
             ),
           ],
@@ -101,14 +103,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Overview',
+                        l10n.overview,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.textTheme.bodySmall?.color,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Dashboard',
+                        l10n.dashboard,
                         style: theme.textTheme.headlineLarge,
                       ),
                       const SizedBox(height: 20),
@@ -121,18 +123,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         children: [
                           _StatCard(
-                            label: 'Total Flats',
+                            label: l10n.totalFlats,
                             value: '$totalFlats',
                             icon: Icons.apartment_outlined,
                           ),
                           _StatCard(
-                            label: 'Active Guards',
+                            label: l10n.activeGuards,
                             value: '$activeGuards',
                             icon: Icons.security_outlined,
                             highlighted: true,
                           ),
                           _StatCard(
-                            label: 'Pending Approvals',
+                            label: l10n.pendingApprovals,
                             value: '$pendingCount',
                             icon: Icons.pending_actions_outlined,
                             isPrimary: true,
@@ -141,7 +143,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                           if (pendingFlatsCount > 0)
                             _StatCard(
-                              label: 'Pending Flats',
+                              label: l10n.pendingFlats,
                               value: '$pendingFlatsCount',
                               icon: Icons.home_work_outlined,
                               isPrimary: true,
@@ -163,28 +165,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Analytics (Mock Data)',
+                        l10n.analyticsMockData,
                         style: theme.textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
-                      const ChartContainer(
-                        title: 'Weekly Visitor Count',
-                        child: VisitorCountChart(),
+                      ChartContainer(
+                        title: l10n.weeklyVisitorCount,
+                        child: const VisitorCountChart(),
                       ),
                       const SizedBox(height: 16),
-                      const ChartContainer(
-                        title: 'Peak Hours',
-                        child: PeakHoursChart(),
+                      ChartContainer(
+                        title: l10n.peakHours,
+                        child: const PeakHoursChart(),
                       ),
                       const SizedBox(height: 16),
-                      const ChartContainer(
-                        title: 'Guard Status',
-                        child: GuardStatusChart(),
+                      ChartContainer(
+                        title: l10n.guardStatus,
+                        child: const GuardStatusChart(),
                       ),
                       const SizedBox(height: 16),
-                      const ChartContainer(
-                        title: 'Approval Rates',
-                        child: ApprovalRateChart(),
+                      ChartContainer(
+                        title: l10n.approvalRates,
+                        child: const ApprovalRateChart(),
                       ),
                     ],
                   ),
@@ -199,7 +201,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Recent Guard Checks',
+                        l10n.recentGuardChecks,
                         style: theme.textTheme.titleLarge,
                       ),
                       const SizedBox(height: 12),
@@ -214,7 +216,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              'No recent checks',
+                              l10n.noRecentChecks,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.disabledColor,
                               ),
@@ -236,13 +238,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 leading: const Icon(Icons.check_circle,
                                     color: Colors.green),
                                 title: Text(
-                                    'Location: ${check.locationId}'),
+                                    '${l10n.location}: ${check.locationId}'),
                                 subtitle: Text(
                                   DateFormat('MMM d, HH:mm')
                                       .format(check.timestamp),
                                 ),
                                 trailing: Text(
-                                  'Guard: ${check.guardId.length > 6 ? check.guardId.substring(0, 6) : check.guardId}...',
+                                  '${l10n.guard}: ${check.guardId.length > 6 ? check.guardId.substring(0, 6) : check.guardId}...',
                                   style: theme.textTheme.labelSmall,
                                 ),
                               ),
@@ -351,6 +353,7 @@ class _AdminBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return BottomNavigationBar(
       backgroundColor: theme.cardColor,
@@ -359,23 +362,23 @@ class _AdminBottomNav extends StatelessWidget {
       currentIndex: currentIndex,
       selectedItemColor: theme.colorScheme.primary,
       unselectedItemColor: theme.textTheme.bodySmall?.color,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_outlined),
-          activeIcon: Icon(Icons.dashboard),
-          label: 'Overview',
+          icon: const Icon(Icons.dashboard_outlined),
+          activeIcon: const Icon(Icons.dashboard),
+          label: l10n.overview,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.apartment_outlined),
-          label: 'Flats',
+          icon: const Icon(Icons.apartment_outlined),
+          label: l10n.flats,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.security),
-          label: 'Guards',
+          icon: const Icon(Icons.security),
+          label: l10n.guards,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          label: 'Settings',
+          icon: const Icon(Icons.settings_outlined),
+          label: l10n.settings,
         ),
       ],
       onTap: (index) {
