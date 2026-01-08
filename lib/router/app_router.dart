@@ -15,7 +15,9 @@ import '../screens/resident/resident_settings_screen.dart';
 import '../screens/resident/flat_management_screen.dart';
 import '../screens/resident/generate_qr_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
-import '../screens/admin/admin_additional_screens.dart';
+import '../screens/admin/admin_flats_screen.dart';
+import '../screens/admin/admin_guards_screen.dart';
+import '../screens/admin/admin_settings_screen.dart';
 import '../screens/shared/visitor_details_screen.dart';
 
 class AppRouter {
