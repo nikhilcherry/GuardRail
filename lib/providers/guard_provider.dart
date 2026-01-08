@@ -78,10 +78,14 @@ class GuardProvider extends ChangeNotifier {
     ),
   ];
 
+  // PERF: Cache for filtered 'inside' entries to avoid O(N) calculation in UI build
+  List<VisitorEntry> _insideEntries = [];
+
   DateTime _lastPatrolCheck = DateTime.now().subtract(const Duration(minutes: 45));
   final List<DateTime> _patrolLogs = [];
   
   List<VisitorEntry> get entries => _entries;
+  List<VisitorEntry> get insideEntries => _insideEntries;
   List<GuardCheck> get checks => _checks;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
@@ -89,6 +93,9 @@ class GuardProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   GuardProvider() {
+    // Initialize cache
+    _updateInsideEntriesCache();
+
     _loadData();
     // Listen to shared repository updates
     VisitorRepository().visitorStream.listen((updatedVisitors) {
@@ -107,8 +114,15 @@ class GuardProvider extends ChangeNotifier {
           vehicleType: v.vehicleType,
         ));
       }
+      _updateInsideEntriesCache();
       notifyListeners();
     });
+  }
+
+  void _updateInsideEntriesCache() {
+    _insideEntries = _entries
+        .where((e) => e.status == 'approved' && e.exitTime == null)
+        .toList();
   }
 
   Future<void> _loadData() async {
@@ -236,6 +250,7 @@ class GuardProvider extends ChangeNotifier {
           vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
           vehicleType: vehicleType ?? oldEntry.vehicleType,
         );
+        _updateInsideEntriesCache();
         notifyListeners();
       }
     } catch (e) {
