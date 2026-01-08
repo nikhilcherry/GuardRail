@@ -8,8 +8,14 @@ class AuthService {
   final _storage = const FlutterSecureStorage();
   final _localAuth = LocalAuthentication();
 
-  // Base URL from env or fallback
-  String get _baseUrl => dotenv.env['API_BASE_URL'] ?? 'https://api.example.com';
+  // Base URL from env - SECURITY: Fail if missing to prevent data leakage
+  String get _baseUrl {
+    final url = dotenv.env['API_BASE_URL'];
+    if (url == null || url.isEmpty) {
+      throw Exception('SECURITY CRITICAL: API_BASE_URL is not configured.');
+    }
+    return url;
+  }
 
   Future<Map<String, dynamic>> login(String phone, String otp) async {
     try {
