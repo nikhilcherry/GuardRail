@@ -23,10 +23,36 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
     _selectedDay = _focusedDay;
   }
 
+  // Cache for grouped visitors to optimize event loading
+  List<Visitor>? _lastAllVisitors;
+  Map<int, List<Visitor>>? _groupedVisitors;
+
+  int _getDateKey(DateTime date) {
+    return date.year * 10000 + date.month * 100 + date.day;
+  }
+
+  void _groupVisitors(List<Visitor> visitors) {
+    final groups = <int, List<Visitor>>{};
+    for (var visitor in visitors) {
+      final key = _getDateKey(visitor.date);
+      if (groups.containsKey(key)) {
+        groups[key]!.add(visitor);
+      } else {
+        groups[key] = [visitor];
+      }
+    }
+    _groupedVisitors = groups;
+    _lastAllVisitors = visitors;
+  }
+
   List<Visitor> _getVisitorsForDay(List<Visitor> allVisitors, DateTime day) {
-    return allVisitors.where((visitor) {
-      return isSameDay(visitor.date, day);
-    }).toList();
+    // Check if cache needs update
+    if (allVisitors != _lastAllVisitors) {
+      _groupVisitors(allVisitors);
+    }
+
+    final key = _getDateKey(day);
+    return _groupedVisitors?[key] ?? [];
   }
 
   @override
