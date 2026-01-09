@@ -7,3 +7,8 @@
 **Vulnerability:** The application was using `print()` to log "EMERGENCY" events including timestamps in `GuardProvider` and `ResidentProvider`.
 **Learning:** `print()` output is often visible in system logs (like Android `logcat`) even in release builds, potentially exposing sensitive user actions or state to other applications or physical attackers.
 **Prevention:** Use a dedicated logging service (like `LoggerService`) that conditionally logs only in debug mode or sends encrypted logs to a crash reporting service in production.
+
+## 2025-05-23 - Unbounded Network Requests
+**Vulnerability:** HTTP requests in `AuthService` (login, register) did not have a timeout configured.
+**Learning:** Default HTTP clients often have no timeout, meaning a malicious or hanging server can keep the connection open indefinitely, causing resource exhaustion or UI freezes (Denial of Service).
+**Prevention:** Always enforce a timeout (e.g., 30s) on all network operations using `.timeout()` or a configured `Client`.
