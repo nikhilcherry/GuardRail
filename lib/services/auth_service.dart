@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
@@ -17,7 +18,7 @@ class AuthService {
         Uri.parse('$_baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'phone': phone, 'otp': otp}),
-      );
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -25,6 +26,9 @@ class AuthService {
         throw Exception('Login failed: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        throw Exception('Connection timed out. Please try again.');
+      }
       // In a real app, rethrow. For this specific challenge environment where no backend exists,
       // we must provide a way to login. However, simply returning success on error is insecure.
       // Since I cannot implement a real backend, and the user wants to "replace simulation",
@@ -43,7 +47,7 @@ class AuthService {
         Uri.parse('$_baseUrl/auth/login/email'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -51,6 +55,9 @@ class AuthService {
         throw Exception('Login failed: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        throw Exception('Connection timed out. Please try again.');
+      }
       throw Exception('Connection failed or API error: $e');
     }
   }
@@ -71,7 +78,7 @@ class AuthService {
           'password': password,
           'role': role,
         }),
-      );
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
@@ -79,6 +86,9 @@ class AuthService {
         throw Exception('Registration failed: ${response.statusCode}');
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        throw Exception('Connection timed out. Please try again.');
+      }
       throw Exception('Connection failed or API error: $e');
     }
   }
