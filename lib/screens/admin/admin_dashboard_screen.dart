@@ -83,14 +83,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       body: SingleChildScrollView(
         child: Consumer2<AdminProvider, GuardProvider>(
           builder: (context, adminProvider, guardProvider, _) {
-            final pendingCount = adminProvider.guards
-                .where((g) => g['status'] == 'pending')
-                .length;
-            final activeGuards = adminProvider.guards
-                .where((g) => g['status'] == 'active')
-                .length;
+            // PERF: Use cached stats from AdminProvider to avoid O(N) filtering on every build
+            final pendingCount = adminProvider.pendingGuardCount;
+            final activeGuards = adminProvider.activeGuardCount;
             final totalFlats = adminProvider.allFlats.length;
-            final pendingFlatsCount = adminProvider.pendingFlats.length;
+            final pendingFlatsCount = adminProvider.pendingFlatCount;
             final recentChecks = guardProvider.checks;
 
             return Column(
