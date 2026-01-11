@@ -17,7 +17,7 @@ class AuthService {
         Uri.parse('$_baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'phone': phone, 'otp': otp}),
-      );
+      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -43,7 +43,7 @@ class AuthService {
         Uri.parse('$_baseUrl/auth/login/email'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -71,7 +71,7 @@ class AuthService {
           'password': password,
           'role': role,
         }),
-      );
+      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
