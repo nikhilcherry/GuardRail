@@ -18,3 +18,9 @@
 **Learning:** `DateFormat` from `package:intl` uses an internal factory cache. Extracting it to a `static final` variable provides negligible performance benefits while breaking localization support (static variables don't update on locale change).
 
 **Action:** Prefer using `DateFormat` directly (or via a localized helper) to ensure correct locale handling, unless profiling proves strict object allocation is a bottleneck despite the factory cache.
+
+## 2024-05-25 - Caching Stats in Provider
+
+**Learning:** Computing statistics (like counts of pending/active items) inside the `build` method leads to redundant iterations and object allocations on every frame.
+
+**Action:** Move the calculation to the Provider level. Compute the stats only when the data changes (in mutator methods) and cache the result in simple variables. Expose these variables via getters for O(1) access in the UI.
