@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:http/http.dart' as http;
@@ -13,8 +14,11 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String phone, String otp) async {
     try {
+      final uri = Uri.parse('$_baseUrl/auth/login');
+      _validateRequest(uri);
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/auth/login'),
+        uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'phone': phone, 'otp': otp}),
       ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
@@ -39,8 +43,11 @@ class AuthService {
 
   Future<Map<String, dynamic>> loginWithEmail(String email, String password) async {
     try {
+      final uri = Uri.parse('$_baseUrl/auth/login/email');
+      _validateRequest(uri);
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/auth/login/email'),
+        uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
@@ -62,8 +69,11 @@ class AuthService {
     required String role,
   }) async {
     try {
+      final uri = Uri.parse('$_baseUrl/auth/register');
+      _validateRequest(uri);
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/auth/register'),
+        uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,
@@ -93,6 +103,12 @@ class AuthService {
 
   Future<void> deleteToken() async {
     await _storage.delete(key: 'auth_token');
+  }
+
+  void _validateRequest(Uri uri) {
+    if (!kDebugMode && uri.scheme != 'https') {
+      throw Exception('SECURITY: Insecure HTTP request blocked in release mode');
+    }
   }
 
   // Biometrics
