@@ -307,6 +307,9 @@ class _EntryCard extends StatelessWidget {
   final VisitorEntry entry;
   const _EntryCard({required this.entry});
 
+  // PERF: Cached formatter to avoid recreation on every build
+  static final _timeFormatter = DateFormat('HH:mm');
+
   String _formatDuration(Duration d) {
     final hours = d.inHours;
     final minutes = d.inMinutes.remainder(60);
@@ -442,11 +445,11 @@ class _EntryCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(DateFormat('HH:mm').format(entry.time),
+              Text(_timeFormatter.format(entry.time),
                   style: theme.textTheme.labelSmall),
               if (entry.exitTime != null)
                 Text(
-                  '${l10n.exit}: ${DateFormat('HH:mm').format(entry.exitTime!)}',
+                  '${l10n.exit}: ${_timeFormatter.format(entry.exitTime!)}',
                   style: theme.textTheme.labelSmall?.copyWith(color: theme.disabledColor),
                 ),
               if (isInside)
