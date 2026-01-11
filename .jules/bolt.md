@@ -24,3 +24,9 @@
 **Learning:** Computing statistics (like counts of pending/active items) inside the `build` method leads to redundant iterations and object allocations on every frame.
 
 **Action:** Move the calculation to the Provider level. Compute the stats only when the data changes (in mutator methods) and cache the result in simple variables. Expose these variables via getters for O(1) access in the UI.
+
+## 2024-05-25 - Optimizing Calendar Event Lookups
+
+**Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day in the calendar (30-42 times) during each rebuild. If the callback performs an O(N) list traversal (e.g., using `.where()`), the complexity becomes O(N * M), leading to jank with large datasets.
+
+**Action:** Pre-process events into a `Map<DateTime, List<Event>>` (indexed by a normalized date key, e.g., UTC YMD) before the `TableCalendar` builds. This reduces `eventLoader` lookups to O(1), making the total complexity O(N + M).

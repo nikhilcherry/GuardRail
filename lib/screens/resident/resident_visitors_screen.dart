@@ -23,12 +23,6 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
     _selectedDay = _focusedDay;
   }
 
-  List<Visitor> _getVisitorsForDay(List<Visitor> allVisitors, DateTime day) {
-    return allVisitors.where((visitor) {
-      return isSameDay(visitor.date, day);
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +39,18 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
             final allVisitors = residentProvider.allVisitors;
-            final selectedVisitors = _getVisitorsForDay(allVisitors, _selectedDay!);
+
+            // PERF: Index visitors by normalized date (UTC YMD) to avoid O(N*M) lookups in TableCalendar
+            // eventLoader is called for every day in the view (~30-42 times), so a Map lookup is O(1) vs O(N) filter.
+            DateTime normalize(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+            final eventsMap = <DateTime, List<Visitor>>{};
+
+            for (var visitor in allVisitors) {
+              final key = normalize(visitor.date);
+              (eventsMap[key] ??= []).add(visitor);
+            }
+
+            final selectedVisitors = eventsMap[normalize(_selectedDay!)] ?? [];
 
             return Column(
               children: [
@@ -76,7 +81,7 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
                     _focusedDay = focusedDay;
                   },
                   eventLoader: (day) {
-                    return _getVisitorsForDay(allVisitors, day);
+                    return eventsMap[normalize(day)] ?? [];
                   },
                   calendarStyle: CalendarStyle(
                     defaultTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
