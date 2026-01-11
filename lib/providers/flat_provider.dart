@@ -16,11 +16,25 @@ class FlatProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  List<FlatMember> get pendingMembers =>
-      _members.where((m) => m.status == MemberStatus.pending).toList();
+  // Cache for filtered lists to avoid O(N) on every build
+  List<FlatMember>? _cachedPendingMembers;
+  List<FlatMember>? _cachedActiveMembers;
 
-  List<FlatMember> get activeMembers =>
-      _members.where((m) => m.status == MemberStatus.accepted).toList();
+  List<FlatMember> get pendingMembers {
+    _cachedPendingMembers ??= _members.where((m) => m.status == MemberStatus.pending).toList();
+    return _cachedPendingMembers!;
+  }
+
+  List<FlatMember> get activeMembers {
+    _cachedActiveMembers ??= _members.where((m) => m.status == MemberStatus.accepted).toList();
+    return _cachedActiveMembers!;
+  }
+
+  void _updateMembers(List<FlatMember> newMembers) {
+    _members = newMembers;
+    _cachedPendingMembers = null;
+    _cachedActiveMembers = null;
+  }
 
   // ============ MOCK DATABASE (for Admin operations) ============
   static final List<Flat> _allFlats = [];
@@ -78,7 +92,7 @@ class FlatProvider extends ChangeNotifier {
       _flatMembers[newFlat.id] = _repository.getMembers(newFlat.id);
 
       _currentFlat = newFlat;
-      _members = _repository.getMembers(newFlat.id);
+      _updateMembers(_repository.getMembers(newFlat.id));
       _error = null;
       notifyListeners();
     } catch (e) {
@@ -142,7 +156,7 @@ class FlatProvider extends ChangeNotifier {
 
   void _refreshMembers() {
     if (_currentFlat != null) {
-      _members = _repository.getMembers(_currentFlat!.id);
+      _updateMembers(_repository.getMembers(_currentFlat!.id));
       notifyListeners();
     }
   }
@@ -155,7 +169,7 @@ class FlatProvider extends ChangeNotifier {
   // Refresh status
   void refreshFlatData() {
     if (_currentFlat != null) {
-      _members = _repository.getMembers(_currentFlat!.id);
+      _updateMembers(_repository.getMembers(_currentFlat!.id));
       notifyListeners();
     }
   }
@@ -163,7 +177,7 @@ class FlatProvider extends ChangeNotifier {
   // Clear state on logout
   void clearState() {
     _currentFlat = null;
-    _members = [];
+    _updateMembers([]);
     _error = null;
     notifyListeners();
   }
@@ -173,10 +187,10 @@ class FlatProvider extends ChangeNotifier {
     final flat = _repository.getFlatForUser(userId);
     if (flat != null) {
       _currentFlat = flat;
-      _members = _repository.getMembers(flat.id);
+      _updateMembers(_repository.getMembers(flat.id));
     } else {
       _currentFlat = null;
-      _members = [];
+      _updateMembers([]);
     }
     notifyListeners();
   }
