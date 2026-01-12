@@ -13,6 +13,12 @@ class AdminProvider extends ChangeNotifier {
   int _activeGuardCount = 0;
   int _pendingFlatCount = 0;
 
+  // Cached lists to prevent O(N) filtering and new list allocation on every getter access
+  // PERF: This turns list access in build() from O(N) to O(1) and reduces GC pressure.
+  List<Flat> _cachedPendingFlats = [];
+  List<Flat> _cachedActiveFlats = [];
+  List<Map<String, dynamic>> _cachedGuards = [];
+
   AdminProvider(this._flatProvider) {
     _refreshStats();
   }
@@ -22,16 +28,25 @@ class AdminProvider extends ChangeNotifier {
   int get pendingFlatCount => _pendingFlatCount;
 
   void _refreshStats() {
-    final allGuards = _guardRepository.getAllGuards();
-    _pendingGuardCount = allGuards.where((g) => g['status'] == 'pending').length;
-    _activeGuardCount = allGuards.where((g) => g['status'] == 'active').length;
-    _pendingFlatCount = _flatRepository.getPendingFlats().length;
+    // Cache the full guards list
+    _cachedGuards = _guardRepository.getAllGuards();
+
+    // Calculate stats from the cached list
+    _pendingGuardCount = _cachedGuards.where((g) => g['status'] == 'pending').length;
+    _activeGuardCount = _cachedGuards.where((g) => g['status'] == 'active').length;
+
+    // Cache flat lists
+    _cachedPendingFlats = _flatRepository.getPendingFlats();
+    _cachedActiveFlats = _flatRepository.getActiveFlats();
+
+    // Update flat stats
+    _pendingFlatCount = _cachedPendingFlats.length;
   }
 
   // ============ GUARDS MANAGEMENT ============
   
-  // Get all guards
-  List<Map<String, dynamic>> get guards => _guardRepository.getAllGuards();
+  // Get all guards (Cached)
+  List<Map<String, dynamic>> get guards => _cachedGuards;
 
   // Create Guard (Admin) - Generates ID
   String createGuardInvite(String name, {String? manualId}) {
@@ -74,14 +89,15 @@ class AdminProvider extends ChangeNotifier {
   // Get all flats
   List<Flat> get allFlats => _flatRepository.allFlats;
 
-  // Get pending flats
-  List<Flat> get pendingFlats => _flatRepository.getPendingFlats();
+  // Get pending flats (Cached)
+  List<Flat> get pendingFlats => _cachedPendingFlats;
 
-  // Get active flats
-  List<Flat> get activeFlats => _flatRepository.getActiveFlats();
+  // Get active flats (Cached)
+  List<Flat> get activeFlats => _cachedActiveFlats;
 
 
   // Get flats from FlatProvider with mapping
+  // Note: This still maps on every call. Could be optimized if it becomes a bottleneck.
   List<Map<String, dynamic>> get flats {
     final allFlats = _flatProvider.getAllFlats();
     return allFlats.map((flat) {
