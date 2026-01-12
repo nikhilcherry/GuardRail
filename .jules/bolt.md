@@ -24,3 +24,9 @@
 **Learning:** Computing statistics (like counts of pending/active items) inside the `build` method leads to redundant iterations and object allocations on every frame.
 
 **Action:** Move the calculation to the Provider level. Compute the stats only when the data changes (in mutator methods) and cache the result in simple variables. Expose these variables via getters for O(1) access in the UI.
+
+## 2025-05-30 - Lazy Caching in Provider Getters
+
+**Learning:** Even simple getters like `.where(...).toList()` create new list instances every time they are accessed. When accessed in `build()` methods (e.g., `Consumer` builders), this happens on every frame/rebuild, increasing garbage collection pressure.
+
+**Action:** Use lazy initialization (memoization) in the getter (`_cache ??= computation()`) and nullify the cache (`_cache = null`) whenever the source data is modified. This ensures the expensive operation runs only once per data change, regardless of how many times the UI rebuilds.
