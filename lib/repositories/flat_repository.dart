@@ -1,4 +1,7 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/firestore_service.dart';
+import '../services/logger_service.dart';
 
 enum MemberStatus { pending, accepted }
 enum MemberRole { owner, member }
@@ -16,6 +19,24 @@ class FlatMember {
     this.status = MemberStatus.pending,
     this.role = MemberRole.member,
   });
+
+  factory FlatMember.fromMap(Map<String, dynamic> data) {
+    return FlatMember(
+      userId: data['userId'] ?? '',
+      name: data['name'] ?? '',
+      status: data['status'] == 'accepted' ? MemberStatus.accepted : MemberStatus.pending,
+      role: data['role'] == 'owner' ? MemberRole.owner : MemberRole.member,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'name': name,
+      'status': status == MemberStatus.accepted ? 'accepted' : 'pending',
+      'role': role == MemberRole.owner ? 'owner' : 'member',
+    };
+  }
 }
 
 class Flat {
@@ -30,52 +51,88 @@ class Flat {
     required this.ownerId,
     this.status = FlatStatus.pending,
   });
+
+  factory Flat.fromFirestore(Map<String, dynamic> data, String docId) {
+    return Flat(
+      id: docId,
+      name: data['name'] ?? '',
+      ownerId: data['ownerId'] ?? '',
+      status: _parseStatus(data['status']),
+    );
+  }
+
+  static FlatStatus _parseStatus(String? status) {
+    switch (status) {
+      case 'active':
+        return FlatStatus.active;
+      case 'rejected':
+        return FlatStatus.rejected;
+      default:
+        return FlatStatus.pending;
+    }
+  }
+
+  String get statusString {
+    switch (status) {
+      case FlatStatus.active:
+        return 'active';
+      case FlatStatus.rejected:
+        return 'rejected';
+      case FlatStatus.pending:
+        return 'pending';
+    }
+  }
 }
 
 class FlatRepository {
   // Singleton pattern
   static final FlatRepository _instance = FlatRepository._internal();
   factory FlatRepository() => _instance;
+  FlatRepository._internal();
 
-  FlatRepository._internal() {
-    // Seed data
-    // Seed for default phone user
-    _createSeedFlat('FLAT01', 'Sunny Apartment', '+919876543210', 'Robert');
+  final FirestoreService _firestoreService = FirestoreService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-    // Seed for 'user' fallback
-    _createSeedFlat('FLAT02', 'Cozy Villa', 'user', 'Robert');
-
-    // Seed for email user
-    _createSeedFlat('FLAT03', 'Green House', 'robert@example.com', 'Robert');
-  }
-
-  void _createSeedFlat(String id, String name, String ownerId, String ownerName) {
-    if (_allFlats.any((f) => f.id == id)) return;
-
-    final flat = Flat(
-      id: id,
-      name: name,
-      ownerId: ownerId,
-      status: FlatStatus.active,
-    );
-
-    final owner = FlatMember(
-      userId: ownerId,
-      name: ownerName,
-      status: MemberStatus.accepted,
-      role: MemberRole.owner,
-    );
-
-    _allFlats.add(flat);
-    _flatMembers[id] = [owner];
-  }
-
-  // Mock database
-  final List<Flat> _allFlats = [];
+  // Local cache
+  List<Flat> _allFlats = [];
   final Map<String, List<FlatMember>> _flatMembers = {};
+  bool _isLoaded = false;
 
   // Getters
   List<Flat> get allFlats => List.unmodifiable(_allFlats);
+
+  /// Initialize and load flats from Firestore
+  Future<void> loadFlats() async {
+    if (_isLoaded) return;
+    
+    try {
+      final snapshot = await _firestore.collection('flats').get();
+      _allFlats.clear();
+      
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        _allFlats.add(Flat.fromFirestore(data, doc.id));
+        
+        // Load members for each flat
+        final membersData = data['members'] as List<dynamic>?;
+        if (membersData != null) {
+          _flatMembers[doc.id] = membersData
+              .map((m) => FlatMember.fromMap(m as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      
+      _isLoaded = true;
+    } catch (e) {
+      LoggerService().error('Failed to load flats', e, StackTrace.current);
+    }
+  }
+
+  /// Refresh flats from Firestore
+  Future<void> refresh() async {
+    _isLoaded = false;
+    await loadFlats();
+  }
 
   List<Flat> getPendingFlats() {
     return _allFlats.where((f) => f.status == FlatStatus.pending).toList();
@@ -85,15 +142,9 @@ class FlatRepository {
     return _allFlats.where((f) => f.status == FlatStatus.active).toList();
   }
 
-  // Flat Operations
+  /// Create a new flat (stored in Firestore)
   Future<Flat> createFlatRequest(String name, String ownerId, String ownerName) async {
     final flatId = _generateFlatId();
-    final newFlat = Flat(
-      id: flatId,
-      name: name,
-      ownerId: ownerId,
-      status: FlatStatus.pending, // Default to pending
-    );
 
     final owner = FlatMember(
       userId: ownerId,
@@ -102,47 +153,77 @@ class FlatRepository {
       role: MemberRole.owner,
     );
 
+    // Create in Firestore
+    await _firestore.collection('flats').doc(flatId).set({
+      'name': name,
+      'ownerId': ownerId,
+      'members': [owner.toMap()],
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    final newFlat = Flat(
+      id: flatId,
+      name: name,
+      ownerId: ownerId,
+      status: FlatStatus.pending,
+    );
+
     _allFlats.add(newFlat);
     _flatMembers[flatId] = [owner];
 
+    LoggerService().info('Flat created: $flatId');
     return newFlat;
   }
 
-  // Admin: Approve Flat
-  void approveFlat(String flatId) {
+  /// Admin: Approve Flat
+  Future<void> approveFlat(String flatId) async {
+    await _firestore.collection('flats').doc(flatId).update({
+      'status': 'active',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
       _allFlats[flatIndex].status = FlatStatus.active;
     }
   }
 
-  // Admin: Reject Flat
-  void rejectFlat(String flatId) {
+  /// Admin: Reject Flat
+  Future<void> rejectFlat(String flatId) async {
+    await _firestore.collection('flats').doc(flatId).update({
+      'status': 'rejected',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
       _allFlats[flatIndex].status = FlatStatus.rejected;
     }
   }
 
-  // Admin: Update Flat Name
-  void updateFlatName(String flatId, String newName) {
+  /// Admin: Update Flat Name
+  Future<void> updateFlatName(String flatId, String newName) async {
+    await _firestore.collection('flats').doc(flatId).update({
+      'name': newName,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
       _allFlats[flatIndex].name = newName;
     }
   }
 
-  // Join Flat
+  /// Join Flat
   Future<void> joinFlat(String flatId, String userId, String userName) async {
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex == -1) {
       throw Exception('Flat not found');
     }
 
-    // Check if flat is active? Or can we join pending flats?
-    // Usually only active flats can be joined.
     if (_allFlats[flatIndex].status != FlatStatus.active) {
-       throw Exception('Flat is not active yet');
+      throw Exception('Flat is not active yet');
     }
 
     final members = _flatMembers[flatId] ?? [];
@@ -157,6 +238,12 @@ class FlatRepository {
       role: MemberRole.member,
     );
 
+    // Update in Firestore
+    await _firestore.collection('flats').doc(flatId).update({
+      'members': FieldValue.arrayUnion([newMember.toMap()]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
     members.add(newMember);
     _flatMembers[flatId] = members;
   }
@@ -166,20 +253,33 @@ class FlatRepository {
     return _flatMembers[flatId] ?? [];
   }
 
-  void updateMemberStatus(String flatId, String userId, MemberStatus status) {
+  Future<void> updateMemberStatus(String flatId, String userId, MemberStatus status) async {
     final members = _flatMembers[flatId];
     if (members != null) {
       final index = members.indexWhere((m) => m.userId == userId);
       if (index != -1) {
         members[index].status = status;
+
+        // Update in Firestore
+        await _firestore.collection('flats').doc(flatId).update({
+          'members': members.map((m) => m.toMap()).toList(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
       }
     }
   }
 
-  void removeMember(String flatId, String userId) {
+  Future<void> removeMember(String flatId, String userId) async {
     final members = _flatMembers[flatId];
     if (members != null) {
-      members.removeWhere((m) => m.userId == userId);
+      final member = members.where((m) => m.userId == userId).firstOrNull;
+      if (member != null) {
+        await _firestore.collection('flats').doc(flatId).update({
+          'members': FieldValue.arrayRemove([member.toMap()]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        members.removeWhere((m) => m.userId == userId);
+      }
     }
   }
 

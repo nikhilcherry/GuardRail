@@ -205,5 +205,218 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get agreeTerms =>
-      'కొనసాగడం ద్వారా, మీరు మా నిబంధనలు & గోప్యతా విధానాన్ని అంగీకరిస్తున్నారు.';
+      'By proceeding, you agree to our Terms & Privacy Policy.';
+
+  @override
+  String get biometricsUpdateFailed =>
+      'బయోమెట్రిక్స్ సెట్టింగ్‌లను అప్‌డేట్ చేయడంలో విఫలమైంది';
+
+  @override
+  String get residentPortal => 'నివాసి పోర్టల్';
+
+  @override
+  String get goodEvening => 'శుభ సాయంత్రం,';
+
+  @override
+  String get notificationCenterMessage =>
+      'అన్ని కార్యకలాపాలపై మిమ్మల్ని అప్‌డేట్‌గా ఉంచడానికి మేము నోటిఫికేషన్ కేంద్రాన్ని జోడిస్తున్నాము.';
+
+  @override
+  String get manageFamily => 'కుటుంబాన్ని నిర్వహించండి';
+
+  @override
+  String get manageFlat => 'ఫ్లాట్‌ను నిర్వహించండి';
+
+  @override
+  String get newInvite => 'కొత్త ఆహ్వానం';
+
+  @override
+  String get pendingRequest => 'పెండింగ్ అభ్యర్థన';
+
+  @override
+  String get live => 'లైవ్';
+
+  @override
+  String get visitorApproved => 'సందర్శకుడు ఆమోదించబడ్డారు';
+
+  @override
+  String get visitorRejected => 'సందర్శకుడు తిరస్కరించబడ్డారు';
+
+  @override
+  String get recentHistory => 'ఇటీవలి చరిత్ర';
+
+  @override
+  String get noRecentVisitors => 'ఇటీవలి సందర్శకులు లేరు';
+
+  @override
+  String get wait => 'వేచి ఉండండి...';
+
+  @override
+  String get arrived => 'వచ్చారు';
+
+  @override
+  String get ago => 'క్రితం';
+
+  @override
+  String get min => 'నిమి';
+
+  @override
+  String get home => 'హోమ్';
+
+  @override
+  String get visitors => 'సందర్శకులు';
+
+  @override
+  String get guardChecks => 'గార్డ్ తనిఖీలు';
+
+  @override
+  String get recentActivity => 'ఇటీవలి కార్యాచరణ';
+
+  @override
+  String get currentlyInside => 'ప్రస్తుతం లోపల';
+
+  @override
+  String get noVisitorsFound => 'సందర్శకులు కనుగొనబడలేదు';
+
+  @override
+  String get registerVisitorMultiline => 'సందర్శకుని\nనమోదు చేయండి';
+
+  @override
+  String get scanVisitorQRMultiline => 'సందర్శకుని QR\nస్కాన్ చేయండి';
+
+  @override
+  String get inside => 'లోపల';
+
+  @override
+  String get flat => 'ఫ్లాట్';
+
+  @override
+  String get duration => 'నిడివి';
+
+  @override
+  String get exit => 'నిష్క్రమణ';
+
+  @override
+  String get markExitTitle => 'నిష్క్రమణను గుర్తించాలా?';
+
+  @override
+  String markExitMessage(String name) {
+    return '$name బయటకు వెళ్లినట్లు గుర్తించాలా?';
+  }
+
+  @override
+  String get confirm => 'నిర్ధారించండి';
+
+  @override
+  String get markExitAction => 'నిష్క్రమణను గుర్తించండి';
+
+  @override
+  String get adminPanel => 'అడ్మిన్ ప్యానెల్';
+
+  @override
+  String get overview => 'అవలోకనం';
+
+  @override
+  String get dashboard => 'డాష్‌బోర్డ్';
+
+  @override
+  String get totalFlats => 'మొత్తం ఫ్లాట్లు';
+
+  @override
+  String get activeGuards => 'యాక్టివ్ గార్డ్స్';
+
+  @override
+  String get pendingFlats => 'పెండింగ్ ఫ్లాట్లు';
+
+  @override
+  String get analyticsMockData => 'విశ్లేషణలు (మాక్ డేటా)';
+
+  @override
+  String get weeklyVisitorCount => 'వారపు సందర్శకుల సంఖ్య';
+
+  @override
+  String get peakHours => 'పీక్ అవర్స్';
+
+  @override
+  String get guardStatus => 'గార్డ్ స్థితి';
+
+  @override
+  String get approvalRates => 'ఆమోదం రేట్లు';
+
+  @override
+  String get recentGuardChecks => 'ఇటీవలి గార్డ్ తనిఖీలు';
+
+  @override
+  String get noRecentChecks => 'ఇటీవలి తనిఖీలు లేవు';
+
+  @override
+  String get location => 'స్థానం';
+
+  @override
+  String get flats => 'ఫ్లాట్లు';
+
+  @override
+  String get guards => 'గార్డ్లు';
+
+  @override
+  String get createAccount => 'ఖాతాను సృష్టించండి';
+
+  @override
+  String get signUpToGetStarted => 'ప్రారంభించడానికి సైన్ అప్ చేయండి';
+
+  @override
+  String get fullName => 'పూర్తి పేరు';
+
+  @override
+  String get emailAddress => 'ఇమెయిల్ చిరునామా';
+
+  @override
+  String get dateOfBirth => 'పుట్టిన తేది';
+
+  @override
+  String get selectDate => 'తేదీని ఎంచుకోండి';
+
+  @override
+  String get confirmPassword => 'పాస్‌వర్డ్‌ను నిర్ధారించండి';
+
+  @override
+  String get createPassword => 'పాస్‌వర్డ్‌ను సృష్టించండి';
+
+  @override
+  String get confirmYourPassword => 'మీ పాస్‌వర్డ్‌ను నిర్ధారించండి';
+
+  @override
+  String get passwordsDoNotMatch => 'పాస్‌వర్డ్‌లు సరిపోలలేదు';
+
+  @override
+  String get continueAs => 'ఇలా కొనసాగించండి';
+
+  @override
+  String get residenceIdOptional => 'నివాస ఐడి (ఐచ్ఛికం)';
+
+  @override
+  String get enterResidenceIdToJoin => 'చేరడానికి నివాస ఐడిని నమోదు చేయండి';
+
+  @override
+  String get leaveEmptyToCreateFlat =>
+      'మీరు కొత్త ఫ్లాట్‌ను సృష్టించాలనుకుంటే ఖాళీగా ఉంచండి';
+
+  @override
+  String get pleaseSelectRole => 'కొనసాగడానికి దయచేసి పాత్రను ఎంచుకోండి';
+
+  @override
+  String get registrationFailed =>
+      'నమోదు విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get pleaseConfirmPassword => 'దయచేసి మీ పాస్‌వర్డ్‌ను నిర్ధారించండి';
+
+  @override
+  String get emailHint => 'your@email.com';
+
+  @override
+  String get nameHint => 'John Doe';
+
+  @override
+  String get phoneHint => '9876543210';
 }

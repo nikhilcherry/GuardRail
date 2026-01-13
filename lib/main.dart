@@ -14,14 +14,12 @@ import 'providers/flat_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'services/crash_reporting_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Repositories
-  final authRepository = AuthRepository();
-  final settingsRepository = SettingsRepository();
 
   // Load environment variables
   try {
@@ -31,10 +29,15 @@ Future<void> main() async {
     await dotenv.load(fileName: ".env.example");
   }
 
+  // Initialize Firebase FIRST - before any Firebase services are used
   await Firebase.initializeApp();
 
   // Initialize crash reporting
   await CrashReportingService().init();
+
+  // Now create repositories (after Firebase is initialized)
+  final authRepository = AuthRepository();
+  final settingsRepository = SettingsRepository();
 
   // Pre-load critical state
   final authProvider = AuthProvider(repository: authRepository);
@@ -109,6 +112,8 @@ class _GuardrailAppState extends State<GuardrailApp> with WidgetsBindingObserver
                 themeMode: themeProvider.themeMode,
                 debugShowCheckedModeBanner: false,
                 routerConfig: appRouter.router,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
               );
             },
           );

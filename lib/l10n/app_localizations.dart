@@ -489,6 +489,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By proceeding, you agree to our Terms & Privacy Policy.'**
   String get agreeTerms;
+
+  /// No description provided for @biometricsUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update biometrics settings'**
+  String get biometricsUpdateFailed;
+
+  /// No description provided for @residentPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Resident Portal'**
+  String get residentPortal;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Evening,'**
+  String get goodEvening;
+
+  /// No description provided for @notificationCenterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are adding a notification center to keep you updated on all activities.'**
+  String get notificationCenterMessage;
+
+  /// No description provided for @manageFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Family'**
+  String get manageFamily;
+
+  /// No description provided for @manageFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Flat'**
+  String get manageFlat;
+
+  /// No description provided for @newInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'New Invite'**
+  String get newInvite;
+
+  /// No description provided for @pendingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Request'**
+  String get pendingRequest;
+
+  /// No description provided for @live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get live;
+
+  /// No description provided for @visitorApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor approved'**
+  String get visitorApproved;
+
+  /// No description provided for @visitorRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor rejected'**
+  String get visitorRejected;
+
+  /// No description provided for @recentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent History'**
+  String get recentHistory;
+
+  /// No description provided for @noRecentVisitors.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent visitors'**
+  String get noRecentVisitors;
+
+  /// No description provided for @wait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait...'**
+  String get wait;
+
+  /// No description provided for @arrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived'**
+  String get arrived;
+
+  /// No description provided for @ago.
+  ///
+  /// In en, this message translates to:
+  /// **'ago'**
+  String get ago;
+
+  /// No description provided for @min.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get min;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @visitors.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitors'**
+  String get visitors;
+
+  /// No description provided for @guardChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard Checks'**
+  String get guardChecks;
+
+  /// No description provided for @recentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get recentActivity;
+
+  /// No description provided for @currentlyInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Inside'**
+  String get currentlyInside;
+
+  /// No description provided for @noVisitorsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No visitors found'**
+  String get noVisitorsFound;
+
+  /// No description provided for @registerVisitorMultiline.
+  ///
+  /// In en, this message translates to:
+  /// **'Register\nVisitor'**
+  String get registerVisitorMultiline;
+
+  /// No description provided for @scanVisitorQRMultiline.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan\nVisitor QR'**
+  String get scanVisitorQRMultiline;
+
+  /// No description provided for @inside.
+  ///
+  /// In en, this message translates to:
+  /// **'INSIDE'**
+  String get inside;
+
+  /// No description provided for @flat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat'**
+  String get flat;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// No description provided for @exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exit;
+
+  /// No description provided for @markExitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Exit?'**
+  String get markExitTitle;
+
+  /// No description provided for @markExitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark {name} as exited?'**
+  String markExitMessage(String name);
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @markExitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Exit'**
+  String get markExitAction;
+
+  /// No description provided for @adminPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Panel'**
+  String get adminPanel;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @totalFlats.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Flats'**
+  String get totalFlats;
+
+  /// No description provided for @activeGuards.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Guards'**
+  String get activeGuards;
+
+  /// No description provided for @pendingFlats.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Flats'**
+  String get pendingFlats;
+
+  /// No description provided for @analyticsMockData.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics (Mock Data)'**
+  String get analyticsMockData;
+
+  /// No description provided for @weeklyVisitorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Visitor Count'**
+  String get weeklyVisitorCount;
+
+  /// No description provided for @peakHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak Hours'**
+  String get peakHours;
+
+  /// No description provided for @guardStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard Status'**
+  String get guardStatus;
+
+  /// No description provided for @approvalRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval Rates'**
+  String get approvalRates;
+
+  /// No description provided for @recentGuardChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Guard Checks'**
+  String get recentGuardChecks;
+
+  /// No description provided for @noRecentChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent checks'**
+  String get noRecentChecks;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @flats.
+  ///
+  /// In en, this message translates to:
+  /// **'Flats'**
+  String get flats;
+
+  /// No description provided for @guards.
+  ///
+  /// In en, this message translates to:
+  /// **'Guards'**
+  String get guards;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
+  /// No description provided for @signUpToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up to get started'**
+  String get signUpToGetStarted;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @createPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password'**
+  String get createPassword;
+
+  /// No description provided for @confirmYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your password'**
+  String get confirmYourPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @continueAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as'**
+  String get continueAs;
+
+  /// No description provided for @residenceIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Residence ID (Optional)'**
+  String get residenceIdOptional;
+
+  /// No description provided for @enterResidenceIdToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Residence ID to join'**
+  String get enterResidenceIdToJoin;
+
+  /// No description provided for @leaveEmptyToCreateFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty if you want to create a new flat'**
+  String get leaveEmptyToCreateFlat;
+
+  /// No description provided for @pleaseSelectRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a role to continue'**
+  String get pleaseSelectRole;
+
+  /// No description provided for @registrationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed. Please try again.'**
+  String get registrationFailed;
+
+  /// No description provided for @pleaseConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get pleaseConfirmPassword;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'your@email.com'**
+  String get emailHint;
+
+  /// No description provided for @nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'John Doe'**
+  String get nameHint;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'9876543210'**
+  String get phoneHint;
 }
 
 class _AppLocalizationsDelegate

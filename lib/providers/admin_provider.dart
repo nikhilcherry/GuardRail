@@ -1,106 +1,167 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../repositories/guard_repository.dart';
 import '../repositories/flat_repository.dart';
 import '../providers/flat_provider.dart';
+import '../services/firestore_service.dart';
 
 class AdminProvider extends ChangeNotifier {
   final GuardRepository _guardRepository = GuardRepository();
   final FlatRepository _flatRepository = FlatRepository();
+  final FirestoreService _firestoreService = FirestoreService();
   final FlatProvider _flatProvider;
 
-  // Cached stats to avoid expensive recalculations in build()
+  // Stats
   int _pendingGuardCount = 0;
   int _activeGuardCount = 0;
   int _pendingFlatCount = 0;
+  bool _isLoading = false;
 
-  // Cached lists to prevent O(N) filtering and new list allocation on every getter access
-  // PERF: This turns list access in build() from O(N) to O(1) and reduces GC pressure.
+  // Cached data (PERF)
+  List<Map<String, dynamic>> _cachedGuards = [];
   List<Flat> _cachedPendingFlats = [];
   List<Flat> _cachedActiveFlats = [];
-  List<Map<String, dynamic>> _cachedGuards = [];
+
+  Map<String, dynamic>? _society;
 
   AdminProvider(this._flatProvider) {
-    _refreshStats();
+    _initializeData();
   }
+
+  // ================= GETTERS =================
 
   int get pendingGuardCount => _pendingGuardCount;
   int get activeGuardCount => _activeGuardCount;
   int get pendingFlatCount => _pendingFlatCount;
+  bool get isLoading => _isLoading;
 
-  void _refreshStats() {
-    // Cache the full guards list
-    _cachedGuards = _guardRepository.getAllGuards();
+  Map<String, dynamic>? get society => _society;
+  List<Map<String, dynamic>> get guards => _cachedGuards;
+  List<Flat> get pendingFlats => _cachedPendingFlats;
+  List<Flat> get activeFlats => _cachedActiveFlats;
+  List<Flat> get allFlats => _flatRepository.allFlats;
 
-    // Calculate stats from the cached list
-    _pendingGuardCount = _cachedGuards.where((g) => g['status'] == 'pending').length;
-    _activeGuardCount = _cachedGuards.where((g) => g['status'] == 'active').length;
+  // ================= INIT =================
 
-    // Cache flat lists
+  Future<void> _initializeData() async {
+    _setLoading(true);
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _society = await _firestoreService.getSocietyByAdmin(user.uid);
+    }
+
+    await _flatRepository.loadFlats();
+    await _refreshStats();
+
+    _setLoading(false);
+  }
+
+  // ================= CORE REFRESH =================
+
+  Future<void> _refreshStats() async {
+    final societyId = _society?['id'];
+
+    // Guards
+    _cachedGuards =
+        await _firestoreService.getAllGuards(societyId: societyId);
+
+    _pendingGuardCount =
+        _cachedGuards.where((g) => g['status'] == 'pending').length;
+
+    _activeGuardCount =
+        _cachedGuards.where((g) => g['status'] == 'active').length;
+
+    // Flats (cached)
     _cachedPendingFlats = _flatRepository.getPendingFlats();
     _cachedActiveFlats = _flatRepository.getActiveFlats();
-
-    // Update flat stats
     _pendingFlatCount = _cachedPendingFlats.length;
   }
 
-  // ============ GUARDS MANAGEMENT ============
-  
-  // Get all guards (Cached)
-  List<Map<String, dynamic>> get guards => _cachedGuards;
+  Future<void> refresh() async {
+    _setLoading(true);
 
-  // Create Guard (Admin) - Generates ID
-  String createGuardInvite(String name, {String? manualId}) {
-    final id = _guardRepository.createGuard(name, manualId: manualId);
-    _refreshStats();
+    await _guardRepository.refresh();
+    await _flatRepository.refresh();
+    await _refreshStats();
+
+    _setLoading(false);
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  // ================= SOCIETY =================
+
+  Future<void> createSociety(String name) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    _setLoading(true);
+
+    final societyId = await _firestoreService.createSociety(
+      name: name,
+      adminId: user.uid,
+    );
+
+    _society = {
+      'id': societyId,
+      'name': name,
+      'adminId': user.uid,
+    };
+
+    _setLoading(false);
+  }
+
+  // ================= GUARDS =================
+
+  Future<String> createGuardInvite(String name, {String? manualId}) async {
+    final id = await _guardRepository.createGuard(
+      name,
+      manualId: manualId,
+      societyId: _society?['id'],
+    );
+    await _refreshStats();
     notifyListeners();
     return id;
   }
 
-  // Update Guard
-  void updateGuard(String originalId, {String? name, String? newId}) {
-    _guardRepository.updateGuard(originalId, name: name, newId: newId);
-    _refreshStats();
+  Future<void> updateGuard(String originalId,
+      {String? name, String? newId}) async {
+    await _guardRepository.updateGuard(
+      originalId,
+      name: name,
+      newId: newId,
+    );
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Approve Guard
-  void approveGuard(String id) {
-    _guardRepository.updateGuardStatus(id, 'active');
-    _refreshStats();
+  Future<void> approveGuard(String id) async {
+    await _guardRepository.updateGuardStatus(id, 'active');
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Reject Guard
-  void rejectGuard(String id) {
-    _guardRepository.updateGuardStatus(id, 'rejected');
-    _refreshStats();
+  Future<void> rejectGuard(String id) async {
+    await _guardRepository.updateGuardStatus(id, 'rejected');
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Delete Guard
-  void deleteGuard(String id) {
-    _guardRepository.deleteGuard(id);
-    _refreshStats();
+  Future<void> deleteGuard(String id) async {
+    await _guardRepository.deleteGuard(id);
+    await _refreshStats();
     notifyListeners();
   }
 
-  // ============ FLATS MANAGEMENT ============
+  // ================= FLATS =================
 
-  // Get all flats
-  List<Flat> get allFlats => _flatRepository.allFlats;
-
-  // Get pending flats (Cached)
-  List<Flat> get pendingFlats => _cachedPendingFlats;
-
-  // Get active flats (Cached)
-  List<Flat> get activeFlats => _cachedActiveFlats;
-
-
-  // Get flats from FlatProvider with mapping
-  // Note: This still maps on every call. Could be optimized if it becomes a bottleneck.
   List<Map<String, dynamic>> get flats {
-    final allFlats = _flatProvider.getAllFlats();
-    return allFlats.map((flat) {
+    return _flatProvider.getAllFlats().map((flat) {
       return {
         'id': flat.id,
         'flat': flat.name,
@@ -110,47 +171,33 @@ class AdminProvider extends ChangeNotifier {
     }).toList();
   }
 
-  // Add flat using FlatProvider
   Future<void> addFlat(String flatName, String ownerName) async {
     final dummyOwnerId =
         'admin_created_${DateTime.now().millisecondsSinceEpoch}';
     await _flatProvider.createFlat(flatName, dummyOwnerId, ownerName);
-    _refreshStats();
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Update flat using FlatProvider
-  Future<void> updateFlat(String id, String flatName, String ownerName) async {
+  Future<void> updateFlat(
+      String id, String flatName, String ownerName) async {
     await _flatProvider.updateFlat(id, flatName, ownerName);
-    _refreshStats();
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Delete flat using FlatProvider
   Future<void> deleteFlat(String id) async {
     await _flatProvider.deleteFlat(id);
-    _refreshStats();
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Approve flat using FlatRepository
-  void approveFlat(String flatId) {
-    _flatRepository.approveFlat(flatId);
-    _refreshStats();
+  Future<void> approveFlat(String flatId) async {
+    await _flatRepository.approveFlat(flatId);
+    await _refreshStats();
     notifyListeners();
   }
 
-  // Reject flat using FlatRepository
-  void rejectFlat(String flatId) {
-    _flatRepository.rejectFlat(flatId);
-    _refreshStats();
-    notifyListeners();
-  }
-
-  // Update flat name using FlatRepository
-  void updateFlatName(String flatId, String newName) {
-    _flatRepository.updateFlatName(flatId, newName);
-    _refreshStats();
-    notifyListeners();
-  }
-}
+  Future<void> rejectFlat(String flatId) async {
+    await _flatRepository.rejectFlat(flatId);
+    await _refreshStats();

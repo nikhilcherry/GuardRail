@@ -18,6 +18,7 @@ import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_flats_screen.dart';
 import '../screens/admin/admin_guards_screen.dart';
 import '../screens/admin/admin_settings_screen.dart';
+import '../screens/admin/society_setup_screen.dart';
 import '../screens/shared/visitor_details_screen.dart';
 
 class AppRouter {
@@ -106,6 +107,10 @@ class AppRouter {
           ),
         ],
       ),
+      GoRoute(
+        path: '/admin_society_setup',
+        builder: (context, state) => const SocietySetupScreen(),
+      ),
     ],
     redirect: (context, state) {
       final isLoggedIn = authProvider.isLoggedIn;
@@ -156,7 +161,7 @@ class AppRouter {
             case 'resident':
               return '/resident_home';
             case 'admin':
-              return '/admin_dashboard';
+              return authProvider.hasSociety ? '/admin_dashboard' : '/admin_society_setup';
             default:
               return '/resident_home';
           }

@@ -1,96 +1,125 @@
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/firestore_service.dart';
+import '../services/logger_service.dart';
 
+/// Authentication service using Firebase Auth.
 class AuthService {
   final _storage = const FlutterSecureStorage();
   final _localAuth = LocalAuthentication();
+  
+  // Use getter to avoid initialization before Firebase.initializeApp()
+  FirebaseAuth get _firebaseAuth => FirebaseAuth.instance;
+  FirestoreService get _firestoreService => FirestoreService();
 
-  // Base URL from env or fallback
-  String get _baseUrl => dotenv.env['API_BASE_URL'] ?? 'https://api.example.com';
+  /// Get current Firebase user
+  User? get currentUser => _firebaseAuth.currentUser;
 
-  Future<Map<String, dynamic>> login(String phone, String otp) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'phone': phone, 'otp': otp}),
-      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Login failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      // In a real app, rethrow. For this specific challenge environment where no backend exists,
-      // we must provide a way to login. However, simply returning success on error is insecure.
-      // Since I cannot implement a real backend, and the user wants to "replace simulation",
-      // strict adherence means failing if no backend.
-      // BUT, to allow the app to work for the user in this mock environment,
-      // I will only fallback if it's a connection error AND we are in a debug/demo mode.
-      // Given the critical review, I will THROW by default to be secure.
-      // The user can implement the backend or point to a real one.
-      throw Exception('Connection failed or API error: $e');
-    }
-  }
-
+  /// Login with email and password using Firebase Auth
   Future<Map<String, dynamic>> loginWithEmail(String email, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/login/email'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Login failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Connection failed or API error: $e');
+      // Fetch user profile from Firestore
+      final profile = await _firestoreService.getUserProfile(credential.user?.uid);
+      
+      return {
+        'success': true,
+        'token': await credential.user?.getIdToken(),
+        'userId': credential.user?.uid,
+        'email': credential.user?.email,
+        'name': profile?['name'] ?? credential.user?.displayName,
+        'role': profile?['role'] ?? 'resident',
+        'isVerified': profile?['isVerified'] ?? true,
+      };
+    } on FirebaseAuthException catch (e) {
+      LoggerService().error('Firebase login failed', e, StackTrace.current);
+      throw Exception(_getFirebaseAuthErrorMessage(e.code));
     }
   }
 
+  /// Register with email and password using Firebase Auth
   Future<Map<String, dynamic>> register({
     required String name,
-    required String contact, // email or phone
+    required String email,
     required String password,
     required String role,
+    String? phone,
+    String? societyId,
+    bool isVerified = false,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'contact': contact,
-          'password': password,
-          'role': role,
-        }),
-      ).timeout(const Duration(seconds: 30)); // SECURITY: Prevent request hanging (DoS)
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Registration failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Connection failed or API error: $e');
+      // Update display name
+      await credential.user?.updateDisplayName(name);
+
+      // Create Firestore user profile
+      await _firestoreService.saveUserProfile(
+        name: name,
+        email: email,
+        role: role,
+        phone: phone,
+        societyId: societyId,
+        isVerified: isVerified,
+      );
+
+      return {
+        'success': true,
+        'token': await credential.user?.getIdToken(),
+        'userId': credential.user?.uid,
+        'email': credential.user?.email,
+        'name': name,
+        'role': role,
+        'isVerified': false,
+      };
+    } on FirebaseAuthException catch (e) {
+      LoggerService().error('Firebase registration failed', e, StackTrace.current);
+      throw Exception(_getFirebaseAuthErrorMessage(e.code));
     }
   }
 
+  /// Login with phone and OTP (placeholder - Firebase Phone Auth requires additional setup)
+  Future<Map<String, dynamic>> login(String phone, String otp) async {
+    // For now, throw - phone auth requires additional setup in Firebase Console
+    throw Exception('Phone authentication requires Firebase Phone Auth setup');
+  }
+
+  /// Send password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
+  /// Sign out
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+    await deleteToken();
+  }
+
+  /// Save auth token to secure storage
   Future<void> saveToken(String token) async {
     await _storage.write(key: 'auth_token', value: token);
   }
 
+  /// Get auth token from secure storage
   Future<String?> getToken() async {
+    // First check if user is signed in with Firebase
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      return await user.getIdToken();
+    }
+    // Fallback to stored token
     return await _storage.read(key: 'auth_token');
   }
 
+  /// Delete auth token from secure storage
   Future<void> deleteToken() async {
     await _storage.delete(key: 'auth_token');
   }
@@ -110,11 +139,35 @@ class AuthService {
     try {
       return await _localAuth.authenticate(
         localizedReason: 'Verify your identity to access GuardRail',
-        // options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
-        // Fallback for older local_auth versions or mock environments
       );
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Convert Firebase Auth error codes to user-friendly messages
+  String _getFirebaseAuthErrorMessage(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return 'No user found with this email';
+      case 'wrong-password':
+        return 'Incorrect password';
+      case 'invalid-credential':
+        return 'Invalid email or password';
+      case 'email-already-in-use':
+        return 'An account already exists with this email';
+      case 'weak-password':
+        return 'Password is too weak';
+      case 'invalid-email':
+        return 'Invalid email address';
+      case 'user-disabled':
+        return 'This account has been disabled';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later';
+      case 'network-request-failed':
+        return 'Network error. Check your connection';
+      default:
+        return 'Authentication failed: $code';
     }
   }
 }

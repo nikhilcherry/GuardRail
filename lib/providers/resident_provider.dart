@@ -37,54 +37,24 @@ class PreApprovedVisitor {
 }
 
 class ResidentProvider extends ChangeNotifier {
-  final List<Visitor> _todaysVisitors = [
-    Visitor(
-      id: '1',
-      name: 'Amazon Delivery',
-      type: 'delivery',
-      status: 'approved',
-      date: DateTime.now().subtract(const Duration(hours: 1, minutes: 15)),
-    ),
-    Visitor(
-      id: '2',
-      name: 'John Doe',
-      type: 'guest',
-      status: 'pending',
-      date: DateTime.now().subtract(const Duration(minutes: 30)),
-    ),
-  ];
+  final List<Visitor> _todaysVisitors = [];
 
   // Cache for pending approvals to avoid O(N) filtering on every build
   List<Visitor>? _cachedPendingApprovals;
   // Cache for all visitors to avoid O(N log N) sorting on every build
   List<Visitor>? _cachedAllVisitors;
 
-  final List<Visitor> _pastVisitors = [
-    Visitor(
-      id: '3',
-      name: 'Plumber Service',
-      type: 'service',
-      status: 'rejected',
-      date: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    Visitor(
-      id: '4',
-      name: 'Sarah Smith',
-      type: 'guest',
-      status: 'approved',
-      date: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-  ];
+  final List<Visitor> _pastVisitors = [];
 
   final List<PreApprovedVisitor> _preApprovedVisitors = [];
 
-  String _residentName = 'Robert';
-  String _flatNumber = '402';
-  String _phoneNumber = '+91 98765 43210';
-  String _email = 'robert@example.com';
+  String _residentName = '';
+  String _flatNumber = '';
+  String _phoneNumber = '';
+  String _email = '';
   String? _profileImage;
   DateTime? _lastLogin;
-  int _pendingRequests = 1;
+  int _pendingRequests = 0;
   bool _isLoading = false;
 
   List<Visitor> get todaysVisitors => _todaysVisitors;
