@@ -17,13 +17,39 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  // Cache for grouped events to optimize eventLoader
+  Map<DateTime, List<Visitor>>? _eventsCache;
+  List<Visitor>? _lastVisitors;
+
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
   }
 
+  // OPTIMIZE: Group visitors by normalized date once
+  Map<DateTime, List<Visitor>> _groupVisitors(List<Visitor> visitors) {
+    final Map<DateTime, List<Visitor>> data = {};
+    for (final visitor in visitors) {
+      // Normalize date to UTC midnight for consistent keys
+      final date = DateTime.utc(
+        visitor.date.year,
+        visitor.date.month,
+        visitor.date.day,
+      );
+      if (data[date] == null) data[date] = [];
+      data[date]!.add(visitor);
+    }
+    return data;
+  }
+
   List<Visitor> _getVisitorsForDay(List<Visitor> allVisitors, DateTime day) {
+    // PERF: Return from cache if available (O(1)) instead of filtering (O(N))
+    if (_eventsCache != null) {
+      final normalizedDay = DateTime.utc(day.year, day.month, day.day);
+      return _eventsCache![normalizedDay] ?? [];
+    }
+
     return allVisitors.where((visitor) {
       return isSameDay(visitor.date, day);
     }).toList();
@@ -45,6 +71,13 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
             final allVisitors = residentProvider.allVisitors;
+
+            // OPTIMIZE: Update cache only when data changes
+            if (_lastVisitors != allVisitors) {
+              _eventsCache = _groupVisitors(allVisitors);
+              _lastVisitors = allVisitors;
+            }
+
             final selectedVisitors = _getVisitorsForDay(allVisitors, _selectedDay!);
 
             return Column(
