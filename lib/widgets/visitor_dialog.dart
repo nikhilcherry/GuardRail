@@ -123,6 +123,8 @@ class _VisitorDialogState extends State<VisitorDialog> {
               TextField(
                 controller: flatCtrl,
                 textInputAction: TextInputAction.next,
+                maxLength: 10, // SECURITY: Prevent large input DoS
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 decoration: const InputDecoration(labelText: 'Flat Number'),
               ),
               const SizedBox(height: 12),
@@ -130,6 +132,8 @@ class _VisitorDialogState extends State<VisitorDialog> {
               TextField(
                 controller: nameCtrl,
                 textInputAction: TextInputAction.next,
+                maxLength: 100, // SECURITY: Prevent large input DoS
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 decoration: const InputDecoration(labelText: 'Visitor Name'),
               ),
               const SizedBox(height: 12),
@@ -162,6 +166,8 @@ class _VisitorDialogState extends State<VisitorDialog> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: vehicleNumberCtrl,
+                  maxLength: 20, // SECURITY: Prevent large input DoS
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   decoration: const InputDecoration(labelText: 'Vehicle Number'),
                 ),
               ],
