@@ -17,3 +17,8 @@
 **Vulnerability:** The `VisitorDialog` text fields (Name, Flat, Vehicle) had no `maxLength` constraint, allowing entry of strings of unlimited length.
 **Learning:** Accepting unbounded input can lead to Denial of Service (DoS) via memory exhaustion (OOM crashes) or processing delays, especially if this data is persisted or sent to a backend.
 **Prevention:** Always enforce `maxLength` on `TextField` and `TextFormField` widgets, aligning limits with backend database schemas or reasonable UI constraints.
+
+## 2024-05-28 - Insecure PII Storage
+**Vulnerability:** User PII (Email, Phone, Name, Flat ID) was stored in `SharedPreferences` (plain text XML) via `AuthRepository`.
+**Learning:** `SharedPreferences` is not secure and can be accessed on rooted devices or via backups. It should only be used for non-sensitive preferences (like Theme or Language).
+**Prevention:** Use `FlutterSecureStorage` (EncryptedSharedPreferences/KeyChain) for any personally identifiable information (PII) or authentication tokens.
