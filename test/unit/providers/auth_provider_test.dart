@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guardrail/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ void main() {
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
+      FlutterSecureStorage.setMockInitialValues({});
       authProvider = AuthProvider();
     });
 
@@ -34,6 +36,13 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('isLoggedIn'), true);
       expect(prefs.getString('selectedRole'), 'resident');
+
+      // Verify PII is NOT in prefs (it's in secure storage)
+      expect(prefs.getString('userEmail'), null);
+
+      // Verify secure storage
+      const storage = FlutterSecureStorage();
+      expect(await storage.read(key: 'userEmail'), 'test@example.com');
     });
 
     test('loginWithPhoneAndOTP updates state correctly', () async {
@@ -47,7 +56,13 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('isLoggedIn'), true);
       expect(prefs.getString('selectedRole'), 'guard');
-      expect(prefs.getString('userPhone'), '1234567890');
+
+      // Verify PII is NOT in prefs
+      expect(prefs.getString('userPhone'), null);
+
+      // Verify secure storage
+      const storage = FlutterSecureStorage();
+      expect(await storage.read(key: 'userPhone'), '1234567890');
     });
 
     test('logout clears state and preferences', () async {

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
@@ -11,6 +12,8 @@ class AuthRepository {
   static const String _keyUserEmail = 'userEmail';
   static const String _keyIsVerified = 'isVerified';
   static const String _keyFlatId = 'flatId';
+
+  final _storage = const FlutterSecureStorage();
 
   // Use getters to avoid initialization before Firebase.initializeApp()
   FirebaseAuth get _firebaseAuth => FirebaseAuth.instance;
@@ -35,11 +38,13 @@ class AuthRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyIsLoggedIn, isLoggedIn);
     if (role != null) await prefs.setString(_keySelectedRole, role);
-    if (phone != null) await prefs.setString(_keyUserPhone, phone);
-    if (name != null) await prefs.setString(_keyUserName, name);
-    if (email != null) await prefs.setString(_keyUserEmail, email);
     if (isVerified != null) await prefs.setBool(_keyIsVerified, isVerified);
-    if (flatId != null) await prefs.setString(_keyFlatId, flatId);
+
+    // SECURITY: Store PII in secure storage
+    if (phone != null) await _storage.write(key: _keyUserPhone, value: phone);
+    if (name != null) await _storage.write(key: _keyUserName, value: name);
+    if (email != null) await _storage.write(key: _keyUserEmail, value: email);
+    if (flatId != null) await _storage.write(key: _keyFlatId, value: flatId);
   }
 
   /// Get login status from local storage
@@ -48,12 +53,25 @@ class AuthRepository {
     return {
       'isLoggedIn': prefs.getBool(_keyIsLoggedIn) ?? false,
       'selectedRole': prefs.getString(_keySelectedRole),
-      'userPhone': prefs.getString(_keyUserPhone),
-      'userName': prefs.getString(_keyUserName),
-      'userEmail': prefs.getString(_keyUserEmail),
       'isVerified': prefs.getBool(_keyIsVerified) ?? false,
-      'flatId': prefs.getString(_keyFlatId),
+      // SECURITY: Read PII from secure storage, fallback to prefs for migration
+      'userPhone': await _readAndMigrate(_keyUserPhone, prefs),
+      'userName': await _readAndMigrate(_keyUserName, prefs),
+      'userEmail': await _readAndMigrate(_keyUserEmail, prefs),
+      'flatId': await _readAndMigrate(_keyFlatId, prefs),
     };
+  }
+
+  Future<String?> _readAndMigrate(String key, SharedPreferences prefs) async {
+    String? val = await _storage.read(key: key);
+    if (val == null && prefs.containsKey(key)) {
+      val = prefs.getString(key);
+      if (val != null) {
+        await _storage.write(key: key, value: val);
+        await prefs.remove(key);
+      }
+    }
+    return val;
   }
 
   /// Clear all auth data
@@ -61,11 +79,13 @@ class AuthRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyIsLoggedIn);
     await prefs.remove(_keySelectedRole);
-    await prefs.remove(_keyUserPhone);
-    await prefs.remove(_keyUserName);
-    await prefs.remove(_keyUserEmail);
     await prefs.remove(_keyIsVerified);
-    await prefs.remove(_keyFlatId);
+
+    // SECURITY: Clear only PII keys managed by this repository
+    await _storage.delete(key: _keyUserPhone);
+    await _storage.delete(key: _keyUserName);
+    await _storage.delete(key: _keyUserEmail);
+    await _storage.delete(key: _keyFlatId);
   }
 
   /// Register with Firebase Auth and create Firestore profile
