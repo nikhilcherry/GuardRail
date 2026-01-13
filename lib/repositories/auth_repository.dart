@@ -87,14 +87,17 @@ class AuthRepository {
       await credential.user?.updateDisplayName(name);
 
       // Create Firestore user profile
-      await _firestoreService.saveUserProfile(
-        name: name,
-        email: email,
-        role: role,
-        phone: phone,
-        flatId: flatId,
-        isVerified: false,
-      );
+      if (credential.user != null) {
+        await _firestoreService.saveUserProfileWithId(
+          uid: credential.user!.uid,
+          name: name,
+          email: email,
+          role: role,
+          phone: phone,
+          flatId: flatId,
+          isVerified: false,
+        );
+      }
 
       // Save to local storage
       await saveLoginStatus(
@@ -127,7 +130,7 @@ class AuthRepository {
       );
 
       // Fetch user profile from Firestore
-      final profile = await _firestoreService.getUserProfile();
+      final profile = await _firestoreService.getUserProfile(credential.user?.uid);
       if (profile != null) {
         await saveLoginStatus(
           isLoggedIn: true,
@@ -167,12 +170,14 @@ class AuthRepository {
 
   /// Get user profile from Firestore
   Future<Map<String, dynamic>?> getUserProfile() async {
-    return _firestoreService.getUserProfile();
+    return _firestoreService.getUserProfile(_firebaseAuth.currentUser?.uid);
   }
 
   /// Update user profile in Firestore
   Future<void> updateUserProfile(Map<String, dynamic> updates) async {
-    await _firestoreService.updateUserProfile(updates);
+    if (_firebaseAuth.currentUser != null) {
+      await _firestoreService.updateUserProfileWithId(_firebaseAuth.currentUser!.uid, updates);
+    }
   }
 
   // Legacy methods for backward compatibility

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/visitor.dart';
 import '../repositories/visitor_repository.dart';
 import '../services/logger_service.dart';
 
-class Visitor {
+// Renamed from Visitor to ResidentVisitor to avoid conflict with model
+class ResidentVisitor {
   final String id;
   final String name;
   final String type; // guest, delivery, service
@@ -10,7 +12,7 @@ class Visitor {
   final DateTime date;
   final String? profileImage;
 
-  Visitor({
+  ResidentVisitor({
     required this.id,
     required this.name,
     required this.type,
@@ -37,14 +39,14 @@ class PreApprovedVisitor {
 }
 
 class ResidentProvider extends ChangeNotifier {
-  final List<Visitor> _todaysVisitors = [];
+  final List<ResidentVisitor> _todaysVisitors = [];
 
   // Cache for pending approvals to avoid O(N) filtering on every build
-  List<Visitor>? _cachedPendingApprovals;
+  List<ResidentVisitor>? _cachedPendingApprovals;
   // Cache for all visitors to avoid O(N log N) sorting on every build
-  List<Visitor>? _cachedAllVisitors;
+  List<ResidentVisitor>? _cachedAllVisitors;
 
-  final List<Visitor> _pastVisitors = [];
+  final List<ResidentVisitor> _pastVisitors = [];
 
   final List<PreApprovedVisitor> _preApprovedVisitors = [];
 
@@ -57,11 +59,11 @@ class ResidentProvider extends ChangeNotifier {
   int _pendingRequests = 0;
   bool _isLoading = false;
 
-  List<Visitor> get todaysVisitors => _todaysVisitors;
-  List<Visitor> get pastVisitors => _pastVisitors;
+  List<ResidentVisitor> get todaysVisitors => _todaysVisitors;
+  List<ResidentVisitor> get pastVisitors => _pastVisitors;
   List<PreApprovedVisitor> get preApprovedVisitors => _preApprovedVisitors;
-  List<Visitor> get pendingVisitors => getPendingApprovals();
-  List<Visitor> get allVisitors {
+  List<ResidentVisitor> get pendingVisitors => getPendingApprovals();
+  List<ResidentVisitor> get allVisitors {
     if (_cachedAllVisitors != null) {
       return _cachedAllVisitors!;
     }
@@ -85,11 +87,11 @@ class ResidentProvider extends ChangeNotifier {
     VisitorRepository().visitorStream.listen((updatedVisitors) {
       _todaysVisitors.clear();
       for (var v in updatedVisitors) {
-        _todaysVisitors.add(Visitor(
+        _todaysVisitors.add(ResidentVisitor(
           id: v.id,
           name: v.name,
           type: v.purpose,
-          status: v.status.name,
+          status: v.status.name, // Enum to String
           date: v.time,
         ));
       }
@@ -161,7 +163,7 @@ class ResidentProvider extends ChangeNotifier {
   }
 
   // Get visitor history by type
-  List<Visitor> getVisitorsByType(String type) {
+  List<ResidentVisitor> getVisitorsByType(String type) {
     return [
       ..._todaysVisitors,
       ..._pastVisitors,
@@ -169,7 +171,7 @@ class ResidentProvider extends ChangeNotifier {
   }
 
   // Get all notifications
-  List<Visitor> getPendingApprovals() {
+  List<ResidentVisitor> getPendingApprovals() {
     // OPTIMIZE: Return cached list if available
     if (_cachedPendingApprovals != null) {
       return _cachedPendingApprovals!;
