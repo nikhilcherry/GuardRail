@@ -40,7 +40,11 @@ class GuardProvider extends ChangeNotifier {
   DateTime _lastPatrolCheck = DateTime.now().subtract(const Duration(minutes: 45));
   final List<DateTime> _patrolLogs = [];
   
+  List<Visitor> _insideEntries = [];
+
   List<Visitor> get entries => _entries;
+  // PERF: Expose cached filtered list for O(1) access
+  List<Visitor> get insideEntries => _insideEntries;
   List<GuardCheck> get checks => _checks;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
@@ -53,8 +57,18 @@ class GuardProvider extends ChangeNotifier {
     VisitorRepository().visitorStream.listen((updatedVisitors) {
       _entries.clear();
       _entries.addAll(updatedVisitors);
+      _updateInsideCache();
       notifyListeners();
     });
+    // Initial cache update
+    _updateInsideCache();
+  }
+
+  void _updateInsideCache() {
+    // PERF: Cache filtered list to avoid O(N) calculation on every build
+    _insideEntries = _entries
+        .where((e) => e.status == VisitorStatus.approved && e.exitTime == null)
+        .toList();
   }
 
   Future<void> _loadData() async {
