@@ -24,3 +24,7 @@
 **Learning:** Computing statistics (like counts of pending/active items) inside the `build` method leads to redundant iterations and object allocations on every frame.
 
 **Action:** Move the calculation to the Provider level. Compute the stats only when the data changes (in mutator methods) and cache the result in simple variables. Expose these variables via getters for O(1) access in the UI.
+
+## 2024-05-26 - TableCalendar Event Loading Bottleneck
+**Learning:** `TableCalendar` calls `eventLoader` for every visible day (30-42 times) on every build. If this loader performs an O(N) iteration (like `.where()`), the build cost becomes O(N * Days).
+**Action:** Pre-calculate events into a `Map<DateTime, List<T>>` when the source list changes. This reduces the `eventLoader` to a fast O(1) map lookup.
