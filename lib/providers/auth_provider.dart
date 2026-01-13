@@ -54,7 +54,7 @@ class AuthProvider extends ChangeNotifier {
         _userName = firebaseUser.displayName;
         
         // Fetch profile from Firestore
-        final profile = await _firestoreService.getUserProfile();
+        final profile = await _firestoreService.getUserProfile(firebaseUser.uid);
         if (profile != null) {
           _selectedRole = profile['role'];
           _isVerified = profile['isVerified'] ?? false;
@@ -226,22 +226,23 @@ class AuthProvider extends ChangeNotifier {
         throw Exception('Invalid Guard ID');
       }
 
-      final status = guard['status'];
+      // Guard is now a Model object, access properties directly
+      final status = guard.status;
 
       if (status == 'created') {
         final success = await _guardRepository.linkUserToGuard(id, userIdentifier, _userName ?? 'Unknown');
         if (!success) throw Exception('Guard ID unavailable');
         throw Exception('PENDING_APPROVAL');
       } else if (status == 'pending') {
-        if (guard['linkedUserEmail'] == userIdentifier) {
+        if (guard.linkedUserEmail == userIdentifier) {
           throw Exception('PENDING_APPROVAL');
         } else {
           throw Exception('Guard ID already in use');
         }
       } else if (status == 'active') {
-        if (guard['linkedUserEmail'] == userIdentifier) {
+        if (guard.linkedUserEmail == userIdentifier) {
           _isVerified = true;
-        } else if (guard['linkedUserEmail'] == null) {
+        } else if (guard.linkedUserEmail == null) {
           await _guardRepository.linkUserToGuard(id, userIdentifier, _userName ?? 'Unknown');
           await _guardRepository.updateGuardStatus(id, 'active');
           _isVerified = true;

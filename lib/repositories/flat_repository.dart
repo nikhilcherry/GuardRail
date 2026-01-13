@@ -1,88 +1,8 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/flat.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
-
-enum MemberStatus { pending, accepted }
-enum MemberRole { owner, member }
-enum FlatStatus { pending, active, rejected }
-
-class FlatMember {
-  final String userId;
-  final String name;
-  MemberStatus status;
-  final MemberRole role;
-
-  FlatMember({
-    required this.userId,
-    required this.name,
-    this.status = MemberStatus.pending,
-    this.role = MemberRole.member,
-  });
-
-  factory FlatMember.fromMap(Map<String, dynamic> data) {
-    return FlatMember(
-      userId: data['userId'] ?? '',
-      name: data['name'] ?? '',
-      status: data['status'] == 'accepted' ? MemberStatus.accepted : MemberStatus.pending,
-      role: data['role'] == 'owner' ? MemberRole.owner : MemberRole.member,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'name': name,
-      'status': status == MemberStatus.accepted ? 'accepted' : 'pending',
-      'role': role == MemberRole.owner ? 'owner' : 'member',
-    };
-  }
-}
-
-class Flat {
-  final String id;
-  String name;
-  final String ownerId;
-  FlatStatus status;
-
-  Flat({
-    required this.id,
-    required this.name,
-    required this.ownerId,
-    this.status = FlatStatus.pending,
-  });
-
-  factory Flat.fromFirestore(Map<String, dynamic> data, String docId) {
-    return Flat(
-      id: docId,
-      name: data['name'] ?? '',
-      ownerId: data['ownerId'] ?? '',
-      status: _parseStatus(data['status']),
-    );
-  }
-
-  static FlatStatus _parseStatus(String? status) {
-    switch (status) {
-      case 'active':
-        return FlatStatus.active;
-      case 'rejected':
-        return FlatStatus.rejected;
-      default:
-        return FlatStatus.pending;
-    }
-  }
-
-  String get statusString {
-    switch (status) {
-      case FlatStatus.active:
-        return 'active';
-      case FlatStatus.rejected:
-        return 'rejected';
-      case FlatStatus.pending:
-        return 'pending';
-    }
-  }
-}
 
 class FlatRepository {
   // Singleton pattern
@@ -95,7 +15,6 @@ class FlatRepository {
 
   // Local cache
   List<Flat> _allFlats = [];
-  final Map<String, List<FlatMember>> _flatMembers = {};
   bool _isLoaded = false;
 
   // Getters
@@ -112,14 +31,6 @@ class FlatRepository {
       for (var doc in snapshot.docs) {
         final data = doc.data();
         _allFlats.add(Flat.fromFirestore(data, doc.id));
-        
-        // Load members for each flat
-        final membersData = data['members'] as List<dynamic>?;
-        if (membersData != null) {
-          _flatMembers[doc.id] = membersData
-              .map((m) => FlatMember.fromMap(m as Map<String, dynamic>))
-              .toList();
-        }
       }
       
       _isLoaded = true;
@@ -167,10 +78,10 @@ class FlatRepository {
       name: name,
       ownerId: ownerId,
       status: FlatStatus.pending,
+      members: [owner],
     );
 
     _allFlats.add(newFlat);
-    _flatMembers[flatId] = [owner];
 
     LoggerService().info('Flat created: $flatId');
     return newFlat;
@@ -185,7 +96,13 @@ class FlatRepository {
 
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
-      _allFlats[flatIndex].status = FlatStatus.active;
+      _allFlats[flatIndex] = Flat(
+        id: _allFlats[flatIndex].id,
+        name: _allFlats[flatIndex].name,
+        ownerId: _allFlats[flatIndex].ownerId,
+        status: FlatStatus.active,
+        members: _allFlats[flatIndex].members,
+      );
     }
   }
 
@@ -198,7 +115,13 @@ class FlatRepository {
 
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
-      _allFlats[flatIndex].status = FlatStatus.rejected;
+      _allFlats[flatIndex] = Flat(
+        id: _allFlats[flatIndex].id,
+        name: _allFlats[flatIndex].name,
+        ownerId: _allFlats[flatIndex].ownerId,
+        status: FlatStatus.rejected,
+        members: _allFlats[flatIndex].members,
+      );
     }
   }
 
@@ -211,7 +134,9 @@ class FlatRepository {
 
     final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
     if (flatIndex != -1) {
-      _allFlats[flatIndex].name = newName;
+       _allFlats[flatIndex].name = newName;
+       // Note: Since name is mutable in my class I could just set it, but to be clean:
+       // _allFlats[flatIndex] = ... (but I defined name as var in Flat, so I can set it)
     }
   }
 
@@ -226,7 +151,7 @@ class FlatRepository {
       throw Exception('Flat is not active yet');
     }
 
-    final members = _flatMembers[flatId] ?? [];
+    final members = _allFlats[flatIndex].members;
     if (members.any((m) => m.userId == userId)) {
       throw Exception('You are already a member or have a pending request for this flat');
     }
@@ -244,41 +169,71 @@ class FlatRepository {
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
-    members.add(newMember);
-    _flatMembers[flatId] = members;
+    // Update local cache
+    // Since List<FlatMember> is unmodifiable? No, it's just a List.
+    // But Flat.members should be mutable or I should replace Flat.
+    // Flat.members is final in my model? Let's check.
+    // "final List<FlatMember> members;" in Flat model.
+    // So I need to replace the Flat object.
+
+    final updatedMembers = List<FlatMember>.from(members)..add(newMember);
+    _allFlats[flatIndex] = Flat(
+        id: _allFlats[flatIndex].id,
+        name: _allFlats[flatIndex].name,
+        ownerId: _allFlats[flatIndex].ownerId,
+        status: _allFlats[flatIndex].status,
+        members: updatedMembers,
+      );
   }
 
   // Member Management
   List<FlatMember> getMembers(String flatId) {
-    return _flatMembers[flatId] ?? [];
+    final flat = _allFlats.where((f) => f.id == flatId).firstOrNull;
+    return flat?.members ?? [];
   }
 
   Future<void> updateMemberStatus(String flatId, String userId, MemberStatus status) async {
-    final members = _flatMembers[flatId];
-    if (members != null) {
-      final index = members.indexWhere((m) => m.userId == userId);
-      if (index != -1) {
-        members[index].status = status;
+    final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
+    if (flatIndex != -1) {
+      final members = _allFlats[flatIndex].members;
+      final memberIndex = members.indexWhere((m) => m.userId == userId);
+
+      if (memberIndex != -1) {
+        members[memberIndex].status = status;
 
         // Update in Firestore
         await _firestore.collection('flats').doc(flatId).update({
           'members': members.map((m) => m.toMap()).toList(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
+
+        // No need to replace Flat object if I mutated member in place?
+        // MemberStatus is mutable in FlatMember.
       }
     }
   }
 
   Future<void> removeMember(String flatId, String userId) async {
-    final members = _flatMembers[flatId];
-    if (members != null) {
+    final flatIndex = _allFlats.indexWhere((f) => f.id == flatId);
+    if (flatIndex != -1) {
+      final members = _allFlats[flatIndex].members;
       final member = members.where((m) => m.userId == userId).firstOrNull;
+
       if (member != null) {
         await _firestore.collection('flats').doc(flatId).update({
           'members': FieldValue.arrayRemove([member.toMap()]),
           'updatedAt': FieldValue.serverTimestamp(),
         });
-        members.removeWhere((m) => m.userId == userId);
+
+        // Update local
+        final updatedMembers = List<FlatMember>.from(members)..removeWhere((m) => m.userId == userId);
+        _allFlats[flatIndex] = Flat(
+          id: _allFlats[flatIndex].id,
+          name: _allFlats[flatIndex].name,
+          ownerId: _allFlats[flatIndex].ownerId,
+          status: _allFlats[flatIndex].status,
+          members: updatedMembers,
+        );
       }
     }
   }
@@ -286,8 +241,7 @@ class FlatRepository {
   // User Queries
   Flat? getFlatForUser(String userId) {
     for (var flat in _allFlats) {
-      final members = _flatMembers[flat.id];
-      if (members != null && members.any((m) => m.userId == userId)) {
+      if (flat.members.any((m) => m.userId == userId)) {
         return flat;
       }
     }
@@ -296,12 +250,9 @@ class FlatRepository {
 
   FlatMember? getMemberForUser(String userId) {
     for (var flat in _allFlats) {
-      final members = _flatMembers[flat.id];
-      if (members != null) {
-        try {
-          return members.firstWhere((m) => m.userId == userId);
-        } catch (_) {}
-      }
+      try {
+        return flat.members.firstWhere((m) => m.userId == userId);
+      } catch (_) {}
     }
     return null;
   }
