@@ -23,12 +23,6 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
     _selectedDay = _focusedDay;
   }
 
-  List<Visitor> _getVisitorsForDay(List<Visitor> allVisitors, DateTime day) {
-    return allVisitors.where((visitor) {
-      return isSameDay(visitor.date, day);
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +39,21 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
             final allVisitors = residentProvider.allVisitors;
-            final selectedVisitors = _getVisitorsForDay(allVisitors, _selectedDay!);
+
+            // PERF: Group visitors by date (Map) to avoid O(N*M) lookup in eventLoader
+            final events = <DateTime, List<Visitor>>{};
+            for (final v in allVisitors) {
+              final date = DateTime.utc(v.date.year, v.date.month, v.date.day);
+              if (events[date] == null) events[date] = [];
+              events[date]!.add(v);
+            }
+
+            final selectedDateKey = DateTime.utc(
+              _selectedDay!.year,
+              _selectedDay!.month,
+              _selectedDay!.day,
+            );
+            final selectedVisitors = events[selectedDateKey] ?? <Visitor>[];
 
             return Column(
               children: [
@@ -76,7 +84,8 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
                     _focusedDay = focusedDay;
                   },
                   eventLoader: (day) {
-                    return _getVisitorsForDay(allVisitors, day);
+                    final date = DateTime.utc(day.year, day.month, day.day);
+                    return events[date] ?? [];
                   },
                   calendarStyle: CalendarStyle(
                     defaultTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
