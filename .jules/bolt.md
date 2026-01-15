@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-26 - TimeOfDay vs DateFormat Behavior
+
+**Learning:** Replacing `TimeOfDay.fromDateTime(...).format(context)` with `DateFormat.jm()` (or similar) to optimize performance changes user-visible behavior. `TimeOfDay` respects the system's 12/24h setting via `MediaQuery`, whereas `DateFormat.jm()` forces 12h format.
+
+**Action:** When optimizing date/time formatting, ensure the replacement respects system settings (using `MediaQuery.of(context).alwaysUse24HourFormat`) or stick to `TimeOfDay` if exact system behavior is required.
