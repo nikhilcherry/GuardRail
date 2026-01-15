@@ -230,6 +230,8 @@ class _AdminGuardDialogState extends State<_AdminGuardDialog> {
             TextField(
               controller: _nameController,
               textInputAction: TextInputAction.done,
+              maxLength: 100, // SECURITY: Prevent large input DoS
+              buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
               decoration: const InputDecoration(
                 labelText: 'Guard Name',
                 border: OutlineInputBorder(),
@@ -256,6 +258,8 @@ class _AdminGuardDialogState extends State<_AdminGuardDialog> {
               TextField(
                 controller: _idController,
                 enabled: isEditing || _isManualId,
+                maxLength: 50, // SECURITY: Prevent large input DoS
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 decoration: const InputDecoration(
                   labelText: 'Guard ID',
                   border: OutlineInputBorder(),
