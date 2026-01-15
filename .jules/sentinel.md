@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2025-01-20 - Unbounded Admin Inputs (DoS)
+**Vulnerability:** The `AdminFlatsScreen` and `AdminGuardsScreen` dialogs (Flat Name, Owner Name, Guard Name) did not have `maxLength` constraints, allowing for potentially unlimited input strings.
+**Learning:** Administrative interfaces are often overlooked for security hardening, but they are equally susceptible to DoS attacks or database issues from oversized inputs. Consistent input validation is required across the entire application, not just public-facing screens.
+**Prevention:** Apply the same rigorous `maxLength` constraints to admin-side forms as user-side forms. Use `buildCounter: ... => null` to maintain a clean UI while enforcing limits.

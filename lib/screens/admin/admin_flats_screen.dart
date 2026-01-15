@@ -141,6 +141,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
                                                   title: 'Edit Request Details',
                                                   label: 'Flat Name',
                                                   initialValue: flat.name,
+                                                  maxLength: 10,
                                                   onSave: (val) {
                                                     adminProvider.updateFlatName(flat.id, val);
                                                     Navigator.pop(context);
@@ -226,6 +227,7 @@ class _AdminFlatsScreenState extends State<AdminFlatsScreen>
                                             title: 'Edit Flat Name',
                                             label: 'Flat Name',
                                             initialValue: flat.name,
+                                              maxLength: 10,
                                             onSave: (val) {
                                               adminProvider.updateFlatName(flat.id, val);
                                               Navigator.pop(context);
@@ -332,6 +334,8 @@ class _AdminFlatDialogState extends State<_AdminFlatDialog> {
           children: [
             TextFormField(
               controller: _flatController,
+              maxLength: 10, // SECURITY: Prevent large input DoS
+              buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
               decoration: const InputDecoration(labelText: 'Flat Name'),
               validator: Validators.validateFlatNumber,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -339,6 +343,8 @@ class _AdminFlatDialogState extends State<_AdminFlatDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _residentController,
+              maxLength: 100, // SECURITY: Prevent large input DoS
+              buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
               decoration: const InputDecoration(labelText: 'Owner Name'),
               validator: Validators.validateName,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -379,12 +385,14 @@ class _EditNameDialog extends StatefulWidget {
   final String title;
   final String label;
   final String initialValue;
+  final int maxLength;
   final Function(String) onSave;
 
   const _EditNameDialog({
     required this.title,
     required this.label,
     required this.initialValue,
+    this.maxLength = 100,
     required this.onSave,
   });
 
@@ -413,6 +421,8 @@ class _EditNameDialogState extends State<_EditNameDialog> {
       title: Text(widget.title),
       content: TextField(
         controller: _controller,
+        maxLength: widget.maxLength, // SECURITY: Prevent large input DoS
+        buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
         decoration: InputDecoration(labelText: widget.label),
       ),
       actions: [
