@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-26 - O(N) Scan Duplication Check
+
+**Learning:** Checking for duplicates using `List.any()` inside a frequently called method (or one that could operate on large lists) creates an O(N) bottleneck. For guard checks, traversing the entire history to find if a location was checked "today" is inefficient.
+
+**Action:** Maintain a parallel `Set<String>` of signatures (e.g., "guardId_locationId_date") to allow O(1) existence checks. This dramatically scales better as the number of checks increases.
