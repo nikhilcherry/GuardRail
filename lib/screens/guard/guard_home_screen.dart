@@ -167,10 +167,9 @@ class _GateControlViewState extends State<_GateControlView> {
                       );
                     }
 
+                    // PERF: Use cached filtered list from provider to avoid O(N) filtering in build
                     final entries = _showOnlyInside
-                        ? guardProvider.entries
-                            .where((e) => e.status == 'approved' && e.exitTime == null)
-                            .toList()
+                        ? guardProvider.insideEntries
                         : guardProvider.entries;
 
                     if (entries.isEmpty) {
