@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/guard.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
 
@@ -12,11 +13,11 @@ class GuardRepository {
   final FirestoreService _firestoreService = FirestoreService();
 
   // Local cache for guards
-  List<Map<String, dynamic>> _guards = [];
+  List<Guard> _guards = [];
   bool _isLoaded = false;
 
   /// Get all guards (from cache or Firestore)
-  Future<List<Map<String, dynamic>>> getAllGuards() async {
+  Future<List<Guard>> getAllGuards() async {
     if (!_isLoaded) {
       await _loadGuards();
     }
@@ -26,7 +27,8 @@ class GuardRepository {
   /// Load guards from Firestore
   Future<void> _loadGuards() async {
     try {
-      _guards = await _firestoreService.getAllGuards();
+      final data = await _firestoreService.getAllGuards();
+      _guards = data.map((d) => Guard.fromFirestore(d, d['id'])).toList();
       _isLoaded = true;
     } catch (e) {
       LoggerService().error('Failed to load guards', e, StackTrace.current);
@@ -64,13 +66,15 @@ class GuardRepository {
     );
 
     // Update local cache
-    _guards.add({
-      'id': id,
-      'guardId': id,
-      'name': name,
-      'status': 'created',
-      'createdAt': DateTime.now(),
-    });
+    final newGuard = Guard(
+      id: id, // Assuming doc ID is same as guard ID for now, or FirestoreService handles it
+      guardId: id,
+      name: name,
+      status: 'created',
+      societyId: societyId,
+      createdAt: DateTime.now(),
+    );
+    _guards.add(newGuard);
 
     LoggerService().info('Guard created: $id');
     return id;
@@ -78,7 +82,7 @@ class GuardRepository {
 
   /// Update existing guard
   Future<void> updateGuard(String originalId, {String? name, String? newId}) async {
-    final index = _guards.indexWhere((g) => g['id'] == originalId || g['guardId'] == originalId);
+    final index = _guards.indexWhere((g) => g.id == originalId || g.guardId == originalId);
     if (index == -1) throw Exception('Guard not found');
 
     final updates = <String, dynamic>{};
@@ -96,7 +100,19 @@ class GuardRepository {
           .update(updates);
 
       // Update local cache
-      _guards[index] = {..._guards[index], ...updates};
+      // We need to create a new Guard object with updated fields
+      final old = _guards[index];
+      _guards[index] = Guard(
+        id: old.id,
+        guardId: updates['guardId'] ?? old.guardId,
+        name: updates['name'] ?? old.name,
+        status: old.status,
+        societyId: old.societyId,
+        linkedUserEmail: old.linkedUserEmail,
+        linkedUserName: old.linkedUserName,
+        createdAt: old.createdAt,
+        updatedAt: DateTime.now(),
+      );
     }
   }
 
@@ -109,24 +125,28 @@ class GuardRepository {
       final code = String.fromCharCodes(Iterable.generate(
           6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
       id = code;
-    } while (_guards.any((g) => g['id'] == id || g['guardId'] == id));
+    } while (_guards.any((g) => g.id == id || g.guardId == id));
     return id;
   }
 
   /// Find guard by ID
-  Future<Map<String, dynamic>?> getGuardById(String id) async {
+  Future<Guard?> getGuardById(String id) async {
     // Check local cache first
-    final cached = _guards.where((g) => g['id'] == id || g['guardId'] == id).firstOrNull;
+    final cached = _guards.where((g) => g.id == id || g.guardId == id).firstOrNull;
     if (cached != null) return cached;
 
     // Fetch from Firestore
-    return await _firestoreService.getGuard(id);
+    final data = await _firestoreService.getGuard(id);
+    if (data != null) {
+      return Guard.fromFirestore(data, data['id'] ?? id);
+    }
+    return null;
   }
 
   /// Find guard by Email (to check login status)
-  Map<String, dynamic>? getGuardByEmail(String email) {
+  Guard? getGuardByEmail(String email) {
     try {
-      return _guards.firstWhere((g) => g['linkedUserEmail'] == email);
+      return _guards.firstWhere((g) => g.linkedUserEmail == email);
     } catch (e) {
       return null;
     }
@@ -138,7 +158,7 @@ class GuardRepository {
     if (guard == null) return false;
 
     // If already active or pending with a different email, fail
-    if (guard['status'] != 'created' && guard['linkedUserEmail'] != email) {
+    if (guard.status != 'created' && guard.linkedUserEmail != email) {
       return false;
     }
 
@@ -150,14 +170,20 @@ class GuardRepository {
     });
 
     // Update local cache
-    final index = _guards.indexWhere((g) => g['id'] == guardId || g['guardId'] == guardId);
+    final index = _guards.indexWhere((g) => g.id == guardId || g.guardId == guardId);
     if (index != -1) {
-      _guards[index] = {
-        ..._guards[index],
-        'status': 'pending',
-        'linkedUserEmail': email,
-        'linkedUserName': userName,
-      };
+      final old = _guards[index];
+      _guards[index] = Guard(
+        id: old.id,
+        guardId: old.guardId,
+        name: old.name,
+        status: 'pending',
+        societyId: old.societyId,
+        linkedUserEmail: email,
+        linkedUserName: userName,
+        createdAt: old.createdAt,
+        updatedAt: DateTime.now(),
+      );
     }
 
     return true;
@@ -168,18 +194,26 @@ class GuardRepository {
     await _firestoreService.updateGuardStatus(id, status);
 
     // Update local cache
-    final index = _guards.indexWhere((g) => g['id'] == id || g['guardId'] == id);
+    final index = _guards.indexWhere((g) => g.id == id || g.guardId == id);
     if (index != -1) {
-      _guards[index] = {
-        ..._guards[index],
-        'status': status,
-      };
+      final old = _guards[index];
+      _guards[index] = Guard(
+        id: old.id,
+        guardId: old.guardId,
+        name: old.name,
+        status: status,
+        societyId: old.societyId,
+        linkedUserEmail: old.linkedUserEmail,
+        linkedUserName: old.linkedUserName,
+        createdAt: old.createdAt,
+        updatedAt: DateTime.now(),
+      );
     }
   }
 
   /// Delete guard
   Future<void> deleteGuard(String id) async {
     await FirebaseFirestore.instance.collection('guards').doc(id).delete();
-    _guards.removeWhere((g) => g['id'] == id || g['guardId'] == id);
+    _guards.removeWhere((g) => g.id == id || g.guardId == id);
   }
 }

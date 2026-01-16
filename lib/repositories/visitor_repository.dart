@@ -1,77 +1,7 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/visitor.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
-
-enum VisitorStatus { pending, approved, rejected, exited }
-
-class SharedVisitor {
-  final String id;
-  final String name;
-  final String flatNumber;
-  final String purpose;
-  VisitorStatus status;
-  final DateTime time;
-  final String? vehicleNumber;
-  final String? vehicleType;
-  final String? photoPath;
-  DateTime? exitTime;
-
-  SharedVisitor({
-    required this.id,
-    required this.name,
-    required this.flatNumber,
-    required this.purpose,
-    this.status = VisitorStatus.pending,
-    required this.time,
-    this.vehicleNumber,
-    this.vehicleType,
-    this.photoPath,
-    this.exitTime,
-  });
-
-  /// Create SharedVisitor from Firestore document
-  factory SharedVisitor.fromFirestore(Map<String, dynamic> data, String docId) {
-    return SharedVisitor(
-      id: docId,
-      name: data['name'] ?? '',
-      flatNumber: data['flatId'] ?? '',
-      purpose: data['purpose'] ?? '',
-      status: _parseStatus(data['status']),
-      time: (data['arrivalTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      vehicleNumber: data['vehicleNumber'],
-      vehicleType: data['vehicleType'],
-      photoPath: data['photoUrl'],
-      exitTime: (data['exitTime'] as Timestamp?)?.toDate(),
-    );
-  }
-
-  static VisitorStatus _parseStatus(String? status) {
-    switch (status) {
-      case 'approved':
-        return VisitorStatus.approved;
-      case 'rejected':
-        return VisitorStatus.rejected;
-      case 'exited':
-        return VisitorStatus.exited;
-      default:
-        return VisitorStatus.pending;
-    }
-  }
-
-  String get statusString {
-    switch (status) {
-      case VisitorStatus.approved:
-        return 'approved';
-      case VisitorStatus.rejected:
-        return 'rejected';
-      case VisitorStatus.exited:
-        return 'exited';
-      case VisitorStatus.pending:
-        return 'pending';
-    }
-  }
-}
 
 class VisitorRepository {
   static final VisitorRepository _instance = VisitorRepository._internal();
@@ -79,13 +9,13 @@ class VisitorRepository {
   VisitorRepository._internal();
 
   final FirestoreService _firestoreService = FirestoreService();
-  final List<SharedVisitor> _visitors = [];
-  final _controller = StreamController<List<SharedVisitor>>.broadcast();
+  final List<Visitor> _visitors = [];
+  final _controller = StreamController<List<Visitor>>.broadcast();
   StreamSubscription? _firestoreSubscription;
   bool _isInitialized = false;
 
-  Stream<List<SharedVisitor>> get visitorStream => _controller.stream;
-  List<SharedVisitor> get visitors => List.unmodifiable(_visitors);
+  Stream<List<Visitor>> get visitorStream => _controller.stream;
+  List<Visitor> get visitors => List.unmodifiable(_visitors);
 
   /// Initialize Firestore listener
   void initialize() {
@@ -97,7 +27,7 @@ class VisitorRepository {
         _visitors.clear();
         for (var doc in snapshot.docs) {
           final data = doc.data() as Map<String, dynamic>;
-          _visitors.add(SharedVisitor.fromFirestore(data, doc.id));
+          _visitors.add(Visitor.fromFirestore(data, doc.id));
         }
         _controller.add(List.from(_visitors));
       },
@@ -115,7 +45,7 @@ class VisitorRepository {
   }
 
   /// Add visitor (creates in Firestore)
-  Future<String> addVisitor(SharedVisitor visitor) async {
+  Future<String> addVisitor(Visitor visitor) async {
     final docId = await _firestoreService.addVisitor(
       name: visitor.name,
       flatId: visitor.flatNumber,
@@ -127,7 +57,8 @@ class VisitorRepository {
     );
 
     // Also add to local cache for immediate UI update
-    final newVisitor = SharedVisitor(
+    // Note: We use the returned docId
+    final newVisitor = Visitor(
       id: docId,
       name: visitor.name,
       flatNumber: visitor.flatNumber,
@@ -137,6 +68,7 @@ class VisitorRepository {
       vehicleNumber: visitor.vehicleNumber,
       vehicleType: visitor.vehicleType,
       photoPath: visitor.photoPath,
+      guardName: visitor.guardName,
     );
     _visitors.insert(0, newVisitor);
     _controller.add(List.from(_visitors));
@@ -169,7 +101,7 @@ class VisitorRepository {
     final index = _visitors.indexWhere((v) => v.id == id);
     if (index != -1) {
       final old = _visitors[index];
-      _visitors[index] = SharedVisitor(
+      _visitors[index] = Visitor(
         id: old.id,
         name: name ?? old.name,
         flatNumber: flatNumber ?? old.flatNumber,
@@ -180,6 +112,7 @@ class VisitorRepository {
         exitTime: old.exitTime,
         vehicleNumber: vehicleNumber ?? old.vehicleNumber,
         vehicleType: vehicleType ?? old.vehicleType,
+        guardName: old.guardName,
       );
       _controller.add(List.from(_visitors));
     }
@@ -197,7 +130,7 @@ class VisitorRepository {
     }
   }
 
-  SharedVisitor? getById(String id) {
+  Visitor? getById(String id) {
     try {
       return _visitors.firstWhere((v) => v.id == id);
     } catch (_) {
@@ -210,7 +143,7 @@ class VisitorRepository {
     final data = await _firestoreService.getVisitors();
     _visitors.clear();
     for (var item in data) {
-      _visitors.add(SharedVisitor.fromFirestore(item, item['id']));
+      _visitors.add(Visitor.fromFirestore(item, item['id']));
     }
     _controller.add(List.from(_visitors));
   }

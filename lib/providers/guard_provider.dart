@@ -1,78 +1,37 @@
 import 'package:flutter/material.dart';
+import '../models/guard_check.dart';
+import '../models/visitor.dart';
 import '../repositories/visitor_repository.dart';
 import '../services/logger_service.dart';
 
-class VisitorEntry {
-  final String id;
-  final String name;
-  final String flatNumber;
-  final String purpose;
-  final String status; // approved, pending, rejected
-  final DateTime time;
-  final DateTime? exitTime;
-  final String? guardName;
-  final String? photoPath;
-  final String? vehicleNumber;
-  final String? vehicleType;
-
-  VisitorEntry({
-    required this.id,
-    required this.name,
-    required this.flatNumber,
-    required this.purpose,
-    required this.status,
-    required this.time,
-    this.exitTime,
-    this.guardName,
-    this.photoPath,
-    this.vehicleNumber,
-    this.vehicleType,
-  });
-}
-
-class GuardCheck {
-  final String id;
-  final String locationId;
-  final String guardId;
-  final DateTime timestamp;
-  final String photoPath;
-
-  GuardCheck({
-    required this.id,
-    required this.locationId,
-    required this.guardId,
-    required this.timestamp,
-    required this.photoPath,
-  });
-}
-
 class GuardProvider extends ChangeNotifier {
   final List<GuardCheck> _checks = [];
-  final List<VisitorEntry> _entries = [
-    VisitorEntry(
+  final List<Visitor> _entries = [
+    // Mock initial data if needed, or empty
+    Visitor(
       id: '1',
       name: 'John Doe',
       flatNumber: '4B',
       purpose: 'Guest',
-      status: 'approved',
+      status: VisitorStatus.approved,
       time: DateTime.now().subtract(const Duration(minutes: 15)),
       guardName: 'Michael S.',
     ),
-    VisitorEntry(
+    Visitor(
       id: '2',
       name: 'Delivery Driver',
       flatNumber: '12A',
       purpose: 'Delivery',
-      status: 'pending',
+      status: VisitorStatus.pending,
       time: DateTime.now().subtract(const Duration(minutes: 30)),
       guardName: 'David K.',
     ),
-    VisitorEntry(
+    Visitor(
       id: '3',
       name: 'Unknown Male',
       flatNumber: '2C',
       purpose: 'Other',
-      status: 'rejected',
+      status: VisitorStatus.rejected,
       time: DateTime.now().subtract(const Duration(minutes: 45)),
       guardName: 'Sarah J.',
     ),
@@ -81,7 +40,11 @@ class GuardProvider extends ChangeNotifier {
   DateTime _lastPatrolCheck = DateTime.now().subtract(const Duration(minutes: 45));
   final List<DateTime> _patrolLogs = [];
   
-  List<VisitorEntry> get entries => _entries;
+  List<Visitor> _insideEntries = [];
+
+  List<Visitor> get entries => _entries;
+  // PERF: Expose cached filtered list for O(1) access
+  List<Visitor> get insideEntries => _insideEntries;
   List<GuardCheck> get checks => _checks;
   DateTime get lastPatrolCheck => _lastPatrolCheck;
   List<DateTime> get patrolLogs => _patrolLogs;
@@ -93,22 +56,19 @@ class GuardProvider extends ChangeNotifier {
     // Listen to shared repository updates
     VisitorRepository().visitorStream.listen((updatedVisitors) {
       _entries.clear();
-      for (var v in updatedVisitors) {
-        _entries.add(VisitorEntry(
-          id: v.id,
-          name: v.name,
-          flatNumber: v.flatNumber,
-          purpose: v.purpose,
-          status: v.status.name,
-          time: v.time,
-          exitTime: v.exitTime,
-          photoPath: v.photoPath,
-          vehicleNumber: v.vehicleNumber,
-          vehicleType: v.vehicleType,
-        ));
-      }
+      _entries.addAll(updatedVisitors);
+      _updateInsideCache();
       notifyListeners();
     });
+    // Initial cache update
+    _updateInsideCache();
+  }
+
+  void _updateInsideCache() {
+    // PERF: Cache filtered list to avoid O(N) calculation on every build
+    _insideEntries = _entries
+        .where((e) => e.status == VisitorStatus.approved && e.exitTime == null)
+        .toList();
   }
 
   Future<void> _loadData() async {
@@ -123,7 +83,7 @@ class GuardProvider extends ChangeNotifier {
   }
 
   // Register new visitor
-  Future<VisitorEntry> registerNewVisitor({
+  Future<Visitor> registerNewVisitor({
     required String name,
     required String flatNumber,
     required String purpose,
@@ -135,7 +95,7 @@ class GuardProvider extends ChangeNotifier {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       final time = DateTime.now();
       
-      final newShared = SharedVisitor(
+      final newVisitor = Visitor(
         id: id,
         name: name,
         flatNumber: flatNumber,
@@ -147,22 +107,11 @@ class GuardProvider extends ChangeNotifier {
         vehicleType: vehicleType,
       );
       
-      VisitorRepository().addVisitor(newShared);
+      // Add to repository
+      await VisitorRepository().addVisitor(newVisitor);
 
-      final newEntry = VisitorEntry(
-        id: id,
-        name: name,
-        flatNumber: flatNumber,
-        purpose: purpose,
-        status: 'pending',
-        time: time,
-        guardName: 'Guard',
-        photoPath: photoPath,
-        vehicleNumber: vehicleNumber,
-        vehicleType: vehicleType,
-      );
-      
-      return newEntry;
+      // The repository stream will update _entries
+      return newVisitor;
     } catch (e) {
       rethrow;
     }
@@ -218,26 +167,6 @@ class GuardProvider extends ChangeNotifier {
         vehicleNumber: vehicleNumber,
         vehicleType: vehicleType,
       );
-
-      // Also update local state for immediate UI feedback
-      final index = _entries.indexWhere((entry) => entry.id == id);
-      if (index != -1) {
-        final oldEntry = _entries[index];
-        _entries[index] = VisitorEntry(
-          id: oldEntry.id,
-          name: name,
-          flatNumber: flatNumber,
-          purpose: purpose,
-          status: oldEntry.status,
-          time: oldEntry.time,
-          exitTime: oldEntry.exitTime,
-          guardName: oldEntry.guardName,
-          photoPath: photoPath ?? oldEntry.photoPath,
-          vehicleNumber: vehicleNumber ?? oldEntry.vehicleNumber,
-          vehicleType: vehicleType ?? oldEntry.vehicleType,
-        );
-        notifyListeners();
-      }
     } catch (e) {
       rethrow;
     }
@@ -256,8 +185,11 @@ class GuardProvider extends ChangeNotifier {
   }
 
   // Get entries by status
-  List<VisitorEntry> getEntriesByStatus(String status) {
-    return _entries.where((entry) => entry.status == status).toList();
+  List<Visitor> getEntriesByStatus(String status) {
+    // Helper to map string to enum if needed, or strict comparison
+    // Status is now enum in Visitor model.
+    // Assuming status passed is string name of enum?
+    return _entries.where((entry) => entry.status.name == status).toList();
   }
 
   // Process a new guard check scan
@@ -274,11 +206,9 @@ class GuardProvider extends ChangeNotifier {
       await Future.delayed(const Duration(seconds: 1));
 
       // Simple parsing: assuming qrCode is the location ID for this MVP
-      // In a real app, this would be a signed token that we verify with the backend
       final locationId = qrCode;
 
       // Duplicate Scan Protection
-      // Block same guard from scanning same QR twice per day
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
 
@@ -311,8 +241,6 @@ class GuardProvider extends ChangeNotifier {
 
   void logEmergency() {
     final timestamp = DateTime.now();
-    // In a real application, this would send an API request to the backend.
-    // SECURITY: Use LoggerService instead of print to prevent sensitive data leakage in release builds.
     LoggerService().info('EMERGENCY: Guard triggered SOS at $timestamp');
   }
 }
