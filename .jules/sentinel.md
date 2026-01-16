@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2024-05-24 - Inconsistent Secure Storage Configuration
+**Vulnerability:** `AuthService` was initializing `FlutterSecureStorage` with default options, while `AuthRepository` was using `AndroidOptions(encryptedSharedPreferences: true)`. This caused two issues: 1) Auth tokens managed by `AuthService` were stored in plaintext `SharedPreferences` on Android by default (less secure). 2) `AuthRepository.clearAuth()` (which calls `deleteAll`) would only clear the encrypted container, potentially leaving the auth token in the default container after logout if the user had data there.
+**Learning:** Default configurations in security libraries often prioritize compatibility over security. Different parts of the app instantiating the same security wrapper with different options creates fragmented storage silos.
+**Prevention:** Centralize the configuration of security primitives (like `FlutterSecureStorage`) in a single constant or factory to ensure all parts of the app use the same security posture and storage container.
