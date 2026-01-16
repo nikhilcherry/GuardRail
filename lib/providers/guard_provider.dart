@@ -6,6 +6,9 @@ import '../services/logger_service.dart';
 
 class GuardProvider extends ChangeNotifier {
   final List<GuardCheck> _checks = [];
+  // PERF: Cache checks by key to allow O(1) duplicate lookup
+  final Set<String> _scanCache = {};
+
   final List<Visitor> _entries = [
     // Mock initial data if needed, or empty
     Visitor(
@@ -210,14 +213,13 @@ class GuardProvider extends ChangeNotifier {
 
       // Duplicate Scan Protection
       final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day);
 
-      final isDuplicate = _checks.any((check) =>
-          check.guardId == guardId &&
-          check.locationId == locationId &&
-          check.timestamp.isAfter(todayStart));
+      // PERF: optimized duplicate check from O(N) to O(1) using Set
+      // Using pipe '|' as delimiter to avoid collisions with standard IDs
+      final dateKey = "${now.year}-${now.month}-${now.day}";
+      final checkKey = "$guardId|$locationId|$dateKey";
 
-      if (isDuplicate) {
+      if (_scanCache.contains(checkKey)) {
         throw Exception('Duplicate scan: You have already checked this location today.');
       }
 
@@ -231,6 +233,8 @@ class GuardProvider extends ChangeNotifier {
             timestamp: now,
             photoPath: photoPath,
           ));
+
+      _scanCache.add(checkKey);
     } catch (e) {
       rethrow;
     } finally {
