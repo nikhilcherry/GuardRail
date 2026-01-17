@@ -6,6 +6,7 @@ import 'dart:io';
 
 import '../../providers/guard_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/guard_check.dart';
 
 class GuardCheckScreen extends StatefulWidget {
   const GuardCheckScreen({Key? key}) : super(key: key);
@@ -227,30 +228,8 @@ class _GuardCheckScreenState extends State<GuardCheckScreen> {
                     return ListView.builder(
                       itemCount: provider.checks.length,
                       itemBuilder: (context, index) {
-                        final check = provider.checks[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: theme.dividerColor),
-                          ),
-                          child: ListTile(
-                            leading: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.check, color: Colors.green),
-                            ),
-                            title: Text('Location: ${check.locationId}'),
-                            subtitle: Text(
-                              'Verified at ${TimeOfDay.fromDateTime(check.timestamp).format(context)}',
-                            ),
-                            trailing: const Icon(Icons.photo_camera_outlined),
-                          ),
-                        );
+                        // PERF: Extracted widget to reduce rebuild scope
+                        return _CheckCard(check: provider.checks[index]);
                       },
                     );
                   },
@@ -259,6 +238,44 @@ class _GuardCheckScreenState extends State<GuardCheckScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CheckCard extends StatelessWidget {
+  final GuardCheck check;
+
+  const _CheckCard({
+    Key? key,
+    required this.check,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.check, color: Colors.green),
+        ),
+        title: Text('Location: ${check.locationId}'),
+        subtitle: Text(
+          'Verified at ${TimeOfDay.fromDateTime(check.timestamp).format(context)}',
+        ),
+        trailing: const Icon(Icons.photo_camera_outlined),
       ),
     );
   }
