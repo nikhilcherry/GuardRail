@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-26 - Extracting List Items
+
+**Learning:** Inline widgets in `ListView.builder` clutter the build method and prevent potential optimization (like `const` subtrees). Extracting them to separate classes improves readability and separation of concerns.
+
+**Action:** Extract list items into dedicated `StatelessWidget` classes, even if they are private to the file. This clarifies the main build method and sets the stage for further optimization.
