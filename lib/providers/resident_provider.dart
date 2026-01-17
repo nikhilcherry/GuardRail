@@ -45,6 +45,8 @@ class ResidentProvider extends ChangeNotifier {
   List<ResidentVisitor>? _cachedPendingApprovals;
   // Cache for all visitors to avoid O(N log N) sorting on every build
   List<ResidentVisitor>? _cachedAllVisitors;
+  // Cache for visitor grouping by date
+  Map<DateTime, List<ResidentVisitor>>? _cachedVisitorsByDate;
 
   final List<ResidentVisitor> _pastVisitors = [];
 
@@ -70,6 +72,22 @@ class ResidentProvider extends ChangeNotifier {
     _cachedAllVisitors = [..._todaysVisitors, ..._pastVisitors]
       ..sort((a, b) => b.date.compareTo(a.date));
     return _cachedAllVisitors!;
+  }
+
+  // PERF: Cached visitor grouping to avoid O(N) loop in UI build
+  Map<DateTime, List<ResidentVisitor>> get visitorsByDate {
+    if (_cachedVisitorsByDate != null) {
+      return _cachedVisitorsByDate!;
+    }
+    _cachedVisitorsByDate = {};
+    for (final v in allVisitors) {
+      final date = DateTime.utc(v.date.year, v.date.month, v.date.day);
+      if (_cachedVisitorsByDate![date] == null) {
+        _cachedVisitorsByDate![date] = [];
+      }
+      _cachedVisitorsByDate![date]!.add(v);
+    }
+    return _cachedVisitorsByDate!;
   }
   
   String get residentName => _residentName;
@@ -98,6 +116,7 @@ class ResidentProvider extends ChangeNotifier {
       _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
       _cachedPendingApprovals = null;
       _cachedAllVisitors = null;
+      _cachedVisitorsByDate = null;
        notifyListeners();
     });
   }

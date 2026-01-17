@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-25 - Expensive Data Transformation in Build
+
+**Learning:** Even if you use a map for O(1) lookups, building that map inside `build()` (e.g. `Consumer` builder) negates the benefit because the map is reconstructed O(N) on every frame/rebuild. This is a common mistake when trying to optimize `TableCalendar`.
+
+**Action:** Move the map construction to the Provider/Bloc. Cache it there and only invalidate it when the source list changes. The UI should only *read* the pre-calculated map.
