@@ -149,6 +149,8 @@ class _GenerateQRScreenState extends State<GenerateQRScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _nameController,
+                      maxLength: 50, // SECURITY: Prevent DoS via large input
+                      buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                       decoration: const InputDecoration(
                         labelText: 'Visitor Name',
                         prefixIcon: Icon(Icons.person_outline),
