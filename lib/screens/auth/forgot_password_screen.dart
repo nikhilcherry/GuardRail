@@ -45,6 +45,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                maxLength: 254, // SECURITY: Prevent DoS via large input
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 decoration: InputDecoration(
                   hintText: 'your@email.com',
                   prefixIcon: const Icon(Icons.email_outlined),
