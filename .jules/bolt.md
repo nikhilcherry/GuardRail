@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-27 - Unoptimized Image Loading in Lists
+
+**Learning:** Displaying high-resolution images (e.g., camera photos) in small list items (thumbnails) using `FileImage` loads the full image into memory. In a `SliverList` or `ListView`, this leads to massive memory spikes and scroll jank as large bitmaps are decoded on the main thread or rasterized.
+
+**Action:** Wrap `FileImage` (or other image providers) with `ResizeImage`. Specify a `width` or `height` corresponding to the display size (multiplied by device pixel ratio, e.g., 3x). This forces the engine to decode the image to a smaller cache size, significantly reducing memory usage and decoding time.
