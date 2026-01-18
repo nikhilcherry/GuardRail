@@ -169,4 +169,79 @@ void main() {
       expect(updatedEntry.name, 'Exit Test Visitor Updated');
     });
   });
+
+  group('GuardProvider Scan Tests', () {
+    late GuardProvider guardProvider;
+
+    setUp(() {
+      guardProvider = GuardProvider();
+    });
+
+    test('processScan adds a new check', () async {
+      await guardProvider.processScan(
+        qrCode: 'LOC-1',
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-1',
+      );
+
+      expect(guardProvider.checks.length, 1);
+      expect(guardProvider.checks.first.locationId, 'LOC-1');
+      expect(guardProvider.checks.first.guardId, 'GUARD-1');
+    });
+
+    test('processScan prevents duplicate scans for same guard and location today', () async {
+      // First scan
+      await guardProvider.processScan(
+        qrCode: 'LOC-2',
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-1',
+      );
+
+      // Duplicate scan
+      expect(
+        () async => await guardProvider.processScan(
+          qrCode: 'LOC-2',
+          photoPath: 'path/to/scan.jpg',
+          guardId: 'GUARD-1',
+        ),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Duplicate scan'),
+        )),
+      );
+    });
+
+    test('processScan allows different locations for same guard', () async {
+      await guardProvider.processScan(
+        qrCode: 'LOC-3',
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-1',
+      );
+
+      await guardProvider.processScan(
+        qrCode: 'LOC-4', // Different location
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-1',
+      );
+
+      expect(guardProvider.checks.length, 2);
+    });
+
+    test('processScan allows different guards for same location', () async {
+      await guardProvider.processScan(
+        qrCode: 'LOC-5',
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-1',
+      );
+
+      await guardProvider.processScan(
+        qrCode: 'LOC-5', // Same location
+        photoPath: 'path/to/scan.jpg',
+        guardId: 'GUARD-2', // Different guard
+      );
+
+      expect(guardProvider.checks.length, 2);
+    });
+  });
 }
