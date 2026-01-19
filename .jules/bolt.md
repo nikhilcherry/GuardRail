@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-26 - Unoptimized Image Loading in Lists
+
+**Learning:** Loading full-resolution local images (e.g., from camera) into small thumbnails causes massive memory spikes. Displaying a 12MP photo in a 48x48 container without resizing forces the engine to decode the full image, potentially leading to OOM crashes on low-end devices.
+
+**Action:** Always wrap `FileImage` (or use `Image.file`'s `cacheWidth`) with `ResizeImage` when displaying thumbnails. Set the target width to `containerSize * devicePixelRatio` (e.g., 150px for a 48px avatar) to minimize memory footprint while maintaining quality.
