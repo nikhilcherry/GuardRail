@@ -179,6 +179,7 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                   controller: _nameController,
                   icon: Icons.person_outline,
                   enabled: _isEditing,
+                  maxLength: 100,
                 ),
                 const SizedBox(height: 16),
                 _ProfileField(
@@ -187,6 +188,7 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                   icon: Icons.phone_outlined,
                   enabled: _isEditing,
                   keyboardType: TextInputType.phone,
+                  maxLength: 20,
                 ),
                 const SizedBox(height: 16),
                 _ProfileField(
@@ -195,6 +197,7 @@ class _ResidentProfileScreenState extends State<ResidentProfileScreen> {
                   icon: Icons.email_outlined,
                   enabled: _isEditing,
                   keyboardType: TextInputType.emailAddress,
+                  maxLength: 254,
                 ),
 
                 const SizedBox(height: 32),
@@ -256,6 +259,7 @@ class _ProfileField extends StatelessWidget {
   final IconData icon;
   final bool enabled;
   final TextInputType? keyboardType;
+  final int? maxLength;
 
   const _ProfileField({
     required this.label,
@@ -263,6 +267,7 @@ class _ProfileField extends StatelessWidget {
     required this.icon,
     required this.enabled,
     this.keyboardType,
+    this.maxLength,
   });
 
   @override
@@ -279,6 +284,8 @@ class _ProfileField extends StatelessWidget {
           controller: controller,
           enabled: enabled,
           keyboardType: keyboardType,
+          maxLength: maxLength,
+          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
           style: Theme.of(context).textTheme.bodyLarge,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: enabled ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant),

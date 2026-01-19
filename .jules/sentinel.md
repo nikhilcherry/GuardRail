@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2024-10-25 - Unbounded Profile Input (DoS)
+**Vulnerability:** The `ResidentProfileScreen` text fields (Name, Phone, Email) had no `maxLength` constraint, allowing entry of unlimited characters.
+**Learning:** Unbounded user profile inputs can cause UI rendering issues, database constraint violations, and potential DoS vectors if large payloads are processed by the backend.
+**Prevention:** Enforce `maxLength` constraints on all user-editable profile fields (Name: 100, Phone: 20, Email: 254), mirroring the constraints used in authentication screens.
