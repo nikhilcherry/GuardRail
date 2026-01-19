@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../models/visitor.dart';
 import '../../providers/guard_provider.dart';
 
 class VisitorStatusScreen extends StatelessWidget {
@@ -17,7 +18,7 @@ class VisitorStatusScreen extends StatelessWidget {
     return Consumer<GuardProvider>(
       builder: (context, guardProvider, child) {
         // Find the entry in the provider to get the latest status
-        VisitorEntry? entry;
+        Visitor? entry;
         try {
           entry = guardProvider.entries.firstWhere((e) => e.id == entryId);
         } catch (_) {
@@ -30,14 +31,14 @@ class VisitorStatusScreen extends StatelessWidget {
         String statusTitle;
         String statusMessage;
 
-        switch (entry.status.toLowerCase()) {
-          case 'approved':
+        switch (entry.status) {
+          case VisitorStatus.approved:
             statusColor = const Color(0xFF2ECC71); // Successful Green
             statusIcon = Icons.check_circle_outline;
             statusTitle = 'Access Granted';
             statusMessage = 'Visitor is authorized to enter.';
             break;
-          case 'rejected':
+          case VisitorStatus.rejected:
             statusColor = const Color(0xFFE74C3C); // Error Red
             statusIcon = Icons.cancel_outlined;
             statusTitle = 'Access Denied';
