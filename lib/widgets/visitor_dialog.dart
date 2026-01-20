@@ -5,10 +5,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../providers/guard_provider.dart';
+import '../models/visitor.dart';
 import '../screens/guard/visitor_status_screen.dart';
 
 class VisitorDialog extends StatefulWidget {
-  final VisitorEntry? entry;
+  final Visitor? entry;
   const VisitorDialog({Key? key, this.entry}) : super(key: key);
 
   @override
@@ -99,7 +100,10 @@ class _VisitorDialogState extends State<VisitorDialog> {
                     border: Border.all(color: theme.dividerColor),
                     image: _imageFile != null
                         ? DecorationImage(
-                            image: FileImage(File(_imageFile!.path)),
+                          image: ResizeImage(
+                            FileImage(File(_imageFile!.path)),
+                            width: 300, // PERF: Resize for preview
+                          ),
                             fit: BoxFit.cover,
                           )
                         : null,
@@ -196,7 +200,7 @@ class _VisitorDialogState extends State<VisitorDialog> {
                           }
 
                           final guard = context.read<GuardProvider>();
-                          VisitorEntry? entry;
+                          Visitor? entry;
                           if (editing) {
                             await guard.updateVisitorEntry(
                               id: widget.entry!.id,
