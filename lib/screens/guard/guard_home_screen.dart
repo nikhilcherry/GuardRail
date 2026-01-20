@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 
 import '../../theme/app_theme.dart';
 import '../../providers/guard_provider.dart';
+import '../../models/visitor.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/shimmer_entry_card.dart';
 import '../../widgets/visitor_dialog.dart';
@@ -303,7 +304,7 @@ class _QuickActions extends StatelessWidget {
 
 
 class _EntryCard extends StatelessWidget {
-  final VisitorEntry entry;
+  final Visitor entry;
   const _EntryCard({required this.entry});
 
   // PERF: Cached formatter to avoid recreation on every build
@@ -322,7 +323,7 @@ class _EntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final isApproved = entry.status == 'approved';
+    final isApproved = entry.status == VisitorStatus.approved;
     final isInside = isApproved && entry.exitTime == null;
     final duration = entry.exitTime != null ? entry.exitTime!.difference(entry.time) : null;
 
@@ -371,7 +372,11 @@ class _EntryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 image: entry.photoPath != null
                     ? DecorationImage(
-                        image: FileImage(File(entry.photoPath!)),
+                        // PERF: Resize image to reduce memory usage for thumbnails
+                        image: ResizeImage(
+                          FileImage(File(entry.photoPath!)),
+                          width: 150,
+                        ),
                         fit: BoxFit.cover,
                       )
                     : null,
