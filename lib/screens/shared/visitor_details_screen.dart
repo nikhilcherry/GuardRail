@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/resident_provider.dart';
+import '../../models/visitor.dart';
 import '../../widgets/visitor_dialog.dart';
 
 class VisitorDetailsScreen extends StatefulWidget {
@@ -76,15 +77,18 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
           : Consumer<ResidentProvider>(builder: (context, provider, _) {
               try {
                 // Check pending first, then all visitors
-                var visitor = provider.allVisitors
-                    .cast<Visitor?>()
-                    .firstWhere((v) => v?.id == widget.visitorId,
-                        orElse: () => null);
-
-                if (visitor == null) {
-                   // Fallback to checking pending specifically if not in allVisitors (though it should be)
+                ResidentVisitor? visitor;
+                try {
+                  visitor = provider.allVisitors
+                      .firstWhere((v) => v.id == widget.visitorId);
+                } catch (_) {
+                  // Fallback to checking pending
                    final pending = provider.getPendingApprovals();
-                    visitor = pending.cast<Visitor?>().firstWhere((v) => v?.id == widget.visitorId, orElse: () => null);
+                    try {
+                      visitor = pending.firstWhere((v) => v.id == widget.visitorId);
+                    } catch (_) {
+                      visitor = null;
+                    }
                 }
 
                 if (visitor == null) {
@@ -100,17 +104,18 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
     );
   }
 
-  void _mapGuardData(VisitorEntry entry) {
+  void _mapGuardData(Visitor entry) {
     _id = entry.id;
     _name = entry.name;
-    _status = entry.status;
+    _status = entry.statusString; // Use statusString for string comparison/display
     _type = entry.purpose;
     _time = entry.time;
     _flatNumber = entry.flatNumber;
     _guardName = entry.guardName;
+    _profileImage = entry.photoPath; // Assuming photoPath is used as profile image
   }
 
-  void _mapResidentData(Visitor visitor) {
+  void _mapResidentData(ResidentVisitor visitor) {
     _id = visitor.id;
     _name = visitor.name;
     _status = visitor.status;
@@ -122,8 +127,8 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
   Widget _buildContent(BuildContext context, ThemeData theme, List<dynamic> allHistory) {
     // Filter history for this visitor (by name)
     final history = allHistory.where((v) {
-      if (v is VisitorEntry) return v.name == _name && v.id != _id;
       if (v is Visitor) return v.name == _name && v.id != _id;
+      if (v is ResidentVisitor) return v.name == _name && v.id != _id;
       return false;
     }).toList();
 
@@ -149,7 +154,12 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
                       ),
                       image: _profileImage != null
                           ? DecorationImage(
-                              image: NetworkImage(_profileImage!),
+                              image: _profileImage!.startsWith('http')
+                                  ? NetworkImage(_profileImage!) as ImageProvider
+                                  : ResizeImage(
+                                      FileImage(File(_profileImage!)),
+                                      width: 300, // PERF: Resize for profile display
+                                    ),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -193,7 +203,9 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
                   _buildInfoRow(
                     theme,
                     'Purpose',
-                    _type.replaceFirst(_type[0], _type[0].toUpperCase()),
+                    _type.isNotEmpty
+                        ? _type.replaceFirst(_type[0], _type[0].toUpperCase())
+                        : _type,
                   ),
                   const Divider(height: 24),
                   _buildInfoRow(
@@ -249,8 +261,8 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
               Text('Visit History', style: theme.textTheme.titleMedium),
               const SizedBox(height: 16),
               ...history.map((h) {
-                final date = h is VisitorEntry ? h.time : (h as Visitor).date;
-                final status = h is VisitorEntry ? h.status : (h as Visitor).status;
+                final date = h is Visitor ? h.time : (h as ResidentVisitor).date;
+                final status = h is Visitor ? h.statusString : (h as ResidentVisitor).status;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
