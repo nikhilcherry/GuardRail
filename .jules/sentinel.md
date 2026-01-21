@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2024-10-25 - Insecure Random Number Generation
+**Vulnerability:** The application was using `Random()` to generate `flatId` and `guardId`.
+**Learning:** `Random()` is a pseudo-random number generator (PRNG) that is not cryptographically secure. Predictable IDs can potentially lead to enumeration attacks or unauthorized resource access.
+**Prevention:** Use `Random.secure()` for generating IDs, tokens, or any security-sensitive values to ensure they are unpredictable.
