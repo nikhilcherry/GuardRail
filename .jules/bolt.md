@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-25 - High Memory Usage with FileImage
+
+**Learning:** Loading full-resolution images from the camera (12MP+) into small thumbnails (e.g., 48x48) causes massive memory spikes because the entire image is decoded into the ImageCache at native resolution.
+
+**Action:** Wrap `FileImage` with `ResizeImage(provider, width: targetWidth)` to decode the image at the specific display size. This drastically reduces memory usage (e.g., from ~36MB to ~100KB per image).
