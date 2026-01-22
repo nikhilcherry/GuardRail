@@ -371,7 +371,11 @@ class _EntryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 image: entry.photoPath != null
                     ? DecorationImage(
-                        image: FileImage(File(entry.photoPath!)),
+                      // PERF: Resize image to reduce memory usage (48px * 3 = ~150px)
+                      image: ResizeImage(
+                        FileImage(File(entry.photoPath!)),
+                        width: 150,
+                      ),
                         fit: BoxFit.cover,
                       )
                     : null,
