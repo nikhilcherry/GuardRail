@@ -55,6 +55,7 @@ class _ContactSupportDialogState extends State<ContactSupportDialog> {
               TextField(
                 controller: _issueController,
                 maxLines: 4,
+                maxLength: 1000, // SECURITY: Prevent DoS via unbounded input
                 decoration: InputDecoration(
                   labelText: 'Describe your issue',
                   alignLabelWithHint: true,
