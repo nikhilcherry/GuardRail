@@ -99,7 +99,11 @@ class _VisitorDialogState extends State<VisitorDialog> {
                     border: Border.all(color: theme.dividerColor),
                     image: _imageFile != null
                         ? DecorationImage(
-                            image: FileImage(File(_imageFile!.path)),
+                            // PERF: Downsample image to reduce memory usage
+                            image: ResizeImage(
+                              FileImage(File(_imageFile!.path)),
+                              width: 300,
+                            ),
                             fit: BoxFit.cover,
                           )
                         : null,

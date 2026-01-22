@@ -30,3 +30,9 @@
 **Learning:** `TableCalendar`'s `eventLoader` callback is invoked for every visible day (M ~ 42) on every rebuild. Providing a function that filters the full list (O(N)) results in O(N*M) complexity, causing severe lag during scrolling or selection.
 
 **Action:** Pre-calculate a `Map<DateTime, List<Event>>` (grouping events by date) whenever the data source changes. This allows the `eventLoader` to perform O(1) lookups, reducing overall complexity to O(N + M).
+
+## 2024-05-26 - Large Image Decoding in Lists
+
+**Learning:** Using `FileImage` (or `NetworkImage`) without explicit resizing loads the image at full resolution. When displayed in small thumbnails (e.g., 48x48) within a `ListView`, this causes massive memory spikes and jank during scrolling, as the engine decodes megapixels of data for every item.
+
+**Action:** Wrap image providers in `ResizeImage` (e.g., `ResizeImage(FileImage(file), width: 150)`) when displaying thumbnails. This ensures the engine only decodes the image to the specified cache dimensions, significantly reducing memory usage and decoding time.
