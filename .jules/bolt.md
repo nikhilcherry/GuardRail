@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-25 - Type Safety in Performance Refactoring
+
+**Learning:** When refactoring expensive logic from `build()` to a Provider (e.g. caching a map), implicit type assumptions in the UI (like iterating over a `List` without explicit types) can be exposed. In this case, `TableCalendar<Visitor>` was used with `List<ResidentVisitor>`, which caused build errors when the logic was moved and typed explicitly.
+
+**Action:** Always verify that the data model types in the Provider match the expected types in the UI widgets *before* moving logic, to avoid cascading type errors during optimization.
