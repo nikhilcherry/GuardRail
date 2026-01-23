@@ -5,10 +5,13 @@ import '../services/logger_service.dart';
 
 class VisitorRepository {
   static final VisitorRepository _instance = VisitorRepository._internal();
-  factory VisitorRepository() => _instance;
+  static VisitorRepository? _mockInstance;
+  static set mockInstance(VisitorRepository? mock) => _mockInstance = mock;
+
+  factory VisitorRepository() => _mockInstance ?? _instance;
   VisitorRepository._internal();
 
-  final FirestoreService _firestoreService = FirestoreService();
+  late final FirestoreService _firestoreService = FirestoreService();
   final List<Visitor> _visitors = [];
   final _controller = StreamController<List<Visitor>>.broadcast();
   StreamSubscription? _firestoreSubscription;
