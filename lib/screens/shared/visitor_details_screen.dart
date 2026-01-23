@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
+import '../../models/visitor.dart';
 import '../../providers/guard_provider.dart';
 import '../../providers/resident_provider.dart';
 import '../../widgets/visitor_dialog.dart';
@@ -77,14 +78,14 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
               try {
                 // Check pending first, then all visitors
                 var visitor = provider.allVisitors
-                    .cast<Visitor?>()
+                    .cast<ResidentVisitor?>()
                     .firstWhere((v) => v?.id == widget.visitorId,
                         orElse: () => null);
 
                 if (visitor == null) {
                    // Fallback to checking pending specifically if not in allVisitors (though it should be)
                    final pending = provider.getPendingApprovals();
-                    visitor = pending.cast<Visitor?>().firstWhere((v) => v?.id == widget.visitorId, orElse: () => null);
+                    visitor = pending.cast<ResidentVisitor?>().firstWhere((v) => v?.id == widget.visitorId, orElse: () => null);
                 }
 
                 if (visitor == null) {
@@ -100,17 +101,17 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
     );
   }
 
-  void _mapGuardData(VisitorEntry entry) {
+  void _mapGuardData(Visitor entry) {
     _id = entry.id;
     _name = entry.name;
-    _status = entry.status;
+    _status = entry.status.name;
     _type = entry.purpose;
     _time = entry.time;
     _flatNumber = entry.flatNumber;
     _guardName = entry.guardName;
   }
 
-  void _mapResidentData(Visitor visitor) {
+  void _mapResidentData(ResidentVisitor visitor) {
     _id = visitor.id;
     _name = visitor.name;
     _status = visitor.status;
@@ -122,8 +123,8 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
   Widget _buildContent(BuildContext context, ThemeData theme, List<dynamic> allHistory) {
     // Filter history for this visitor (by name)
     final history = allHistory.where((v) {
-      if (v is VisitorEntry) return v.name == _name && v.id != _id;
       if (v is Visitor) return v.name == _name && v.id != _id;
+      if (v is ResidentVisitor) return v.name == _name && v.id != _id;
       return false;
     }).toList();
 
@@ -249,8 +250,8 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
               Text('Visit History', style: theme.textTheme.titleMedium),
               const SizedBox(height: 16),
               ...history.map((h) {
-                final date = h is VisitorEntry ? h.time : (h as Visitor).date;
-                final status = h is VisitorEntry ? h.status : (h as Visitor).status;
+                final date = h is Visitor ? h.time : (h as ResidentVisitor).date;
+                final status = h is Visitor ? h.status.name : (h as ResidentVisitor).status;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
