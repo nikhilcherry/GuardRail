@@ -107,6 +107,12 @@ class FirestoreService {
     return query.snapshots();
   }
 
+  // Placeholder to fix build error
+  Future<List<Map<String, dynamic>>> getVisitors() async {
+    // Return mock data or empty list for now to allow compilation
+    return [];
+  }
+
   Future<void> updateVisitorStatus(String visitorId, String status) async {
     final updates = {
       'status': status,

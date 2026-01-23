@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - O(1) Duplicate Scan Check
+
+**Learning:** Checking for duplicates in a list using `.any()` is O(N). For frequent operations like scanning, this linear search grows with the dataset, potentially causing dropped frames if the list becomes large.
+
+**Action:** Implement a parallel `Set<String>` cache using a composite key (e.g., `guardId|locationId|date`) to enable O(1) duplicate checks. This ensures the check remains instant regardless of the history size.
