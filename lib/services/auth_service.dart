@@ -1,12 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
 
 /// Authentication service using Firebase Auth.
 class AuthService {
-  final _storage = const FlutterSecureStorage();
   final _localAuth = LocalAuthentication();
   
   // Use getter to avoid initialization before Firebase.initializeApp()
@@ -43,6 +41,7 @@ class AuthService {
   }
 
   /// Register with email and password using Firebase Auth
+  // SECURITY: Input validation is handled by Firebase Auth and Firestore rules
   Future<Map<String, dynamic>> register({
     required String name,
     required String email,
@@ -95,33 +94,6 @@ class AuthService {
   /// Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     await _firebaseAuth.sendPasswordResetEmail(email: email);
-  }
-
-  /// Sign out
-  Future<void> signOut() async {
-    await _firebaseAuth.signOut();
-    await deleteToken();
-  }
-
-  /// Save auth token to secure storage
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: 'auth_token', value: token);
-  }
-
-  /// Get auth token from secure storage
-  Future<String?> getToken() async {
-    // First check if user is signed in with Firebase
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      return await user.getIdToken();
-    }
-    // Fallback to stored token
-    return await _storage.read(key: 'auth_token');
-  }
-
-  /// Delete auth token from secure storage
-  Future<void> deleteToken() async {
-    await _storage.delete(key: 'auth_token');
   }
 
   // Biometrics

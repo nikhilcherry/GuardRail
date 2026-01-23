@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2025-05-21 - Insecure Manual Token Storage
+**Vulnerability:** `AuthService` was manually storing the Firebase ID token in `FlutterSecureStorage` and retrieving it via `getToken`. If `FirebaseAuth.currentUser` was null, `getToken` would return this potentially expired or revoked token, which could be used to impersonate the user.
+**Learning:** Developers often mistakenly believe they need to manually persist tokens when using Firebase Auth, not realizing the SDK handles this securely. This creates a dual-state-of-truth where the SDK might say "logged out" but the local storage says "logged in".
+**Prevention:** Rely exclusively on the authentication provider's SDK (e.g., `FirebaseAuth.instance.currentUser`) for session state and token retrieval (`user.getIdToken()`). Do not duplicate token storage manually unless strictly necessary.
