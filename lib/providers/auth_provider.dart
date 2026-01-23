@@ -110,11 +110,6 @@ class AuthProvider extends ChangeNotifier {
       _selectedRole = response['role'];
       _isVerified = response['isVerified'] ?? true;
       
-      // Save token
-      if (response['token'] != null) {
-        await _authService.saveToken(response['token']);
-      }
-      
       // Save to local storage
       await _repository.saveLoginStatus(
         isLoggedIn: true,
@@ -176,11 +171,6 @@ class AuthProvider extends ChangeNotifier {
       _userPhone = phone;
       _selectedRole = role;
       _isVerified = false; // New users need verification
-
-      // Save token
-      if (response['token'] != null) {
-        await _authService.saveToken(response['token']);
-      }
 
       // Save to local storage
       await _repository.saveLoginStatus(
@@ -339,7 +329,6 @@ class AuthProvider extends ChangeNotifier {
     _isVerified = false;
     _hasSociety = false;
 
-    await _authService.deleteToken();
     await _repository.clearAuth();
 
     notifyListeners();
