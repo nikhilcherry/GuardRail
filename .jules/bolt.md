@@ -36,3 +36,14 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - Expensive List Grouping in Build
+
+**Learning:** `ResidentVisitorsScreen` was performing an O(N) iteration over `allVisitors` inside the `build` method to group them by date for `TableCalendar`. This happens on every rebuild (e.g., date selection), causing unnecessary CPU cycles.
+
+**Action:**
+1. Moved the grouping logic to `ResidentProvider` as `groupedVisitors`.
+2. Cached the result in `_cachedGroupedVisitors`.
+3. Exposed a getter that returns the cached map or computes it once.
+4. Invalidated the cache when visitor data changes.
+5. Updated UI to consume `residentProvider.groupedVisitors` directly, making `build` O(1) in terms of visitor processing.

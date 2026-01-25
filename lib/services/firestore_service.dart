@@ -120,6 +120,11 @@ class FirestoreService {
     await visitorsCollection.doc(visitorId).update(updates);
   }
 
+  // Placeholder to satisfy VisitorRepository compilation
+  Future<List<Map<String, dynamic>>> getVisitors() async {
+    return [];
+  }
+
   // ==================== SOCIETY OPERATIONS ====================
 
   Future<String> createSociety({
