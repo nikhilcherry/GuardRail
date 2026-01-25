@@ -107,6 +107,15 @@ class FirestoreService {
     return query.snapshots();
   }
 
+  Future<List<Map<String, dynamic>>> getVisitors() async {
+    final snapshot = await visitorsCollection.orderBy('arrivalTime', descending: true).get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+  }
+
   Future<void> updateVisitorStatus(String visitorId, String status) async {
     final updates = {
       'status': status,
