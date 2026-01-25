@@ -190,7 +190,7 @@ class AuthProvider extends ChangeNotifier {
         phone: phone,
         name: name,
         isVerified: false,
-        societyId: residenceId,
+        flatId: residenceId,
       );
 
       // If residence ID provided, try to join flat
