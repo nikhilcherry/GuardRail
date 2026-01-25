@@ -6,7 +6,11 @@ import '../services/logger_service.dart';
 
 /// Authentication service using Firebase Auth.
 class AuthService {
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
+  );
   final _localAuth = LocalAuthentication();
   
   // Use getter to avoid initialization before Firebase.initializeApp()
