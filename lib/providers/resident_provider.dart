@@ -46,6 +46,9 @@ class ResidentProvider extends ChangeNotifier {
   // Cache for all visitors to avoid O(N log N) sorting on every build
   List<ResidentVisitor>? _cachedAllVisitors;
 
+  // Cache for grouped visitors to avoid O(N) grouping on every build
+  Map<DateTime, List<ResidentVisitor>>? _cachedGroupedVisitors;
+
   final List<ResidentVisitor> _pastVisitors = [];
 
   final List<PreApprovedVisitor> _preApprovedVisitors = [];
@@ -71,6 +74,34 @@ class ResidentProvider extends ChangeNotifier {
       ..sort((a, b) => b.date.compareTo(a.date));
     return _cachedAllVisitors!;
   }
+
+  // Optimized grouped visitors for calendar
+  Map<DateTime, List<ResidentVisitor>> get groupedVisitors {
+    if (_cachedGroupedVisitors != null) {
+      return _cachedGroupedVisitors!;
+    }
+
+    _cachedGroupedVisitors = {};
+    // Use allVisitors which is already sorted
+    for (final v in allVisitors) {
+      final date = DateTime.utc(v.date.year, v.date.month, v.date.day);
+      if (_cachedGroupedVisitors![date] == null) {
+        _cachedGroupedVisitors![date] = [];
+      }
+      _cachedGroupedVisitors![date]!.add(v);
+    }
+    return _cachedGroupedVisitors!;
+  }
+
+  @visibleForTesting
+  void setVisitorsForTest(List<ResidentVisitor> visitors) {
+    _todaysVisitors.clear();
+    _todaysVisitors.addAll(visitors);
+    _cachedPendingApprovals = null;
+    _cachedAllVisitors = null;
+    _cachedGroupedVisitors = null;
+    notifyListeners();
+  }
   
   String get residentName => _residentName;
   String get flatNumber => _flatNumber;
@@ -81,10 +112,10 @@ class ResidentProvider extends ChangeNotifier {
   int get pendingRequests => _pendingRequests;
   bool get isLoading => _isLoading;
 
-  ResidentProvider() {
+  ResidentProvider({VisitorRepository? visitorRepository}) {
     _loadData();
     // Listen to shared repository updates
-    VisitorRepository().visitorStream.listen((updatedVisitors) {
+    (visitorRepository ?? VisitorRepository()).visitorStream.listen((updatedVisitors) {
       _todaysVisitors.clear();
       for (var v in updatedVisitors) {
         _todaysVisitors.add(ResidentVisitor(
@@ -98,6 +129,7 @@ class ResidentProvider extends ChangeNotifier {
       _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
       _cachedPendingApprovals = null;
       _cachedAllVisitors = null;
+      _cachedGroupedVisitors = null;
        notifyListeners();
     });
   }
