@@ -226,15 +226,13 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Row(
       children: [
         // Manual Registration
         Expanded(
-          child: _actionCard(
-            context,
+          child: _ActionCard(
             icon: Icons.person_add_outlined,
             label: l10n.registerVisitorMultiline,
             onTap: () => showDialog(
@@ -246,8 +244,7 @@ class _QuickActions extends StatelessWidget {
         const SizedBox(width: 16),
         // QR Scanning
         Expanded(
-          child: _actionCard(
-            context,
+          child: _ActionCard(
             icon: Icons.qr_code_scanner,
             label: l10n.scanVisitorQRMultiline,
             onTap: () => Navigator.push(
@@ -259,10 +256,23 @@ class _QuickActions extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _actionCard(BuildContext context,
-      {required IconData icon, required String label, required VoidCallback onTap}) {
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // PERF: Extracted widget allows for const optimization and efficient rebuilding
     return InkWell(
       onTap: onTap,
       child: Container(
