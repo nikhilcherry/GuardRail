@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-25 - Widget Extraction vs Helper Methods
+
+**Learning:** Using helper methods (e.g., `_buildCard()`) to return widgets prevents the framework from optimizing rebuilds and caching the element tree effectively. It also couples the helper to the parent's `BuildContext`.
+
+**Action:** Extract such helpers into separate `StatelessWidget` or `StatefulWidget` classes. This enables the use of `const` constructors, allows for finer-grained rebuilds, and follows Flutter's performance best practices.
