@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2024-10-24 - Hardcoded Secrets in Unused Configuration Files
+**Vulnerability:** `lib/firebase_config.dart` contained hardcoded Firebase API keys and App IDs, despite the project using `google-services.json`. The file was unused but committed to the repository.
+**Learning:** Unused or "backup" configuration files are often overlooked during security reviews but can leak sensitive credentials if the repository is exposed.
+**Prevention:** Use `.gitignore` to exclude all configuration files containing secrets. Regularly audit the codebase for unused files and remove them. Use environment variables or secure vault injection for CI/CD instead of checking in config files.
