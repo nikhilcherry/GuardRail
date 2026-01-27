@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - Virtualizing Mixed Content Lists
+
+**Learning:** Using `SingleChildScrollView` + `Column` for a screen that contains a dynamic list (even if below static content) prevents virtualization. All list items are built and kept in memory, regardless of visibility. For long lists (e.g., visitor history), this causes massive startup lag and memory usage.
+
+**Action:** Replace `SingleChildScrollView` + `Column` with `CustomScrollView`. Use `SliverToBoxAdapter` for static headers/footers and `SliverList` (or `SliverFixedExtentList`) for the dynamic content. This enables true virtualization for the list part while maintaining the scrolling behavior of a single page.
