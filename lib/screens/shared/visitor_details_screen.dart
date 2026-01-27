@@ -128,222 +128,266 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
       return false;
     }).toList();
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Header
-            Center(
+    return CustomScrollView(
+      slivers: [
+        // Header
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          sliver: SliverToBoxAdapter(
+            child: _buildHeader(theme),
+          ),
+        ),
+
+        // History
+        if (history.isNotEmpty) ...[
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverToBoxAdapter(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.dividerColor,
-                        width: 2,
-                      ),
-                      image: _profileImage != null
-                          ? DecorationImage(
-                              image: NetworkImage(_profileImage!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: _profileImage == null
-                        ? Icon(
-                            Icons.person,
-                            size: 50,
-                            color: theme.disabledColor,
-                          )
-                        : null,
-                  ),
+                  Text('Visit History', style: theme.textTheme.titleMedium),
                   const SizedBox(height: 16),
-                  Text(
-                    _name,
-                    style: theme.textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildStatusBadge(theme),
                 ],
               ),
             ),
-            const SizedBox(height: 32),
-
-            // Info Grid
-            Text('Details', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.dividerColor),
-              ),
-              child: Column(
-                children: [
-                  if (_flatNumber != null) ...[
-                    _buildInfoRow(theme, 'Flat Number', _flatNumber!),
-                    const Divider(height: 24),
-                  ],
-                  _buildInfoRow(
-                    theme,
-                    'Purpose',
-                    _type.replaceFirst(_type[0], _type[0].toUpperCase()),
-                  ),
-                  const Divider(height: 24),
-                  _buildInfoRow(
-                    theme,
-                    'Entry Time',
-                    DateFormat('MMM d, y • h:mm a').format(_time),
-                  ),
-                  if (_guardName != null) ...[
-                    const Divider(height: 24),
-                    _buildInfoRow(theme, 'Checked in by', _guardName!),
-                  ],
-                ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final h = history[index];
+                  // PERF: Virtualized list item building
+                  return _buildHistoryItem(theme, h);
+                },
+                childCount: history.length,
               ),
             ),
+          ),
+        ],
 
-            const SizedBox(height: 32),
+        // Footer / Actions
+        SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverToBoxAdapter(
+            child: _buildFooter(theme),
+          ),
+        ),
+      ],
+    );
+  }
 
-            // Timeline (Simplified)
-            Text('Timeline', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.dividerColor),
-              ),
-              child: Column(
-                children: [
-                   _buildTimelineItem(
-                    theme,
-                    title: 'Checked In',
-                    time: _time,
-                    isLast: _status != 'approved' && _status != 'rejected',
-                    isActive: true,
+  Widget _buildHeader(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Profile Header
+        Center(
+          child: Column(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.dividerColor,
+                    width: 2,
                   ),
-                  if (_status == 'approved' || _status == 'rejected')
-                    _buildTimelineItem(
-                      theme,
-                      title: _status == 'approved' ? 'Approved' : 'Rejected',
-                      time: _time.add(const Duration(minutes: 5)), // Mock delay
-                      isLast: true,
-                      isActive: true,
-                    ),
-                ],
+                  image: _profileImage != null
+                      ? DecorationImage(
+                          image: NetworkImage(_profileImage!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: _profileImage == null
+                    ? Icon(
+                        Icons.person,
+                        size: 50,
+                        color: theme.disabledColor,
+                      )
+                    : null,
               ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // History
-            if (history.isNotEmpty) ...[
-              Text('Visit History', style: theme.textTheme.titleMedium),
               const SizedBox(height: 16),
-              ...history.map((h) {
-                final date = h is Visitor ? h.time : (h as ResidentVisitor).date;
-                final status = h is Visitor ? h.status.name : (h as ResidentVisitor).status;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.cardColor.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                         DateFormat('MMM d, y • h:mm a').format(date),
-                         style: theme.textTheme.bodyMedium,
-                      ),
-                      Text(
-                        status.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: status == 'approved'
-                              ? AppTheme.successGreen
-                              : (status == 'rejected' ? AppTheme.errorRed : AppTheme.textSecondary),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
-
-            const SizedBox(height: 20),
-
-            // Actions
-            if (widget.source == 'resident' && _status == 'pending')
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.errorRed,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () async {
-                         await context.read<ResidentProvider>().rejectVisitor(_id);
-                         if (context.mounted) context.pop();
-                      },
-                      child: const Text('Reject'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.successGreen,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () async {
-                        await context.read<ResidentProvider>().approveVisitor(_id);
-                        if (context.mounted) context.pop();
-                      },
-                      child: const Text('Approve'),
-                    ),
-                  ),
-                ],
+              Text(
+                _name,
+                style: theme.textTheme.headlineSmall,
               ),
+              const SizedBox(height: 8),
+              _buildStatusBadge(theme),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
 
-            if (widget.source == 'resident' && _status != 'pending')
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Remove from Log'),
-                   style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.errorRed,
-                        side: BorderSide(color: AppTheme.errorRed),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                  onPressed: () {
-                    // Logic to remove would go here
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Feature coming soon')));
+        // Info Grid
+        Text('Details', style: theme.textTheme.titleMedium),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.dividerColor),
+          ),
+          child: Column(
+            children: [
+              if (_flatNumber != null) ...[
+                _buildInfoRow(theme, 'Flat Number', _flatNumber!),
+                const Divider(height: 24),
+              ],
+              _buildInfoRow(
+                theme,
+                'Purpose',
+                _type.replaceFirst(_type[0], _type[0].toUpperCase()),
+              ),
+              const Divider(height: 24),
+              _buildInfoRow(
+                theme,
+                'Entry Time',
+                DateFormat('MMM d, y • h:mm a').format(_time),
+              ),
+              if (_guardName != null) ...[
+                const Divider(height: 24),
+                _buildInfoRow(theme, 'Checked in by', _guardName!),
+              ],
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Timeline (Simplified)
+        Text('Timeline', style: theme.textTheme.titleMedium),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.dividerColor),
+          ),
+          child: Column(
+            children: [
+              _buildTimelineItem(
+                theme,
+                title: 'Checked In',
+                time: _time,
+                isLast: _status != 'approved' && _status != 'rejected',
+                isActive: true,
+              ),
+              if (_status == 'approved' || _status == 'rejected')
+                _buildTimelineItem(
+                  theme,
+                  title: _status == 'approved' ? 'Approved' : 'Rejected',
+                  time: _time.add(const Duration(minutes: 5)), // Mock delay
+                  isLast: true,
+                  isActive: true,
+                ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  Widget _buildHistoryItem(ThemeData theme, dynamic h) {
+    final date = h is Visitor ? h.time : (h as ResidentVisitor).date;
+    final status = h is Visitor ? h.status.name : (h as ResidentVisitor).status;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            DateFormat('MMM d, y • h:mm a').format(date),
+            style: theme.textTheme.bodyMedium,
+          ),
+          Text(
+            status.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: status == 'approved'
+                  ? AppTheme.successGreen
+                  : (status == 'rejected' ? AppTheme.errorRed : AppTheme.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(ThemeData theme) {
+    return Column(
+      children: [
+        if (widget.source == 'resident' && _status == 'pending')
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.errorRed,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    await context.read<ResidentProvider>().rejectVisitor(_id);
+                    if (context.mounted) context.pop();
                   },
+                  child: const Text('Reject'),
                 ),
               ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.successGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    await context.read<ResidentProvider>().approveVisitor(_id);
+                    if (context.mounted) context.pop();
+                  },
+                  child: const Text('Approve'),
+                ),
+              ),
+            ],
+          ),
 
-             const SizedBox(height: 40),
-          ],
-        ),
-      ),
+        if (widget.source == 'resident' && _status != 'pending')
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Remove from Log'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.errorRed,
+                side: BorderSide(color: AppTheme.errorRed),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                // Logic to remove would go here
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Feature coming soon')));
+              },
+            ),
+          ),
+
+        const SizedBox(height: 40),
+      ],
     );
   }
 
