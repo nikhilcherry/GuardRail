@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - Hidden Type Mismatches in Generic Widgets
+
+**Learning:** Using implicit typing in generic widgets (like `TableCalendar<Visitor>`) can mask underlying type mismatches (e.g., passing `ResidentVisitor` to it). This often surfaces only during refactoring or optimization when types become explicit.
+
+**Action:** Always verify the type of data being passed to generic widgets matches the declared generic type. Explicitly define types in collections (e.g., `final events = <DateTime, List<SpecificType>>{}`) to catch mismatches early.
