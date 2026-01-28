@@ -259,7 +259,7 @@ class FlatRepository {
 
   String _generateFlatId() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
+    final rnd = Random.secure();
     return String.fromCharCodes(Iterable.generate(
         6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
   }

@@ -119,7 +119,7 @@ class GuardRepository {
   /// Generate a unique ID (Mixed case + numbers)
   String _generateGuardId() {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
+    final rnd = Random.secure();
     String id;
     do {
       final code = String.fromCharCodes(Iterable.generate(
