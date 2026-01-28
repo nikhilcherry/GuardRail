@@ -35,4 +35,6 @@
 
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
-**Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+## 2024-05-22 - Move Expense Grouping Logic to Provider
+**Learning:** Performing O(N) grouping logic inside `build()` methods (e.g. `ResidentVisitorsScreen`) causes unnecessary re-computation on every frame, even when data hasn't changed.
+**Action:** Move such logic to the Provider (e.g. `ResidentProvider`) and cache the result using a memoized getter or `_cached` variable invalidated on data updates. This ensures the computation only runs when data changes.
