@@ -138,13 +138,4 @@ class VisitorRepository {
     }
   }
 
-  /// Load visitors from Firestore (one-time fetch)
-  Future<void> loadVisitors() async {
-    final data = await _firestoreService.getVisitors();
-    _visitors.clear();
-    for (var item in data) {
-      _visitors.add(Visitor.fromFirestore(item, item['id']));
-    }
-    _controller.add(List.from(_visitors));
-  }
 }

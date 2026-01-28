@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/logger_service.dart';
@@ -150,7 +151,10 @@ class FirestoreService {
   }
 
   String _generateShortId(int length) {
-    final r = DateTime.now().millisecondsSinceEpoch % 1000000;
-    return 'SR${r.toString().padLeft(6, '0')}';
+    const chars = '0123456789';
+    final rnd = Random.secure();
+    return 'SR${String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
+    ))}';
   }
 }
