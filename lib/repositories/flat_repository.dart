@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/security_utils.dart';
 import '../models/flat.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
@@ -258,9 +259,9 @@ class FlatRepository {
   }
 
   String _generateFlatId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+    return SecurityUtils.generateId(
+      length: 6,
+      chars: SecurityUtils.uppercaseAlphanumeric,
+    );
   }
 }

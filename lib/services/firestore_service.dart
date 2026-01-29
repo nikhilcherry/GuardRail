@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/logger_service.dart';
+import '../utils/security_utils.dart';
 
 /// Central Firestore service for all database operations.
 class FirestoreService {
@@ -150,7 +151,11 @@ class FirestoreService {
   }
 
   String _generateShortId(int length) {
-    final r = DateTime.now().millisecondsSinceEpoch % 1000000;
-    return 'SR${r.toString().padLeft(6, '0')}';
+    // SECURITY: Use cryptographically secure RNG instead of time-based
+    return SecurityUtils.generateId(
+      length: 6,
+      chars: SecurityUtils.digits,
+      prefix: 'SR'
+    );
   }
 }
