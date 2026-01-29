@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/security_utils.dart';
 import '../models/guard.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
@@ -118,13 +119,12 @@ class GuardRepository {
 
   /// Generate a unique ID (Mixed case + numbers)
   String _generateGuardId() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
     String id;
     do {
-      final code = String.fromCharCodes(Iterable.generate(
-          6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-      id = code;
+      id = SecurityUtils.generateId(
+        length: 6,
+        chars: SecurityUtils.alphanumeric,
+      );
     } while (_guards.any((g) => g.id == id || g.guardId == id));
     return id;
   }
