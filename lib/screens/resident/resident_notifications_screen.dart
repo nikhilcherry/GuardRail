@@ -82,7 +82,7 @@ class ResidentNotificationsScreen extends StatelessWidget {
 }
 
 class _NotificationCard extends StatelessWidget {
-  final Visitor visitor;
+  final ResidentVisitor visitor;
   final VoidCallback onApprove;
   final VoidCallback onReject;
 
