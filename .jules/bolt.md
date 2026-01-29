@@ -36,3 +36,7 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-22 - Expensive grouping in build method
+**Learning:** `ResidentVisitorsScreen` was grouping visitors by date inside the `build` method using an O(N) loop. This runs on every rebuild (e.g. date selection), which is wasteful for large lists.
+**Action:** Moved grouping logic to `ResidentProvider` and cached the result using a memoized getter `groupedVisitors`, reducing the build complexity to O(1) lookup.
