@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-27 - O(N) Grouping in Build Method
+
+**Learning:** Performing data transformation (like grouping a list into a map) inside the `build` method runs on every frame/rebuild. For lists that grow over time, this becomes a significant bottleneck.
+
+**Action:** Move transformation logic to the Provider (or ViewModel) and cache the result. Invalidate the cache only when the source data changes. Use the cached data in the `build` method for O(1) access.
