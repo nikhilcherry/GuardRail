@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/resident_provider.dart';
+import '../../models/visitor.dart';
 
 class ResidentVisitorsScreen extends StatefulWidget {
   const ResidentVisitorsScreen({super.key});
@@ -38,15 +39,8 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
       body: SafeArea(
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
-            final allVisitors = residentProvider.allVisitors;
-
-            // PERF: Group visitors by date (Map) to avoid O(N*M) lookup in eventLoader
-            final events = <DateTime, List<Visitor>>{};
-            for (final v in allVisitors) {
-              final date = DateTime.utc(v.date.year, v.date.month, v.date.day);
-              if (events[date] == null) events[date] = [];
-              events[date]!.add(v);
-            }
+            // PERF: Use cached grouped visitors from provider to avoid O(N) grouping in build
+            final events = residentProvider.groupedVisitors;
 
             final selectedDateKey = DateTime.utc(
               _selectedDay!.year,
@@ -164,10 +158,18 @@ class _VisitorListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeLabel = visitor.type[0].toUpperCase() + visitor.type.substring(1);
-    final statusLabel =
-        visitor.status[0].toUpperCase() + visitor.status.substring(1);
-    final timeLabel = _timeFormatter.format(visitor.date);
+    // Visitor model uses 'purpose' instead of 'type'
+    final typeLabel = visitor.purpose.isNotEmpty
+      ? visitor.purpose[0].toUpperCase() + visitor.purpose.substring(1)
+      : 'Unknown';
+
+    // Visitor model has statusString helper
+    final statusLabel = visitor.statusString.isNotEmpty
+        ? visitor.statusString[0].toUpperCase() + visitor.statusString.substring(1)
+        : 'Unknown';
+
+    // Visitor model uses 'time' instead of 'date'
+    final timeLabel = _timeFormatter.format(visitor.time);
 
     return Container(
       padding: const EdgeInsets.all(16),

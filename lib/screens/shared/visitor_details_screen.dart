@@ -78,14 +78,14 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
               try {
                 // Check pending first, then all visitors
                 var visitor = provider.allVisitors
-                    .cast<ResidentVisitor?>()
+                    .cast<Visitor?>()
                     .firstWhere((v) => v?.id == widget.visitorId,
                         orElse: () => null);
 
                 if (visitor == null) {
                    // Fallback to checking pending specifically if not in allVisitors (though it should be)
                    final pending = provider.getPendingApprovals();
-                    visitor = pending.cast<ResidentVisitor?>().firstWhere((v) => v?.id == widget.visitorId, orElse: () => null);
+                    visitor = pending.cast<Visitor?>().firstWhere((v) => v?.id == widget.visitorId, orElse: () => null);
                 }
 
                 if (visitor == null) {
@@ -104,28 +104,26 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
   void _mapGuardData(Visitor entry) {
     _id = entry.id;
     _name = entry.name;
-    _status = entry.status.name;
+    _status = entry.statusString;
     _type = entry.purpose;
     _time = entry.time;
     _flatNumber = entry.flatNumber;
     _guardName = entry.guardName;
   }
 
-  void _mapResidentData(ResidentVisitor visitor) {
+  void _mapResidentData(Visitor visitor) {
     _id = visitor.id;
     _name = visitor.name;
-    _status = visitor.status;
-    _type = visitor.type;
-    _time = visitor.date;
-    _profileImage = visitor.profileImage;
+    _status = visitor.statusString;
+    _type = visitor.purpose;
+    _time = visitor.time;
+    _profileImage = visitor.photoPath;
   }
 
-  Widget _buildContent(BuildContext context, ThemeData theme, List<dynamic> allHistory) {
+  Widget _buildContent(BuildContext context, ThemeData theme, List<Visitor> allHistory) {
     // Filter history for this visitor (by name)
     final history = allHistory.where((v) {
-      if (v is Visitor) return v.name == _name && v.id != _id;
-      if (v is ResidentVisitor) return v.name == _name && v.id != _id;
-      return false;
+      return v.name == _name && v.id != _id;
     }).toList();
 
     return SingleChildScrollView(
@@ -194,7 +192,7 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
                   _buildInfoRow(
                     theme,
                     'Purpose',
-                    _type.replaceFirst(_type[0], _type[0].toUpperCase()),
+                    _type.isNotEmpty ? _type.replaceFirst(_type[0], _type[0].toUpperCase()) : 'Unknown',
                   ),
                   const Divider(height: 24),
                   _buildInfoRow(
@@ -250,15 +248,15 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
               Text('Visit History', style: theme.textTheme.titleMedium),
               const SizedBox(height: 16),
               ...history.map((h) {
-                final date = h is Visitor ? h.time : (h as ResidentVisitor).date;
-                final status = h is Visitor ? h.status.name : (h as ResidentVisitor).status;
+                final date = h.time;
+                final status = h.statusString;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: theme.cardColor.withOpacity(0.5),
+                    color: theme.cardColor.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -368,9 +366,9 @@ class _VisitorDetailsScreenState extends State<VisitorDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

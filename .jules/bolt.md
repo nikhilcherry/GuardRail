@@ -36,3 +36,12 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-25 - Removing Redundant Models and Caching
+
+**Learning:** Duplicate models (e.g., `ResidentVisitor` wrapping `Visitor`) cause unnecessary O(N) object allocation loops during data updates. Additionally, logic like grouping events by date inside `build()` methods (for `TableCalendar`) causes O(N) recalculations on every rebuild.
+
+**Action:**
+1.  Standardize on a single shared model (`Visitor`).
+2.  Move expensive grouping/filtering logic to the Provider (e.g., `groupedVisitors`).
+3.  Memoize the result in the Provider and only invalidate it when the underlying data changes.

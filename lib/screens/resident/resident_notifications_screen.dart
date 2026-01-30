@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/resident_provider.dart';
+import '../../models/visitor.dart';
 
 class ResidentNotificationsScreen extends StatelessWidget {
   const ResidentNotificationsScreen({Key? key}) : super(key: key);
@@ -98,7 +99,7 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final timeLabel = _timeFormatter.format(visitor.date);
+    final timeLabel = _timeFormatter.format(visitor.time);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -123,7 +124,7 @@ class _NotificationCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -148,7 +149,7 @@ class _NotificationCard extends StatelessWidget {
                       style: theme.textTheme.titleMedium,
                     ),
                     Text(
-                      '${visitor.type.toUpperCase()} • $timeLabel',
+                      '${visitor.purpose.toUpperCase()} • $timeLabel',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
