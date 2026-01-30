@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/visitor.dart';
 import '../repositories/visitor_repository.dart';
 import '../services/logger_service.dart';
+import '../utils/security_utils.dart';
 
 // Renamed from Visitor to ResidentVisitor to avoid conflict with model
 class ResidentVisitor {
@@ -143,7 +144,10 @@ class ResidentProvider extends ChangeNotifier {
     try {
       await Future.delayed(const Duration(seconds: 1));
       
-      const accessCode = 'ABCD1234';
+      final accessCode = SecurityUtils.generateSecureString(
+        length: 8,
+        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+      );
       
       final preApprovedVisitor = PreApprovedVisitor(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
