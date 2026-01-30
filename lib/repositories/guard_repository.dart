@@ -1,8 +1,8 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/guard.dart';
 import '../services/firestore_service.dart';
 import '../services/logger_service.dart';
+import '../utils/security_utils.dart';
 
 class GuardRepository {
   // Singleton pattern
@@ -118,13 +118,9 @@ class GuardRepository {
 
   /// Generate a unique ID (Mixed case + numbers)
   String _generateGuardId() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
     String id;
     do {
-      final code = String.fromCharCodes(Iterable.generate(
-          6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-      id = code;
+      id = SecurityUtils.generateSecureString(length: 6);
     } while (_guards.any((g) => g.id == id || g.guardId == id));
     return id;
   }
