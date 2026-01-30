@@ -8,6 +8,7 @@ import '../../widgets/coming_soon.dart';
 import '../../providers/resident_provider.dart';
 import '../../providers/flat_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/visitor.dart';
 import 'resident_notifications_screen.dart';
 import '../../widgets/shimmer_list_item.dart';
 import '../../widgets/sos_button.dart';
@@ -522,10 +523,12 @@ class _PendingVisitorCardState extends State<_PendingVisitorCard> with SingleTic
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          widget.visitor.type.replaceFirst(
-                            widget.visitor.type[0],
-                            widget.visitor.type[0].toUpperCase(),
-                          ),
+                          widget.visitor.purpose.isNotEmpty // WAS type
+                            ? widget.visitor.purpose.replaceFirst(
+                                widget.visitor.purpose[0],
+                                widget.visitor.purpose[0].toUpperCase(),
+                              )
+                            : 'Unknown',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary,
                           ),
@@ -629,9 +632,9 @@ class _HistoryCard extends StatelessWidget {
 
   Color _getStatusColor() {
     switch (visitor.status) {
-      case 'approved':
+      case VisitorStatus.approved: // WAS approved string
         return AppTheme.successGreen;
-      case 'rejected':
+      case VisitorStatus.rejected: // WAS rejected string
         return AppTheme.errorRed;
       default:
         return AppTheme.textSecondary;
@@ -639,7 +642,7 @@ class _HistoryCard extends StatelessWidget {
   }
 
   IconData _getTypeIcon() {
-    switch (visitor.type) {
+    switch (visitor.purpose) { // WAS type
       case 'guest':
         return Icons.person;
       case 'delivery':
@@ -688,7 +691,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _timeFormatter.format(visitor.date),
+                  _timeFormatter.format(visitor.time), // WAS date
                   style: theme.textTheme.labelSmall,
                 ),
               ],
@@ -707,10 +710,12 @@ class _HistoryCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              visitor.status.replaceFirst(
-                visitor.status[0],
-                visitor.status[0].toUpperCase(),
-              ),
+              visitor.statusString.isNotEmpty // WAS status
+                ? visitor.statusString.replaceFirst(
+                    visitor.statusString[0],
+                    visitor.statusString[0].toUpperCase(),
+                  )
+                : 'Unknown',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: _getStatusColor(),
                 fontSize: 9,

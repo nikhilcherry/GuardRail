@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guardrail/providers/guard_provider.dart';
 import 'package:guardrail/repositories/visitor_repository.dart';
+import 'package:guardrail/models/visitor.dart';
 
 void main() {
   group('GuardProvider Visitor Registration Tests', () {
@@ -90,7 +91,7 @@ void main() {
     test('Initial entries should have exitTime as null or valid DateTime', () {
       final entries = guardProvider.entries;
       for (var entry in entries) {
-        if (entry.status == 'approved' && entry.exitTime == null) {
+        if (entry.status == VisitorStatus.approved && entry.exitTime == null) {
           // Should be considered inside
           expect(entry.exitTime, isNull);
         }

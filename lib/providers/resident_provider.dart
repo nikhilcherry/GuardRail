@@ -3,25 +3,6 @@ import '../models/visitor.dart';
 import '../repositories/visitor_repository.dart';
 import '../services/logger_service.dart';
 
-// Renamed from Visitor to ResidentVisitor to avoid conflict with model
-class ResidentVisitor {
-  final String id;
-  final String name;
-  final String type; // guest, delivery, service
-  final String status; // approved, pending, rejected
-  final DateTime date;
-  final String? profileImage;
-
-  ResidentVisitor({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.status,
-    required this.date,
-    this.profileImage,
-  });
-}
-
 class PreApprovedVisitor {
   final String id;
   final String name;
@@ -39,14 +20,16 @@ class PreApprovedVisitor {
 }
 
 class ResidentProvider extends ChangeNotifier {
-  final List<ResidentVisitor> _todaysVisitors = [];
+  final List<Visitor> _todaysVisitors = [];
 
   // Cache for pending approvals to avoid O(N) filtering on every build
-  List<ResidentVisitor>? _cachedPendingApprovals;
+  List<Visitor>? _cachedPendingApprovals;
   // Cache for all visitors to avoid O(N log N) sorting on every build
-  List<ResidentVisitor>? _cachedAllVisitors;
+  List<Visitor>? _cachedAllVisitors;
+  // Cache for grouped visitors to avoid O(N) grouping on every build
+  Map<DateTime, List<Visitor>>? _cachedGroupedVisitors;
 
-  final List<ResidentVisitor> _pastVisitors = [];
+  final List<Visitor> _pastVisitors = [];
 
   final List<PreApprovedVisitor> _preApprovedVisitors = [];
 
@@ -59,17 +42,33 @@ class ResidentProvider extends ChangeNotifier {
   int _pendingRequests = 0;
   bool _isLoading = false;
 
-  List<ResidentVisitor> get todaysVisitors => _todaysVisitors;
-  List<ResidentVisitor> get pastVisitors => _pastVisitors;
+  List<Visitor> get todaysVisitors => _todaysVisitors;
+  List<Visitor> get pastVisitors => _pastVisitors;
   List<PreApprovedVisitor> get preApprovedVisitors => _preApprovedVisitors;
-  List<ResidentVisitor> get pendingVisitors => getPendingApprovals();
-  List<ResidentVisitor> get allVisitors {
+  List<Visitor> get pendingVisitors => getPendingApprovals();
+  List<Visitor> get allVisitors {
     if (_cachedAllVisitors != null) {
       return _cachedAllVisitors!;
     }
     _cachedAllVisitors = [..._todaysVisitors, ..._pastVisitors]
-      ..sort((a, b) => b.date.compareTo(a.date));
+      ..sort((a, b) => b.time.compareTo(a.time));
     return _cachedAllVisitors!;
+  }
+
+  // PERF: Memoized getter for grouped visitors
+  Map<DateTime, List<Visitor>> get groupedVisitors {
+    if (_cachedGroupedVisitors != null) {
+      return _cachedGroupedVisitors!;
+    }
+    _cachedGroupedVisitors = {};
+    for (var v in allVisitors) {
+      final date = DateTime.utc(v.time.year, v.time.month, v.time.day);
+      if (_cachedGroupedVisitors![date] == null) {
+        _cachedGroupedVisitors![date] = [];
+      }
+      _cachedGroupedVisitors![date]!.add(v);
+    }
+    return _cachedGroupedVisitors!;
   }
   
   String get residentName => _residentName;
@@ -86,18 +85,13 @@ class ResidentProvider extends ChangeNotifier {
     // Listen to shared repository updates
     VisitorRepository().visitorStream.listen((updatedVisitors) {
       _todaysVisitors.clear();
-      for (var v in updatedVisitors) {
-        _todaysVisitors.add(ResidentVisitor(
-          id: v.id,
-          name: v.name,
-          type: v.purpose,
-          status: v.status.name, // Enum to String
-          date: v.time,
-        ));
-      }
-      _pendingRequests = _todaysVisitors.where((v) => v.status == 'pending').length;
+      // Directly use Visitor objects
+      _todaysVisitors.addAll(updatedVisitors);
+
+      _pendingRequests = _todaysVisitors.where((v) => v.status == VisitorStatus.pending).length;
       _cachedPendingApprovals = null;
       _cachedAllVisitors = null;
+      _cachedGroupedVisitors = null;
        notifyListeners();
     });
   }
@@ -163,20 +157,20 @@ class ResidentProvider extends ChangeNotifier {
   }
 
   // Get visitor history by type
-  List<ResidentVisitor> getVisitorsByType(String type) {
+  List<Visitor> getVisitorsByType(String type) {
     return [
       ..._todaysVisitors,
       ..._pastVisitors,
-    ].where((v) => v.type == type).toList();
+    ].where((v) => v.purpose == type).toList();
   }
 
   // Get all notifications
-  List<ResidentVisitor> getPendingApprovals() {
+  List<Visitor> getPendingApprovals() {
     // OPTIMIZE: Return cached list if available
     if (_cachedPendingApprovals != null) {
       return _cachedPendingApprovals!;
     }
-    _cachedPendingApprovals = _todaysVisitors.where((v) => v.status == 'pending').toList();
+    _cachedPendingApprovals = _todaysVisitors.where((v) => v.status == VisitorStatus.pending).toList();
     return _cachedPendingApprovals!;
   }
 

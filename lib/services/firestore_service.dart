@@ -107,6 +107,21 @@ class FirestoreService {
     return query.snapshots();
   }
 
+  Future<List<Map<String, dynamic>>> getVisitors({String? flatId, String? societyId, String? status}) async {
+    Query query = visitorsCollection.orderBy('arrivalTime', descending: true);
+
+    if (flatId != null) query = query.where('flatId', isEqualTo: flatId);
+    if (societyId != null) query = query.where('societyId', isEqualTo: societyId);
+    if (status != null) query = query.where('status', isEqualTo: status);
+
+    final snapshot = await query.get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+  }
+
   Future<void> updateVisitorStatus(String visitorId, String status) async {
     final updates = {
       'status': status,
