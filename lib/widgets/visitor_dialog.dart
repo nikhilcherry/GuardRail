@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import '../services/logger_service.dart';
 import '../models/visitor.dart';
 import '../providers/guard_provider.dart';
 import '../screens/guard/visitor_status_screen.dart';
@@ -63,11 +64,14 @@ class _VisitorDialogState extends State<VisitorDialog> {
           _imageChanged = true;
         });
       }
-    } catch (e) {
-      // Handle camera error or permission denial gracefully
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open camera: $e')),
-      );
+    } catch (e, stackTrace) {
+      // SECURITY: Prevent sensitive error exposure to users
+      LoggerService().error('Camera error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open camera. Please check permissions.')),
+        );
+      }
     }
   }
 
@@ -235,10 +239,12 @@ class _VisitorDialogState extends State<VisitorDialog> {
                               );
                             }
                           }
-                        } catch (e) {
+                        } catch (e, stackTrace) {
+                          // SECURITY: Prevent sensitive error exposure to users
+                          LoggerService().error('Visitor operation failed', e, stackTrace);
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
+                              const SnackBar(content: Text('Failed to process visitor. Please try again.')),
                             );
                           }
                         } finally {
