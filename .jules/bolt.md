@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-28 - Optimizing the Optimization
+
+**Learning:** Creating a lookup Map inside `build()` (to avoid O(N) lookups) is still O(N) work on every frame. It defeats the purpose if the build method runs frequently (e.g. on scroll or selection).
+
+**Action:** Move the Map creation to the Provider/State level and cache it. Only recreate the Map when the source data changes.
