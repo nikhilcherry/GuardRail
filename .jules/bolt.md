@@ -36,3 +36,7 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-27 - Grouping Logic in Build Method
+**Learning:** Performing data grouping (e.g. for calendars) inside `build()` causes O(N) operations on every frame, leading to jank.
+**Action:** Move grouping logic to the Provider, cache the result, and invalidate only when data changes.
