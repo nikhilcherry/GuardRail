@@ -36,3 +36,7 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - Optimized Visitor Grouping
+**Learning:** Performing data processing (like grouping lists into maps) inside the `build` method executes on every frame/rebuild, which is inefficient (O(N)). For `TableCalendar`, this also makes the `eventLoader` callback O(N) instead of O(1), leading to O(N*M) total complexity.
+**Action:** Moved the visitor grouping logic to `ResidentProvider` and cached the result (`_cachedGroupedVisitors`). The cache is invalidated only when the data source changes. This reduces the `build` method complexity to O(1) by simply looking up the pre-calculated map. Also resolved compilation errors by replacing the undefined `Visitor` class with `ResidentVisitor`.
