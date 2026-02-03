@@ -36,3 +36,12 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-10-27 - Provider Caching for List Grouping
+
+**Learning:** `ResidentVisitorsScreen` was performing an O(N) grouping of visitors by date inside the `build()` method. This logic executed on every frame/rebuild, wasting CPU cycles. Additionally, strict type checking (`ResidentVisitor` vs `Visitor`) caused compilation errors when using generic models.
+
+**Action:**
+1. Moved the grouping logic into `ResidentProvider` as a `groupedVisitors` getter.
+2. Implemented memoization (`_cachedGroupedVisitors`) which is invalidated only when the data stream updates.
+3. Updated the UI to consume the cached map, turning the build-time operation into O(1).
