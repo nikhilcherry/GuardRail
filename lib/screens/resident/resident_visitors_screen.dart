@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../theme/app_theme.dart';
 import '../../providers/resident_provider.dart';
 
 class ResidentVisitorsScreen extends StatefulWidget {
@@ -38,26 +37,19 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
       body: SafeArea(
         child: Consumer<ResidentProvider>(
           builder: (context, residentProvider, _) {
-            final allVisitors = residentProvider.allVisitors;
-
-            // PERF: Group visitors by date (Map) to avoid O(N*M) lookup in eventLoader
-            final events = <DateTime, List<Visitor>>{};
-            for (final v in allVisitors) {
-              final date = DateTime.utc(v.date.year, v.date.month, v.date.day);
-              if (events[date] == null) events[date] = [];
-              events[date]!.add(v);
-            }
+            // PERF: Use cached grouped visitors from provider to avoid O(N) grouping on every rebuild
+            final events = residentProvider.groupedVisitors;
 
             final selectedDateKey = DateTime.utc(
               _selectedDay!.year,
               _selectedDay!.month,
               _selectedDay!.day,
             );
-            final selectedVisitors = events[selectedDateKey] ?? <Visitor>[];
+            final selectedVisitors = events[selectedDateKey] ?? <ResidentVisitor>[];
 
             return Column(
               children: [
-                TableCalendar<Visitor>(
+                TableCalendar<ResidentVisitor>(
                   firstDay: DateTime.utc(2023, 1, 1),
                   lastDay: DateTime.utc(2026, 12, 31),
                   focusedDay: _focusedDay,
@@ -156,7 +148,7 @@ class _ResidentVisitorsScreenState extends State<ResidentVisitorsScreen> {
 }
 
 class _VisitorListItem extends StatelessWidget {
-  final Visitor visitor;
+  final ResidentVisitor visitor;
   // PERF: Cache DateFormat to avoid repeated parsing overhead in list items.
   static final _timeFormatter = DateFormat('h:mm a');
 
