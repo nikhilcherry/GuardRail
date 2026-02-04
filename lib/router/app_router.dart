@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
@@ -8,6 +7,7 @@ import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/id_verification_screen.dart';
 import '../screens/auth/lock_screen.dart';
 import '../screens/welcome_screen.dart';
+import '../screens/splash_screen.dart';
 import '../screens/guard/guard_home_screen.dart';
 import '../screens/resident/resident_home_screen.dart';
 import '../screens/resident/resident_visitors_screen.dart';
@@ -30,6 +30,10 @@ class AppRouter {
     refreshListenable: authProvider,
     initialLocation: '/',
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/',
         builder: (context, state) => const WelcomeScreen(),
@@ -117,8 +121,13 @@ class AppRouter {
       final isVerified = authProvider.isVerified;
       final selectedRole = authProvider.selectedRole;
       final isAppLocked = authProvider.isAppLocked;
+      final isInitializing = authProvider.isInitializing;
 
       final currentPath = state.uri.toString();
+
+      if (isInitializing) {
+        return '/splash';
+      }
 
       // Lock Logic
       if (isAppLocked) {
@@ -154,7 +163,7 @@ class AppRouter {
         }
 
         // If verified (or not required), but trying to access auth/verification screens, redirect to home.
-        if (isLoggingIn || isRoleSelection || isSignUp || isVerification || currentPath == '/lock') {
+        if (isLoggingIn || isRoleSelection || isSignUp || isVerification || currentPath == '/lock' || currentPath == '/splash') {
           switch (selectedRole) {
             case 'guard':
               return '/guard_home';
