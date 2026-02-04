@@ -22,3 +22,8 @@
 **Vulnerability:** The `AuthRepository` was storing sensitive user data (Name, Email, Phone, Flat ID) in plain-text `SharedPreferences`.
 **Learning:** `SharedPreferences` on Android stores data in an XML file that can be easily read if the device is rooted or via backup extraction. It is not suitable for Personally Identifiable Information (PII).
 **Prevention:** Use `FlutterSecureStorage` (which uses Keystore/Keychain) for all sensitive data. Only use `SharedPreferences` for non-sensitive UI flags (e.g., `isLoggedIn`, `themeMode`).
+
+## 2026-02-04 - Bundled Secrets in Production Artifacts
+**Vulnerability:** The `.env` file containing sensitive credentials was included in the `pubspec.yaml` assets, causing it to be bundled in the release binary.
+**Learning:** Adding `.env` to `assets` makes it accessible to anyone who decompiles the application, completely bypassing gitignore rules.
+**Prevention:** Never include `.env` or other secret configuration files in `pubspec.yaml` assets. Use compile-time environment variables (`--dart-define`) or secure backend delivery for secrets.
