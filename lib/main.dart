@@ -14,7 +14,6 @@ import 'providers/flat_provider.dart';
 import 'router/app_router.dart';
 import 'screens/auth/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'services/crash_reporting_service.dart';
 
@@ -41,7 +40,7 @@ Future<void> main() async {
 
   // Pre-load critical state
   final authProvider = AuthProvider(repository: authRepository);
-  await authProvider.checkLoginStatus();
+  authProvider.checkLoginStatus();
 
   runApp(GuardrailApp(
     authProvider: authProvider,
