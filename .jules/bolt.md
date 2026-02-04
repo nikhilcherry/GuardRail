@@ -36,3 +36,9 @@
 **Learning:** Loading full-resolution images (e.g., from camera) into small thumbnail widgets using `FileImage` consumes excessive memory as the entire image is decoded. For a grid of thumbnails, this can quickly lead to OOM or jank.
 
 **Action:** Wrap `FileImage` with `ResizeImage` (or `ResizeImage.resizeIfNeeded`) specifying the target `width` or `height` (e.g., `width: 150` for thumbnails) to decode only the necessary dimensions, significantly reducing memory footprint.
+
+## 2024-05-26 - Grouping Logic in Build vs Provider
+
+**Learning:** While grouping data (e.g., for `TableCalendar`) avoids O(N*M) lookups, doing this grouping inside `build()` (or `Consumer` builder) still incurs O(N) cost on every rebuild (e.g., `setState`).
+
+**Action:** Move the grouping logic into the Provider and cache the result map. Invalidate/recompute only when the underlying list changes. This ensures `build()` is always O(1) or O(M) for map lookups.
