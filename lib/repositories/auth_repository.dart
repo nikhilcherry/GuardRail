@@ -13,11 +13,15 @@ class AuthRepository {
   static const String _keyIsVerified = 'isVerified';
   static const String _keyFlatId = 'flatId';
 
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
-  );
+  final FlutterSecureStorage _storage;
+
+  AuthRepository({FlutterSecureStorage? storage})
+      : _storage = storage ??
+            const FlutterSecureStorage(
+              aOptions: AndroidOptions(
+                encryptedSharedPreferences: true,
+              ),
+            );
 
   // Use getters to avoid initialization before Firebase.initializeApp()
   FirebaseAuth get _firebaseAuth => FirebaseAuth.instance;
@@ -49,19 +53,76 @@ class AuthRepository {
     if (name != null) await _storage.write(key: _keyUserName, value: name);
     if (email != null) await _storage.write(key: _keyUserEmail, value: email);
     if (flatId != null) await _storage.write(key: _keyFlatId, value: flatId);
+
+    // SECURITY: Cleanup legacy insecure storage
+    // Ensure sensitive data is removed from SharedPreferences if it exists
+    await prefs.remove(_keyUserPhone);
+    await prefs.remove(_keyUserName);
+    await prefs.remove(_keyUserEmail);
+    await prefs.remove(_keyFlatId);
   }
 
   /// Get login status from local storage
   Future<Map<String, dynamic>> getLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Try to read from secure storage first
+    String? userPhone = await _storage.read(key: _keyUserPhone);
+    String? userName = await _storage.read(key: _keyUserName);
+    String? userEmail = await _storage.read(key: _keyUserEmail);
+    String? flatId = await _storage.read(key: _keyFlatId);
+
+    // Migration: If not in secure storage but in prefs, move it
+    bool migrationNeeded = false;
+
+    if (userPhone == null && prefs.containsKey(_keyUserPhone)) {
+      userPhone = prefs.getString(_keyUserPhone);
+      if (userPhone != null) {
+        await _storage.write(key: _keyUserPhone, value: userPhone);
+        migrationNeeded = true;
+      }
+    }
+
+    if (userName == null && prefs.containsKey(_keyUserName)) {
+      userName = prefs.getString(_keyUserName);
+      if (userName != null) {
+        await _storage.write(key: _keyUserName, value: userName);
+        migrationNeeded = true;
+      }
+    }
+
+    if (userEmail == null && prefs.containsKey(_keyUserEmail)) {
+      userEmail = prefs.getString(_keyUserEmail);
+      if (userEmail != null) {
+        await _storage.write(key: _keyUserEmail, value: userEmail);
+        migrationNeeded = true;
+      }
+    }
+
+    if (flatId == null && prefs.containsKey(_keyFlatId)) {
+      flatId = prefs.getString(_keyFlatId);
+      if (flatId != null) {
+        await _storage.write(key: _keyFlatId, value: flatId);
+        migrationNeeded = true;
+      }
+    }
+
+    // Cleanup SharedPreferences after successful migration
+    if (migrationNeeded) {
+      await prefs.remove(_keyUserPhone);
+      await prefs.remove(_keyUserName);
+      await prefs.remove(_keyUserEmail);
+      await prefs.remove(_keyFlatId);
+    }
+
     return {
       'isLoggedIn': prefs.getBool(_keyIsLoggedIn) ?? false,
       'selectedRole': prefs.getString(_keySelectedRole),
-      'userPhone': await _storage.read(key: _keyUserPhone) ?? prefs.getString(_keyUserPhone),
-      'userName': await _storage.read(key: _keyUserName) ?? prefs.getString(_keyUserName),
-      'userEmail': await _storage.read(key: _keyUserEmail) ?? prefs.getString(_keyUserEmail),
+      'userPhone': userPhone,
+      'userName': userName,
+      'userEmail': userEmail,
       'isVerified': prefs.getBool(_keyIsVerified) ?? false,
-      'flatId': await _storage.read(key: _keyFlatId) ?? prefs.getString(_keyFlatId),
+      'flatId': flatId,
     };
   }
 
