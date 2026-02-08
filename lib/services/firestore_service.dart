@@ -35,8 +35,30 @@ class FirestoreService {
     final userId = currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
-    await usersCollection.doc(userId).set({
-      'userId': userId,
+    await saveUserProfileWithId(
+      uid: userId,
+      name: name,
+      email: email,
+      role: role,
+      phone: phone,
+      flatId: flatId,
+      societyId: societyId,
+      isVerified: isVerified,
+    );
+  }
+
+  Future<void> saveUserProfileWithId({
+    required String uid,
+    required String name,
+    required String email,
+    required String role,
+    String? phone,
+    String? flatId,
+    String? societyId,
+    bool isVerified = false,
+  }) async {
+    await usersCollection.doc(uid).set({
+      'userId': uid,
       'name': name,
       'email': email,
       'role': role,
@@ -48,7 +70,7 @@ class FirestoreService {
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    LoggerService().info('User profile saved: $userId');
+    LoggerService().info('User profile saved: $uid');
   }
 
   Future<Map<String, dynamic>?> getUserProfile([String? userId]) async {
@@ -63,8 +85,12 @@ class FirestoreService {
     final userId = currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
+    await updateUserProfileWithId(userId, updates);
+  }
+
+  Future<void> updateUserProfileWithId(String uid, Map<String, dynamic> updates) async {
     updates['updatedAt'] = FieldValue.serverTimestamp();
-    await usersCollection.doc(userId).update(updates);
+    await usersCollection.doc(uid).update(updates);
   }
 
   // ==================== VISITOR OPERATIONS ====================
